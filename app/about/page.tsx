@@ -11,7 +11,7 @@ import { AnimatePresence } from "framer-motion"
 // Personal stats data
 const personalStats = [
   {
-    number: "4+",
+    number: "2+",
     label: "Years of Experience",
     icon: Coffee,
     description: "Building scalable applications"
