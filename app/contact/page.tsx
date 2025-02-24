@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, Mail, Phone, MapPin, MessageSquare, Check, Loader2 } from "lucide-react"
+import { Send, Mail, Phone, MapPin, MessageSquare, Check, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import emailjs from '@emailjs/browser'
 
 const contactInfo = [
   {
@@ -26,26 +27,49 @@ const contactInfo = [
   }
 ]
 
+// Add this type for form status
+type FormStatus = "idle" | "loading" | "success" | "error"
+
 function ContactForm() {
+  const formRef = useRef<HTMLFormElement>(null)
+  const [formStatus, setFormStatus] = useState<FormStatus>("idle")
+  const [errorMessage, setErrorMessage] = useState("")
+  
   const [formState, setFormState] = useState({
     name: "",
     email: "",
     message: ""
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-    setTimeout(() => setIsSubmitted(false), 3000)
+    setFormStatus("loading")
+    
+    try {
+      const result = await emailjs.sendForm(
+        'service_gx0cj7o', // Get from EmailJS dashboard
+        'template_nodmfpa', // Get from EmailJS dashboard
+        formRef.current!,
+        'pa51ET1DYIGze1RqM' // Get from EmailJS dashboard
+      )
+
+      if (result.text === 'OK') {
+        setFormStatus("success")
+        setFormState({ name: "", email: "", message: "" })
+        setTimeout(() => setFormStatus("idle"), 3000)
+      } else {
+        throw new Error("Failed to send message")
+      }
+    } catch (error) {
+      setFormStatus("error")
+      setErrorMessage("Failed to send message. Please try again.")
+      setTimeout(() => setFormStatus("idle"), 3000)
+    }
   }
 
   return (
     <motion.form
+      ref={formRef}
       onSubmit={handleSubmit}
       className="space-y-6"
       initial={{ opacity: 0, y: 20 }}
@@ -56,6 +80,7 @@ function ContactForm() {
         <div className="relative group">
           <input
             type="text"
+            name="user_name" // Required for EmailJS
             value={formState.name}
             onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
             className="w-full px-5 py-4 rounded-xl bg-neutral-900/50 border border-neutral-800 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
@@ -69,6 +94,7 @@ function ContactForm() {
         <div className="relative group">
           <input
             type="email"
+            name="user_email" // Required for EmailJS
             value={formState.email}
             onChange={(e) => setFormState(prev => ({ ...prev, email: e.target.value }))}
             className="w-full px-5 py-4 rounded-xl bg-neutral-900/50 border border-neutral-800 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
@@ -82,6 +108,7 @@ function ContactForm() {
       {/* Message Input */}
       <div className="relative group">
         <textarea
+          name="message" // Required for EmailJS
           value={formState.message}
           onChange={(e) => setFormState(prev => ({ ...prev, message: e.target.value }))}
           rows={5}
@@ -92,10 +119,10 @@ function ContactForm() {
         <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
       </div>
 
-      {/* Submit Button */}
+      {/* Submit Button with Status */}
       <motion.button
         type="submit"
-        disabled={isSubmitting}
+        disabled={formStatus === "loading"}
         className={cn(
           "w-full px-8 py-4 rounded-xl",
           "bg-gradient-to-r from-purple-500 to-blue-500",
@@ -109,18 +136,37 @@ function ContactForm() {
         whileTap={{ scale: 0.98 }}
       >
         <AnimatePresence mode="wait">
-          {isSubmitting ? (
+          {formStatus === "loading" ? (
             <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-          ) : isSubmitted ? (
-            <Check className="w-6 h-6 mx-auto text-green-500" />
+          ) : formStatus === "success" ? (
+            <motion.div className="flex items-center justify-center gap-2">
+              <Check className="w-5 h-5" />
+              <span>Message Sent!</span>
+            </motion.div>
+          ) : formStatus === "error" ? (
+            <motion.div className="flex items-center justify-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              <span>Failed to send</span>
+            </motion.div>
           ) : (
-            <div className="flex items-center justify-center gap-2">
+            <motion.div className="flex items-center justify-center gap-2">
               <Send className="w-5 h-5" />
               <span>Send Message</span>
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
+
+      {/* Error Message */}
+      {formStatus === "error" && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-red-500 text-sm text-center"
+        >
+          {errorMessage}
+        </motion.p>
+      )}
     </motion.form>
   )
 }

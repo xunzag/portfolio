@@ -226,6 +226,30 @@ function TechStackShowcase() {
   )
 }
 
+// Add this projects data array
+const projects = [
+  {
+    title: "Peptides Mobile App",
+    description: "A mobile app for peptides calculations which helps in calculating the molecular weight of peptides",
+    image: "/images/1.png"
+  },
+  {
+    title: "LunchThymes",
+    description: "A food and lunch app for school students and parents to order lunch for their children",
+    image: "/images/2.png"
+  },
+  {
+    title: "LMS Portal",
+    description: "A portal for managing the learning management system of a school",
+    image: "/images/3.png"
+  },
+  {
+    title: "Sales Analytics",
+    description: "A sales analytics dashboard for a company to analyze their sales data",
+    image: "/images/4.png"
+  }
+];
+
 function FeaturedWorkPreview() {
   return (
     <div className="py-32 relative overflow-hidden">
@@ -243,7 +267,7 @@ function FeaturedWorkPreview() {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
-          {[1, 2].map((_, i) => (
+          {projects.map((project, i) => (
             <motion.div
               key={i}
               whileHover={{ scale: 1.02 }}
@@ -251,15 +275,18 @@ function FeaturedWorkPreview() {
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
               <Image
-                src={"/images/1.jpg"}
+                src={project.image}
                 alt={`Project ${i + 1}`}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
+                priority={i < 2}
               />
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                <h3 className="text-2xl font-bold text-white">Project Title {i + 1}</h3>
-                <p className="text-neutral-200 mt-2 max-w-md">
-                  Brief description of the project and the technologies used
+                <h3 className={`text-2xl font-bold ${i < 3 ? 'text-black' : 'text-white'}`}>
+                  {project.title}
+                </h3>
+                <p className={`mt-2 max-w-md ${i < 3 ? 'text-black' : 'text-neutral-200'}`}>
+                  {project.description}
                 </p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -268,7 +295,7 @@ function FeaturedWorkPreview() {
                 >
                   <Link
                     href="#"
-                    className="inline-flex items-center text-white hover:text-purple-400 transition-colors"
+                    className={`inline-flex items-center ${i < 3 ? 'text-black hover:text-gray-700' : 'text-white hover:text-purple-400'} transition-colors`}
                   >
                     View Project
                     <ArrowRight className="ml-2 w-4 h-4" />
@@ -286,7 +313,26 @@ function FeaturedWorkPreview() {
 // Add this new component for interactive background particles
 function InteractiveBackground() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   
+  useEffect(() => {
+    // Set dimensions after component mounts (client-side only)
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    })
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e
     setMousePosition({ x: clientX, y: clientY })
@@ -333,13 +379,13 @@ function InteractiveBackground() {
 
       {/* Interactive Particles */}
       <div className="absolute inset-0">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {dimensions.width > 0 && Array.from({ length: 50 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-purple-500/30 rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * dimensions.width,
+              y: Math.random() * dimensions.height,
             }}
             animate={{
               x: mousePosition.x + (Math.random() - 0.5) * 100,
@@ -411,28 +457,59 @@ function HeroSection() {
               >
                 <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter gradient-text pb-2">
                   Farhan Ali
-            </h1>
+                </h1>
                 <div className="absolute -bottom-2 left-0 w-full h-px bg-gradient-to-r from-purple-500 via-blue-500 to-transparent" />
               </motion.div>
             </motion.div>
 
             {/* Enhanced Description */}
-            <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl text-neutral-400 max-w-lg leading-relaxed"
-            >
-              Transforming ideas into reality through{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 font-semibold">
-                innovative code
-              </span>{" "}
-              and{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500 font-semibold">
-                creative solutions
-              </span>. 
-              Specializing in building exceptional digital experiences.
-            </motion.p>
+            <div className="space-y-4">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-xl text-neutral-400 max-w-lg leading-relaxed"
+              >
+                Transforming ideas into reality through{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 font-semibold">
+                  innovative code
+                </span>{" "}
+                and{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500 font-semibold">
+                  creative solutions
+                </span>. 
+                Specializing in building exceptional digital experiences.
+              </motion.p>
+
+              {/* Read More button as a separate element */}
+              <div className="relative">
+                <Link href="/about" className="group/link">
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className={cn(
+                      "inline-flex items-center gap-2 px-4 py-2",
+                      "rounded-full border border-neutral-800",
+                      "bg-neutral-900/50 backdrop-blur-sm",
+                      "hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px] hover:shadow-purple-500/20",
+                      "transition-all duration-300"
+                    )}
+                  >
+                    <span className="text-sm text-neutral-400 group-hover/link:text-white transition-colors">
+                      Read More
+                    </span>
+                    <motion.span
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="text-neutral-400 group-hover/link:text-white"
+                    >
+                      →
+                    </motion.span>
+                  </motion.div>
+                </Link>
+              </div>
+            </div>
 
             {/* Quick Stats */}
             <motion.div 
@@ -442,8 +519,8 @@ function HeroSection() {
               className="flex gap-6 pt-4"
             >
               {[
-                { number: "4+", label: "Years Experience" },
-                { number: "50+", label: "Projects Completed" },
+                { number: "2+", label: "Years Experience" },
+                { number: "80+", label: "Projects Completed" },
                 { number: "100%", label: "Client Satisfaction" },
               ].map((stat, idx) => (
                 <div key={idx} className="space-y-1">
@@ -866,10 +943,19 @@ function Footer() {
 const timeline = [
   {
     type: "experience",
-    date: "2023 - Present",
+    date: "2024 - Present",
+    title: "Software Developer",
+    institution: "Elevate Carts",
+    description: "Working on full-stack development, implementing new features, and optimizing application performance for e-commerce solutions.",
+    icon: Briefcase,
+    skills: ["React", "Node.js", "TypeScript", "AWS"]
+  },
+  {
+    type: "experience",
+    date: "2023 - Jan 2024",
     title: "Backend Developer",
     institution: "Invex Solutions",
-    description: "Developing robust backend solutions, implementing APIs, and optimizing database performance for scalable applications.",
+    description: "Developed robust backend solutions, implementing APIs, and optimizing database performance for scalable applications.",
     icon: Briefcase,
     skills: ["Node.js", "Express", "MongoDB", "AWS"]
   },

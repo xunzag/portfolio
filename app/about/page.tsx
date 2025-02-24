@@ -42,19 +42,46 @@ const coreValues = [
     title: "Innovation First",
     description: "Always pushing boundaries with cutting-edge solutions",
     icon: Brain,
-    gradient: "from-purple-500 to-blue-500"
+    gradient: "from-purple-500 to-blue-500",
+    metrics: [
+      { label: "New Technologies", value: "15+" },
+      { label: "Innovative Solutions", value: "25+" }
+    ],
+    principles: [
+      "Embrace emerging tech",
+      "Think outside the box",
+      "Challenge conventions"
+    ]
   },
   {
     title: "Quality Driven",
     description: "Delivering excellence in every line of code",
     icon: Star,
-    gradient: "from-blue-500 to-cyan-500"
+    gradient: "from-blue-500 to-cyan-500",
+    metrics: [
+      { label: "Code Quality", value: "A+" },
+      { label: "Test Coverage", value: "95%" }
+    ],
+    principles: [
+      "Clean architecture",
+      "Robust testing",
+      "Performance first"
+    ]
   },
   {
     title: "User Focused",
     description: "Creating intuitive and engaging experiences",
     icon: Heart,
-    gradient: "from-cyan-500 to-green-500"
+    gradient: "from-cyan-500 to-green-500",
+    metrics: [
+      { label: "User Satisfaction", value: "98%" },
+      { label: "Retention Rate", value: "95%" }
+    ],
+    principles: [
+      "Intuitive design",
+      "Accessibility",
+      "User feedback driven"
+    ]
   }
 ]
 
@@ -171,7 +198,7 @@ function AboutHeroSection() {
           className="relative aspect-square rounded-2xl overflow-hidden"
         >
           <Image
-            src="/your-photo.jpg" // Add your professional photo
+            src="/images/me.jpg"
             alt="Farhan Ali"
             fill
             className="object-cover"
@@ -184,6 +211,54 @@ function AboutHeroSection() {
 }
 
 function CoreValuesSection() {
+  const coreValues = [
+    {
+      title: "Innovation First",
+      description: "Always pushing boundaries with cutting-edge solutions",
+      icon: Brain,
+      gradient: "from-purple-500 to-blue-500",
+      metrics: [
+        { label: "New Technologies", value: "15+" },
+        { label: "Innovative Solutions", value: "25+" }
+      ],
+      principles: [
+        "Embrace emerging tech",
+        "Think outside the box",
+        "Challenge conventions"
+      ]
+    },
+    {
+      title: "Quality Driven",
+      description: "Delivering excellence in every line of code",
+      icon: Star,
+      gradient: "from-blue-500 to-cyan-500",
+      metrics: [
+        { label: "Code Quality", value: "A+" },
+        { label: "Test Coverage", value: "95%" }
+      ],
+      principles: [
+        "Clean architecture",
+        "Robust testing",
+        "Performance first"
+      ]
+    },
+    {
+      title: "User Focused",
+      description: "Creating intuitive and engaging experiences",
+      icon: Heart,
+      gradient: "from-cyan-500 to-green-500",
+      metrics: [
+        { label: "User Satisfaction", value: "98%" },
+        { label: "Retention Rate", value: "95%" }
+      ],
+      principles: [
+        "Intuitive design",
+        "Accessibility",
+        "User feedback driven"
+      ]
+    }
+  ]
+
   return (
     <div className="py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
@@ -205,29 +280,76 @@ function CoreValuesSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {coreValues.map((value, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="cosmic-card p-6 rounded-xl group"
+              className="group relative"
             >
-              <div className="space-y-4">
+              <div className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-neutral-800 bg-neutral-900/50">
+                {/* Header with Icon */}
                 <div className={cn(
-                  "w-12 h-12 rounded-lg flex items-center justify-center",
-                  "bg-gradient-to-r",
+                  "p-6",
+                  "bg-gradient-to-r bg-opacity-10",
                   value.gradient
                 )}>
-                  <value.icon className="w-6 h-6 text-white" />
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-lg flex items-center justify-center",
+                      "bg-gradient-to-r",
+                      value.gradient
+                    )}>
+                      <value.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
+                        {value.title}
+                      </h3>
+                      <p className="text-sm text-neutral-400">
+                        {value.description}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                  {value.title}
-                </h3>
-                <p className="text-neutral-400">
-                  {value.description}
-                </p>
+
+                {/* Metrics */}
+                <div className="grid grid-cols-2 border-y border-neutral-800">
+                  {value.metrics.map((metric, metricIdx) => (
+                    <div
+                      key={metricIdx}
+                      className="p-4 text-center group-hover:bg-neutral-800/50 transition-colors"
+                    >
+                      <div className="text-xl font-bold text-white">{metric.value}</div>
+                      <div className="text-xs text-neutral-500">{metric.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Principles */}
+                <div className="p-6 space-y-3">
+                  {value.principles.map((principle, principleIdx) => (
+                    <motion.div
+                      key={principleIdx}
+                      className="flex items-center gap-3 group/item"
+                      whileHover={{ x: 5 }}
+                    >
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        "bg-gradient-to-r",
+                        value.gradient
+                      )} />
+                      <span className="text-sm text-neutral-400 group-hover/item:text-white transition-colors">
+                        {principle}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Hover Effects */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             </motion.div>
           ))}
@@ -241,17 +363,32 @@ function SkillsSection() {
   const skills = [
     {
       category: "Frontend",
-      items: ["React", "Next.js", "TypeScript", "TailwindCSS"],
+      items: [
+        { name: "React", level: 95, icon: "⚛️" },
+        { name: "Next.js", level: 90, icon: "▲" },
+        { name: "TypeScript", level: 88, icon: "TS" },
+        { name: "TailwindCSS", level: 92, icon: "🎨" }
+      ],
       gradient: "from-purple-500 to-blue-500"
     },
     {
       category: "Backend",
-      items: ["Node.js", "Express", "Python", "MongoDB"],
+      items: [
+        { name: "Node.js", level: 85, icon: "🟢" },
+        { name: "Express", level: 88, icon: "🚂" },
+        { name: "Python", level: 80, icon: "🐍" },
+        { name: "MongoDB", level: 85, icon: "🍃" }
+      ],
       gradient: "from-blue-500 to-cyan-500"
     },
     {
       category: "Tools & Others",
-      items: ["Git", "AWS", "Docker", "CI/CD"],
+      items: [
+        { name: "Git", level: 90, icon: "🌳" },
+        { name: "AWS", level: 82, icon: "☁️" },
+        { name: "Docker", level: 85, icon: "🐳" },
+        { name: "CI/CD", level: 88, icon: "⚡" }
+      ],
       gradient: "from-cyan-500 to-green-500"
     }
   ]
@@ -277,31 +414,55 @@ function SkillsSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {skills.map((category, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="cosmic-card p-6 rounded-xl"
+              className="cosmic-card p-6 rounded-xl backdrop-blur-sm border border-neutral-800 bg-neutral-900/50"
             >
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className={cn(
-                  "text-lg font-semibold bg-clip-text text-transparent",
+                  "text-xl font-bold bg-clip-text text-transparent",
                   "bg-gradient-to-r",
                   category.gradient
                 )}>
                   {category.category}
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                
+                <div className="space-y-4">
                   {category.items.map((skill, skillIdx) => (
                     <motion.div
                       key={skillIdx}
-                      whileHover={{ scale: 1.05 }}
-                      className="px-3 py-2 rounded-lg bg-neutral-900/50 text-neutral-300 text-sm text-center"
+                      className="group"
+                      whileHover={{ y: -2 }}
                     >
-                      {skill}
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-800 group-hover:bg-neutral-700 transition-colors">
+                          <span className="text-lg">{skill.icon}</span>
+                        </div>
+                        <span className="text-neutral-300 font-medium group-hover:text-white transition-colors">
+                          {skill.name}
+                        </span>
+                        <span className="ml-auto text-sm text-neutral-500 group-hover:text-neutral-400">
+                          {skill.level}%
+                        </span>
+                      </div>
+                      
+                      <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${skill.level}%` }}
+                          transition={{ duration: 1, delay: idx * 0.1 + skillIdx * 0.1 }}
+                          className={cn(
+                            "h-full rounded-full",
+                            "bg-gradient-to-r",
+                            category.gradient
+                          )}
+                        />
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -318,21 +479,39 @@ function InterestsSection() {
   const interests = [
     {
       title: "AI & Machine Learning",
-      description: "Exploring the frontiers of artificial intelligence",
+      description: "Exploring the frontiers of artificial intelligence and its applications in real-world scenarios",
       icon: Brain,
-      gradient: "from-purple-500 to-blue-500"
+      gradient: "from-purple-500 to-blue-500",
+      stats: [
+        { label: "Projects", value: "15+" },
+        { label: "Papers Read", value: "50+" },
+        { label: "Models Trained", value: "25+" }
+      ],
+      tools: ["TensorFlow", "PyTorch", "Scikit-learn", "Keras"]
     },
     {
       title: "Open Source",
-      description: "Contributing to the developer community",
+      description: "Contributing to the developer community and building public tools for everyone",
       icon: Code,
-      gradient: "from-blue-500 to-cyan-500"
+      gradient: "from-blue-500 to-cyan-500",
+      stats: [
+        { label: "Contributions", value: "200+" },
+        { label: "Stars", value: "1k+" },
+        { label: "Projects", value: "10+" }
+      ],
+      tools: ["GitHub", "Git", "Open Source", "Community"]
     },
     {
       title: "Innovation",
-      description: "Building next-generation solutions",
+      description: "Building next-generation solutions that push the boundaries of technology",
       icon: Rocket,
-      gradient: "from-cyan-500 to-green-500"
+      gradient: "from-cyan-500 to-green-500",
+      stats: [
+        { label: "Patents", value: "2" },
+        { label: "Research", value: "5+" },
+        { label: "POCs", value: "20+" }
+      ],
+      tools: ["Web3", "IoT", "Cloud Native", "Edge Computing"]
     }
   ]
 
@@ -357,30 +536,75 @@ function InterestsSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {interests.map((interest, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              className="cosmic-card p-6 rounded-xl group"
+              className="group relative"
             >
-              <div className="space-y-4">
+              <div className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-neutral-800 bg-neutral-900/50">
+                {/* Header */}
                 <div className={cn(
-                  "w-12 h-12 rounded-lg flex items-center justify-center",
+                  "p-6 flex items-start gap-4",
                   "bg-gradient-to-r",
-                  interest.gradient
+                  interest.gradient,
+                  "bg-opacity-10"
                 )}>
-                  <interest.icon className="w-6 h-6 text-white" />
+                  <div className={cn(
+                    "w-12 h-12 rounded-lg flex items-center justify-center",
+                    "bg-gradient-to-r",
+                    interest.gradient
+                  )}>
+                    <interest.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
+                      {interest.title}
+                    </h3>
+                    <p className="text-sm text-neutral-400 mt-1">
+                      {interest.description}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                  {interest.title}
-                </h3>
-                <p className="text-neutral-400">
-                  {interest.description}
-                </p>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 border-y border-neutral-800">
+                  {interest.stats.map((stat, statIdx) => (
+                    <div
+                      key={statIdx}
+                      className="p-4 text-center group-hover:bg-neutral-800/50 transition-colors"
+                    >
+                      <div className="text-xl font-bold text-white">{stat.value}</div>
+                      <div className="text-xs text-neutral-500">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tools */}
+                <div className="p-6">
+                  <div className="flex flex-wrap gap-2">
+                    {interest.tools.map((tool, toolIdx) => (
+                      <motion.span
+                        key={toolIdx}
+                        whileHover={{ y: -2 }}
+                        className={cn(
+                          "px-3 py-1 rounded-full text-xs",
+                          "bg-neutral-800 text-neutral-300",
+                          "hover:bg-gradient-to-r hover:text-white transition-colors",
+                          interest.gradient
+                        )}
+                      >
+                        {tool}
+                      </motion.span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Hover Effects */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             </motion.div>
           ))}
@@ -450,215 +674,123 @@ function HobbiesSection() {
   )
 }
 
-function AnimeSection() {
-  const animes = [
-    {
-      title: "Hunter X Hunter",
-      image: "https://i.ibb.co/k2GZGvF/hxh.jpg", // Higher quality image
-      rating: "9.1",
-      genre: "Action, Adventure",
-      description: "A masterpiece that follows Gon's journey to become a Hunter",
-      episodes: "148 Episodes",
-      year: "2011",
-      favoriteChar: "Killua Zoldyck",
-      bestArc: "Chimera Ant Arc"
-    },
-    {
-      title: "Monster",
-      image: "https://i.ibb.co/3vQyLXT/monster.jpg", // Higher quality image
-      rating: "8.9",
-      genre: "Psychological Thriller",
-      description: "Dr. Tenma's pursuit of a brilliant but twisted mind",
-      episodes: "74 Episodes",
-      year: "2004",
-      favoriteChar: "Dr. Kenzo Tenma",
-      bestArc: "The Perfect Suicide"
-    },
-    {
-      title: "Bleach",
-      image: "https://i.ibb.co/XxgRqPd/bleach.jpg", // Higher quality image
-      rating: "8.8",
-      genre: "Action, Supernatural",
-      description: "Soul Reaper Ichigo protecting both worlds",
-      episodes: "366 Episodes",
-      year: "2004",
-      favoriteChar: "Byakuya Kuchiki",
-      bestArc: "Soul Society Arc"
-    },
-    {
-      title: "Attack on Titan",
-      image: "https://i.ibb.co/9gPHTr8/aot.jpg", // Higher quality image
-      rating: "9.0",
-      genre: "Dark Fantasy, Action",
-      description: "Humanity's fight for survival within the walls",
-      episodes: "87 Episodes",
-      year: "2013",
-      favoriteChar: "Levi Ackerman",
-      bestArc: "Marley Arc"
-    },
-    {
-      title: "Jujutsu Kaisen",
-      image: "https://i.ibb.co/VwWB9Vz/jjk.jpg", // Higher quality image
-      rating: "8.7",
-      genre: "Action, Supernatural",
-      description: "Modern sorcery and curses in contemporary Japan",
-      episodes: "24 Episodes",
-      year: "2020",
-      favoriteChar: "Gojo Satoru",
-      bestArc: "Shibuya Incident"
-    },
-    {
-      title: "Death Note",
-      image: "https://i.ibb.co/qCh6rt2/deathnote.jpg", // Higher quality image
-      rating: "8.9",
-      genre: "Psychological Thriller",
-      description: "Battle of wits between Light and L",
-      episodes: "37 Episodes",
-      year: "2006",
-      favoriteChar: "L Lawliet",
-      bestArc: "Kira Investigation"
-    }
-  ]
-
-  return (
-    <div className="py-32 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4 mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            My Favorite{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Anime
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            When I need inspiration, these masterpieces never fail to amaze
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {animes.map((anime, idx) => (
-            <motion.div
-              key={anime.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="group relative"
-            >
-              {/* Enhanced Card */}
-              <motion.div
-                whileHover={{ 
-                  y: -10,
-                  transition: { duration: 0.2 }
-                }}
-                className="relative rounded-xl overflow-hidden bg-neutral-900/50 backdrop-blur-sm border border-neutral-800"
-              >
-                {/* Image with Parallax Effect */}
-                <motion.div 
-                  className="relative aspect-[3/4] overflow-hidden"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Image
-                    src={anime.image}
-                    alt={anime.title}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                  
-                  {/* Enhanced Rating Badge */}
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    whileHover={{ scale: 1.1 }}
-                    className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-yellow-500/90 backdrop-blur-sm font-bold text-white flex items-center gap-1"
-                  >
-                    <span className="text-xs">★</span>
-                    <span className="text-sm">{anime.rating}</span>
-                  </motion.div>
-
-                  {/* Year Badge */}
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm text-xs font-medium text-white">
-                    {anime.year}
-                  </div>
-                </motion.div>
-
-                {/* Enhanced Content */}
-                <div className="p-6 space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                      {anime.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-purple-400">{anime.genre}</span>
-                      <span className="text-neutral-600">•</span>
-                      <span className="text-blue-400">{anime.episodes}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <span className="text-neutral-400">Favorite Character: </span>
-                      <span className="text-white font-medium">{anime.favoriteChar}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-neutral-400">Best Arc: </span>
-                      <span className="text-white font-medium">{anime.bestArc}</span>
-                    </div>
-                  </div>
-
-                  {/* Hover Effect */}
-                  <motion.div
-                    whileHover={{ opacity: 1 }}
-                    className="mt-4 pt-4 border-t border-neutral-800/50"
-                  >
-                    <p className="text-sm text-neutral-400 italic">
-                      "{anime.description}"
-                    </p>
-                  </motion.div>
-          </div>
-
-                {/* Enhanced Hover Effect */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function FunFactsTicker() {
   return (
-    <div className="py-16 bg-neutral-900/50 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,black_0%,transparent_20%,transparent_80%,black_100%)] z-10" />
+    <div className="py-16 relative overflow-hidden bg-neutral-900/50">
+      {/* Gradient Overlays */}
+      <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-black to-transparent z-10" />
+      
+      {/* RGB Lines */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
+
+      {/* Two rows of facts scrolling in opposite directions */}
+      <div className="flex flex-col gap-8">
+        <motion.div
+          animate={{
+            x: [-1000, 1000],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="flex gap-8 whitespace-nowrap"
+        >
+          {[...personalInterests.funFacts, ...personalInterests.funFacts].slice(0, 8).map((fact, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className={cn(
+                "px-6 py-3 rounded-xl backdrop-blur-sm",
+                "border border-neutral-800",
+                "bg-neutral-900/50",
+                "flex items-center gap-4",
+                "group cursor-pointer"
+              )}
+            >
+              <motion.span 
+                className="text-3xl"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                {fact.icon}
+              </motion.span>
+              <div className="relative">
+                <p className="text-neutral-400 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
+                  {fact.fact}
+                </p>
+                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform" />
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          animate={{
+            x: [1000, -1000],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="flex gap-8 whitespace-nowrap"
+        >
+          {[...personalInterests.funFacts, ...personalInterests.funFacts].slice(8).map((fact, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className={cn(
+                "px-6 py-3 rounded-xl backdrop-blur-sm",
+                "border border-neutral-800",
+                "bg-neutral-900/50",
+                "flex items-center gap-4",
+                "group cursor-pointer"
+              )}
+            >
+              <motion.span 
+                className="text-3xl"
+                animate={{ rotate: [0, -360] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                {fact.icon}
+              </motion.span>
+              <div className="relative">
+                <p className="text-neutral-400 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
+                  {fact.fact}
+                </p>
+                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform" />
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
           <motion.div
-        animate={{
-          x: [0, -1000],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="flex gap-8 whitespace-nowrap"
-      >
-        {[...funFacts, ...funFacts].map((fact, idx) => (
-          <div
-            key={idx}
-            className="flex items-center gap-3 px-4"
-          >
-            <fact.icon className={cn("w-6 h-6", fact.color)} />
-            <span className="text-neutral-400">{fact.fact}</span>
-          </div>
-            ))}
-          </motion.div>
+            key={i}
+            className="absolute w-1 h-1 bg-purple-500/20 rounded-full"
+            animate={{
+              x: ["0%", "100%"],
+              y: [
+                Math.random() * 100 + "%",
+                Math.random() * 100 + "%",
+              ],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 5 + 5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -716,7 +848,7 @@ const personalInterests = {
   animes: [
     {
       title: "Hunter X Hunter",
-      image: "https://i.ibb.co/9TDVqBM/hxh-new.jpg", // New HQ image
+      image: "/images/anime/hxh.jpg", // Updated path
       rating: "9.1",
       genre: "Action, Adventure",
       description: "A masterpiece following Gon's journey, featuring complex characters and unique power systems",
@@ -727,7 +859,7 @@ const personalInterests = {
     },
     {
       title: "Monster",
-      image: "https://i.ibb.co/XSLhVpZ/monster-new.jpg", // New HQ image
+      image: "/images/anime/monster.jpg", // Updated path
       rating: "8.9",
       genre: "Psychological Thriller",
       description: "A gripping tale of morality, identity, and the consequences of our choices",
@@ -738,7 +870,7 @@ const personalInterests = {
     },
     {
       title: "Bleach",
-      image: "https://i.ibb.co/7K9fLHQ/bleach-new.jpg", // New HQ image
+      image: "/images/anime/bleach.jpg", // Updated path
       rating: "8.8",
       genre: "Action, Supernatural",
       description: "Epic battles, stunning visuals, and deep character development",
@@ -749,7 +881,7 @@ const personalInterests = {
     },
     {
       title: "Attack on Titan",
-      image: "https://i.ibb.co/Jk3TGSB/aot-new.jpg", // New HQ image
+      image: "/images/anime/aot.jpg", // Updated path
       rating: "9.0",
       genre: "Dark Fantasy, Action",
       description: "A masterpiece of storytelling that redefines the meaning of freedom",
@@ -760,7 +892,7 @@ const personalInterests = {
     },
     {
       title: "Jujutsu Kaisen",
-      image: "https://i.ibb.co/0MNdpLP/jjk-new.jpg", // New HQ image
+      image: "/images/anime/jjk.jpg", // Updated path
       rating: "8.7",
       genre: "Action, Supernatural",
       description: "Modern dark fantasy with stunning animation and unique curse system",
@@ -768,29 +900,63 @@ const personalInterests = {
       bestArc: "Shibuya Incident",
       quote: "Throughout heaven and earth, I alone am the honored one.",
       yearWatched: "2022"
+    },
+    {
+      title: "Death Note",
+      image: "/images/anime/deathnote.jpg",
+      rating: "9.0",
+      genre: "Psychological Thriller, Supernatural",
+      description: "A brilliant cat-and-mouse game between Light Yagami and L, exploring morality and justice through supernatural means",
+      favoriteChar: "L Lawliet",
+      bestArc: "L vs Light Arc",
+      quote: "I am Justice! I protect the innocent and those who fear evil. I'm the one who will become the god of a new world that everyone desires!",
+      yearWatched: "2017"
     }
   ],
   hobbies: [
     {
-      name: "Gaming",
-      icon: "🎮",
-      description: "Strategy and RPG enthusiast",
-      details: ["Favorite Game: The Witcher 3", "Preferred Genre: RPG", "Platform: PC"],
-      gradient: "from-green-500 to-emerald-500"
+      title: "Gaming",
+      image: "/images/hobbies/got.jpg",
+      rating: "Elite",
+      genre: "RPG & Strategy",
+      description: "Dedicated gamer with a passion for complex storylines and strategic gameplay",
+      favoriteGame: "Ghost Of Tsushima",
+      platform: "PC Master Race",
+      quote: "We end this together! Yuna.",
+      yearStarted: "2010"
     },
     {
-      name: "Reading",
-      icon: "📚",
-      description: "Tech books and manga lover",
-      details: ["Current Read: Clean Code", "Favorite Genre: Tech/Manga", "Books/Year: 12"],
-      gradient: "from-blue-500 to-cyan-500"
+      title: "Photography",
+      image: "/images/hobbies/photography.jpg",
+      rating: "Amateur+",
+      genre: "Street & Nature",
+      description: "Capturing moments and perspectives that tell unique stories through the lens",
+      favoriteCamera: "Sony A7III",
+      bestLocation: "Northern Areas",
+      quote: "The best camera is the one you have with you",
+      yearStarted: "2019"
     },
     {
-      name: "Music",
-      icon: "🎵",
-      description: "Lo-fi and rock enthusiast",
-      details: ["Favorite Genre: Lo-fi", "While Coding: Chill Beats", "Instrument: Guitar"],
-      gradient: "from-purple-500 to-pink-500"
+      title: "Reading",
+      image: "/images/hobbies/reading.jpg",
+      rating: "Bookworm",
+      genre: "History & Science",
+      description: "History is the best storyteller and science is the best teacher",
+      favoriteBook: "The History of the World",
+      readingPace: "12 Books/Year",
+      quote: "Knowledge is power, and books are the battery",
+      yearStarted: "2015"
+    },
+    {
+      title: "Music",
+      image: "/images/hobbies/musice.jpg",
+      rating: "Enthusiast",
+      genre: "Pop & Rock",
+      description: "Music is the way to code yourself out of bugs",
+      favoriteBand: "The Weeknd",
+      instrument: "Guitar",
+      quote: "I tried to find love, in someone else too many times.",
+      yearStarted: "2016"
     }
   ],
   funFacts: [
@@ -808,6 +974,31 @@ const personalInterests = {
       fact: "I can type at 120 WPM",
       icon: "⚡",
       gradient: "from-green-500 to-teal-500"
+    },
+    {
+      fact: "I sleep exactly 6 hours a day",
+      icon: "😴",
+      gradient: "from-blue-500 to-cyan-500"
+    },
+    {
+      fact: "I consume 3000+ calories daily",
+      icon: "🍔",
+      gradient: "from-red-500 to-pink-500"
+    },
+    {
+      fact: "I've solved 500+ LeetCode problems",
+      icon: "🧩",
+      gradient: "from-emerald-500 to-teal-500"
+    },
+    {
+      fact: "I drink 4 liters of water daily",
+      icon: "💧",
+      gradient: "from-sky-500 to-blue-500"
+    },
+    {
+      fact: "I can do 50 push-ups in one go",
+      icon: "💪",
+      gradient: "from-orange-500 to-red-500"
     }
   ]
 }
@@ -915,7 +1106,7 @@ function TypewriterText({ text, delay }: { text: string; delay: number }) {
 }
 
 function MoreAboutMeSection() {
-  const [activeTab, setActiveTab] = useState("hobbies")
+  const [activeTab, setActiveTab] = useState("anime")
 
   return (
     <div className="py-32 relative overflow-hidden">
@@ -968,38 +1159,10 @@ function MoreAboutMeSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid md:grid-cols-3 gap-8"
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {personalInterests.hobbies.map((hobby, idx) => (
-                <motion.div
-                  key={hobby.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  className="group relative p-6 rounded-xl overflow-hidden"
-                >
-                  <div className={cn(
-                    "absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500",
-                    "bg-gradient-to-r",
-                    hobby.gradient
-                  )} />
-                  <div className="relative space-y-4">
-                    <span className="text-4xl">{hobby.icon}</span>
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-2">{hobby.name}</h3>
-                      <p className="text-neutral-400">{hobby.description}</p>
-                    </div>
-                    <ul className="space-y-2">
-                      {hobby.details.map((detail, i) => (
-                        <li key={i} className="text-sm text-neutral-300 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
+                <HobbyCard key={hobby.title} hobby={hobby} idx={idx} />
               ))}
             </motion.div>
           )}
@@ -1136,6 +1299,101 @@ function AnimeCard({ anime, idx }: { anime: typeof personalInterests.animes[0], 
           <div className="pt-4 border-t border-neutral-800">
             <p className="text-sm text-neutral-400 italic">
               "{anime.quote}"
+            </p>
+          </div>
+        </div>
+
+        {/* Enhanced Hover Effects */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-purple-500/20 transition-all duration-300" />
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// Add this new component for hobbies
+function HobbyCard({ hobby, idx }: { hobby: typeof personalInterests.hobbies[0], idx: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.1 }}
+      className="group relative"
+    >
+      <motion.div
+        whileHover={{ y: -10 }}
+        className="relative rounded-xl overflow-hidden bg-neutral-900/50 backdrop-blur-sm border border-neutral-800"
+      >
+        {/* Image Container */}
+        <div className="relative aspect-[3/4] overflow-hidden">
+          <Image
+            src={hobby.image}
+            alt={hobby.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            priority={idx < 2}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+          
+          {/* Badges */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="px-2 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm text-xs font-bold text-white flex items-center gap-1"
+            >
+              {hobby.rating}
+            </motion.div>
+            <div className="px-2 py-1 rounded-full bg-blue-500/90 backdrop-blur-sm text-xs font-medium text-white">
+              {hobby.yearStarted}
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
+              {hobby.title}
+            </h3>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-purple-400">{hobby.genre}</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-sm text-neutral-400">{hobby.description}</p>
+            <div className="pt-3 border-t border-neutral-800 space-y-2">
+              {hobby.favoriteGame && (
+                <div className="text-sm">
+                  <span className="text-neutral-500">Favorite Game: </span>
+                  <span className="text-white font-medium">{hobby.favoriteGame}</span>
+                </div>
+              )}
+              {hobby.favoriteCamera && (
+                <div className="text-sm">
+                  <span className="text-neutral-500">Camera: </span>
+                  <span className="text-white font-medium">{hobby.favoriteCamera}</span>
+                </div>
+              )}
+              {hobby.favoriteBook && (
+                <div className="text-sm">
+                  <span className="text-neutral-500">Favorite Book: </span>
+                  <span className="text-white font-medium">{hobby.favoriteBook}</span>
+                </div>
+              )}
+              {hobby.favoriteBand && (
+                <div className="text-sm">
+                  <span className="text-neutral-500">Favorite Band: </span>
+                  <span className="text-white font-medium">{hobby.favoriteBand}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quote */}
+          <div className="pt-4 border-t border-neutral-800">
+            <p className="text-sm text-neutral-400 italic">
+              "{hobby.quote}"
             </p>
           </div>
         </div>

@@ -10,29 +10,93 @@ import { cn } from "@/lib/utils"
 // Featured projects with detailed information
 const projects = [
   {
-    title: "AI-Powered Chat Application",
-    description: "Real-time chat application with AI-powered features, sentiment analysis, and automatic language translation",
-    Image: "/images/1.jpg", // Temporary image, replace with project image
-    tech: ["Next.js", "TypeScript", "OpenAI", "WebSocket", "TailwindCSS"],
+    title: "Peptides Calculator",
+    description: "A comprehensive mobile application for calculating molecular weight of peptides. Features include real-time calculations, history tracking, and export functionality.",
+    image: "/images/1.png",
+    tech: ["React Native", "Node.js", "Prisma", "PostgreSQL", "TypeScript"],
     links: {
-      github: "https://github.com/yourusername/project1",
-      live: "https://project1.com"
-    },
-    category: "Full Stack",
-    stats: {
-      stars: 120,
-      forks: 34,
-      views: 1500
+      github: "https://github.com/xunzag/peptides-calculator",
+      live: "https://play.google.com/store/apps/details?id=com.peptidescalculator"
     },
     features: [
-      "Real-time messaging with WebSocket",
-      "AI-powered response suggestions",
-      "Multi-language support",
-      "Voice messages with transcription"
+      "Real-time molecular weight calculation",
+      "Sequence validation",
+      "Export to PDF/CSV",
+      "Calculation history"
     ],
-    color: "from-purple-500 to-blue-500"
+    metrics: {
+      downloads: "1000+",
+      users: "500+",
+      rating: "4.8"
+    },
+    gradient: "from-purple-500 to-blue-500"
   },
-  // Add more projects with similar structure
+  {
+    title: "LunchThymes",
+    description: "A modern food ordering platform for schools, enabling parents to order lunches for their children with ease. Built with MERN stack and enhanced with shadcn UI.",
+    image: "/images/2.png",
+    tech: ["React", "Node.js", "MongoDB", "Express", "Shadcn UI", "TailwindCSS"],
+    links: {
+      github: "https://github.com/xunzag/lunchthymes",
+      live: "https://lunchthymes.com"
+    },
+    features: [
+      "Intuitive ordering system",
+      "Payment integration",
+      "Menu customization",
+      "Order tracking"
+    ],
+    metrics: {
+      orders: "10k+",
+      schools: "15+",
+      satisfaction: "98%"
+    },
+    gradient: "from-blue-500 to-cyan-500"
+  },
+  {
+    title: "LMS Portal",
+    description: "A comprehensive Learning Management System built with PHP/Laravel, featuring course management, student progress tracking, and interactive learning tools.",
+    image: "/images/3.png",
+    tech: ["PHP", "Laravel", "MySQL", "jQuery", "Bootstrap", "AWS"],
+    links: {
+      github: "https://github.com/xunzag/lms-portal",
+      live: "https://demo-lms.com"
+    },
+    features: [
+      "Course management",
+      "Progress tracking",
+      "Interactive quizzes",
+      "Resource library"
+    ],
+    metrics: {
+      students: "5000+",
+      courses: "100+",
+      completion: "92%"
+    },
+    gradient: "from-cyan-500 to-green-500"
+  },
+  {
+    title: "Sales Analytics Dashboard",
+    description: "Real-time sales analytics dashboard with advanced visualization and reporting capabilities. Built with modern web technologies and real-time data processing.",
+    image: "/images/4.png",
+    tech: ["Next.js", "D3.js", "Firebase", "TailwindCSS", "TypeScript"],
+    links: {
+      github: "https://github.com/xunzag/sales-analytics",
+      live: "https://sales-analytics-demo.com"
+    },
+    features: [
+      "Real-time analytics",
+      "Custom reports",
+      "Data visualization",
+      "Export functionality"
+    ],
+    metrics: {
+      dataPoints: "1M+",
+      reports: "50+",
+      accuracy: "99.9%"
+    },
+    gradient: "from-orange-500 to-red-500"
+  }
 ]
 
 // Project categories for filtering
@@ -40,17 +104,6 @@ const categories = ["All", "Full Stack", "Frontend", "Backend", "AI/ML", "Mobile
 
 // Project filtering and showcase section
 function ProjectShowcase() {
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
-  const { scrollYProgress } = useScroll()
-
-  const filteredProjects = projects.filter(project => {
-    const matchesCategory = selectedCategory === "All" || project.category === selectedCategory
-    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
-
   return (
     <div className="py-32 relative">
       {/* Background Effects */}
@@ -74,68 +127,15 @@ function ProjectShowcase() {
           </p>
         </motion.div>
 
-        {/* Search and Filter */}
-        <div className="flex flex-col md:flex-row gap-4 mb-12">
-          {/* Search */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="relative flex-1"
-          >
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-neutral-900/50 border border-neutral-800 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
-            />
-          </motion.div>
-
-          {/* Category Filter */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex gap-2 overflow-x-auto pb-2 md:pb-0"
-          >
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  selectedCategory === category
-                    ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-                    : "bg-neutral-900/50 text-neutral-400 hover:text-white"
-                )}
-              >
-                {category}
-              </button>
-            ))}
-          </motion.div>
-        </div>
-
         {/* Projects Grid */}
         <motion.div
           layout
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
-          <AnimatePresence mode="popLayout">
-            {filteredProjects.map((project, idx) => (
-              <ProjectCard key={project.title} project={project} index={idx} />
-            ))}
-          </AnimatePresence>
+          {projects.map((project, idx) => (
+            <ProjectCard key={project.title} project={project} index={idx} />
+          ))}
         </motion.div>
-
-        {/* Empty State */}
-        {filteredProjects.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <p className="text-neutral-400">No projects found matching your criteria</p>
-          </motion.div>
-        )}
       </div>
     </div>
   )
@@ -217,28 +217,24 @@ function ProjectCard({ project, index }: { project: typeof projects[0], index: n
         {/* Project Image */}
         <div className="relative aspect-video overflow-hidden">
           <Image
-            src={project.Image}
+            src={project.image}
             alt={project.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
           
-          {/* Category Badge */}
-          <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/90 to-blue-500/90 backdrop-blur-sm text-xs font-medium text-white">
-            {project.category}
-          </div>
-
-          {/* Stats */}
+          {/* Project Metrics */}
           <div className="absolute top-4 right-4 flex items-center gap-3">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm">
-              <Star className="w-3 h-3 text-yellow-500" />
-              <span className="text-xs text-white">{project.stats.stars}</span>
-            </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm">
-              <Eye className="w-3 h-3 text-blue-500" />
-              <span className="text-xs text-white">{project.stats.views}</span>
-            </div>
+            {Object.entries(project.metrics).map(([key, value]) => (
+              <div
+                key={key}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm"
+              >
+                <span className="text-xs font-medium text-white">{value}</span>
+                <span className="text-xs text-neutral-400">{key}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -308,12 +304,61 @@ function ProjectCard({ project, index }: { project: typeof projects[0], index: n
   )
 }
 
+// Add this new component for the GitHub CTA
+function GitHubCTA() {
+  return (
+    <div className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
+      
+      <div className="relative max-w-4xl mx-auto px-4 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="space-y-8"
+        >
+          <Github className="w-20 h-20 mx-auto text-white opacity-50" />
+          <h2 className="text-3xl md:text-4xl font-bold">
+            Explore More on{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
+              GitHub
+            </span>
+          </h2>
+          <p className="text-neutral-400 max-w-2xl mx-auto">
+            These are just a few highlights of my work. Visit my GitHub profile to explore more projects,
+            contributions, and see my coding journey.
+          </p>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-block"
+          >
+            <Link
+              href="https://github.com/xunzag"
+              target="_blank"
+              className={cn(
+                "inline-flex items-center gap-3 px-8 py-4 rounded-full",
+                "bg-white text-black font-medium",
+                "hover:shadow-[0_0_30px_-5px] hover:shadow-white/20",
+                "transition-all duration-300"
+              )}
+            >
+              <Github className="w-5 h-5" />
+              Visit My GitHub Profile
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+
 // Main Projects Page
 export default function ProjectsPage() {
   return (
     <main className="bg-black text-white pt-20">
       <ProjectShowcase />
       <ProjectStats />
+      <GitHubCTA />
     </main>
   )
 } 
