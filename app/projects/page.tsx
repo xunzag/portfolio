@@ -96,6 +96,72 @@ const projects = [
       accuracy: "99.9%"
     },
     gradient: "from-orange-500 to-red-500"
+  },
+  {
+    title: "AmazonChapter",
+    description: "Educational platform where students can learn Amazon-related courses, from FBA to marketing strategies. Features interactive lessons and community learning.",
+    image: "/images/5.png",
+    tech: ["React", "Next.js", "TailwindCSS", "Firebase", "Stripe", "TypeScript"],
+    links: {
+      github: "https://github.com/xunzag/amazonchapter",
+      live: "https://amazonchapter.com"
+    },
+    features: [
+      "Interactive course modules",
+      "Progress tracking",
+      "Community forums",
+      "Resource library"
+    ],
+    metrics: {
+      students: "2000+",
+      courses: "25+",
+      satisfaction: "96%"
+    },
+    gradient: "from-yellow-500 to-orange-500"
+  },
+  {
+    title: "FreshCart",
+    description: "Modern grocery purchasing platform with seamless ordering experience, real-time inventory tracking, and fast delivery options for fresh products.",
+    image: "/images/6.png",
+    tech: ["React", "Node.js", "MongoDB", "Express", "Redux", "TailwindCSS"],
+    links: {
+      github: "https://github.com/xunzag/freshcart",
+      live: "https://freshcart-demo.com"
+    },
+    features: [
+      "Real-time inventory tracking",
+      "Secure checkout",
+      "Delivery scheduling",
+      "Personalized recommendations"
+    ],
+    metrics: {
+      products: "5000+",
+      dailyOrders: "200+",
+      deliveryTime: "30 min avg"
+    },
+    gradient: "from-green-500 to-emerald-500"
+  },
+  {
+    title: "Elevate Carts",
+    description: "Software company providing tailored e-commerce solutions and software services. Features include custom shopping carts, payment integrations, and business analytics.",
+    image: "/images/ec-1.png",
+    tech: ["Vue.js", "Laravel", "MySQL", "Docker", "AWS", "GraphQL"],
+    links: {
+      github: "https://github.com/xunzag/elevatecarts",
+      live: "https://elevatecarts.com"
+    },
+    features: [
+      "Custom e-commerce solutions",
+      "Payment gateway integration",
+      "Business analytics",
+      "Multi-platform support"
+    ],
+    metrics: {
+      clients: "50+",
+      transactions: "1M+",
+      uptime: "99.9%"
+    },
+    gradient: "from-indigo-500 to-purple-500"
   }
 ]
 
