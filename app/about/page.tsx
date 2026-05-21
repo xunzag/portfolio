@@ -1,1429 +1,805 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import React, { useState, useRef } from "react"
+import { motion, AnimatePresence, useInView } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { Code, Brain, Rocket, Heart, Coffee, Star, Cat, Music, Gamepad, Book } from "lucide-react"
+import {
+  Code, Brain, Rocket, Heart, Coffee,
+  Star, Music, Book, Camera, Gamepad2,
+  ArrowRight, Download, CheckCircle2, GitFork, Eye,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { AnimatePresence } from "framer-motion"
+import CountUp from "react-countup"
+import { ScrambleText } from "@/components/scramble-text"
 
-// Personal stats data
+/* ════════════════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════════════════ */
+
 const personalStats = [
-  {
-    number: "2+",
-    label: "Years of Experience",
-    icon: Coffee,
-    description: "Building scalable applications"
-  },
-  {
-    number: "50+",
-    label: "Projects Completed",
-    icon: Rocket,
-    description: "From web apps to AI solutions"
-  },
-  {
-    number: "30+",
-    label: "Happy Clients",
-    icon: Heart,
-    description: "Worldwide satisfaction"
-  },
-  {
-    number: "15+",
-    label: "Technologies Mastered",
-    icon: Code,
-    description: "Full-stack expertise"
-  }
+  { value: 2,  suffix: "+", label: "Years Experience",      cmd: "career --years"           },
+  { value: 50, suffix: "+", label: "Projects Shipped",       cmd: "git log --all | wc -l"   },
+  { value: 30, suffix: "+", label: "Happy Clients",          cmd: "clients --satisfied"      },
+  { value: 15, suffix: "+", label: "Technologies Mastered",  cmd: "npm list | grep -c '^'"  },
 ]
 
-// Core values data
 const coreValues = [
   {
+    emoji: "🧠",
     title: "Innovation First",
-    description: "Always pushing boundaries with cutting-edge solutions",
-    icon: Brain,
+    description: "Always pushing boundaries with cutting-edge solutions and emerging technologies.",
     gradient: "from-purple-500 to-blue-500",
-    metrics: [
-      { label: "New Technologies", value: "15+" },
-      { label: "Innovative Solutions", value: "25+" }
-    ],
-    principles: [
-      "Embrace emerging tech",
-      "Think outside the box",
-      "Challenge conventions"
-    ]
+    items: ["Embrace emerging tech", "Think outside the box", "Challenge conventions"],
   },
   {
+    emoji: "⭐",
     title: "Quality Driven",
-    description: "Delivering excellence in every line of code",
-    icon: Star,
+    description: "Delivering excellence in every line of code — clean architecture, robust testing.",
     gradient: "from-blue-500 to-cyan-500",
-    metrics: [
-      { label: "Code Quality", value: "A+" },
-      { label: "Test Coverage", value: "95%" }
-    ],
-    principles: [
-      "Clean architecture",
-      "Robust testing",
-      "Performance first"
-    ]
+    items: ["Clean architecture", "Robust testing", "Performance first"],
   },
   {
+    emoji: "❤️",
     title: "User Focused",
-    description: "Creating intuitive and engaging experiences",
-    icon: Heart,
+    description: "Creating intuitive, accessible, engaging experiences that delight real users.",
     gradient: "from-cyan-500 to-green-500",
-    metrics: [
-      { label: "User Satisfaction", value: "98%" },
-      { label: "Retention Rate", value: "95%" }
-    ],
-    principles: [
-      "Intuitive design",
-      "Accessibility",
-      "User feedback driven"
-    ]
-  }
+    items: ["Intuitive design", "Accessibility", "User feedback driven"],
+  },
 ]
 
-// Add this for the moving cat
-function MovingCat({ mousePosition }: { mousePosition: { x: number; y: number } }) {
+const skills = [
+  {
+    category: "Frontend",
+    label: "FRONTEND_DEV",
+    gradient: "from-purple-500 to-blue-500",
+    items: [
+      { name: "React & Next.js", level: 93 },
+      { name: "TypeScript",      level: 88 },
+      { name: "TailwindCSS",     level: 92 },
+      { name: "Framer Motion",   level: 82 },
+    ],
+  },
+  {
+    category: "Backend",
+    label: "BACKEND_DEV",
+    gradient: "from-blue-500 to-cyan-500",
+    items: [
+      { name: "Node.js & Express", level: 87 },
+      { name: "Python",            level: 80 },
+      { name: "MongoDB",           level: 85 },
+      { name: "PostgreSQL",        level: 83 },
+    ],
+  },
+  {
+    category: "Cloud & DevOps",
+    label: "CLOUD_OPS",
+    gradient: "from-cyan-500 to-green-500",
+    items: [
+      { name: "AWS",    level: 80 },
+      { name: "Docker", level: 85 },
+      { name: "CI/CD",  level: 86 },
+      { name: "Git",    level: 92 },
+    ],
+  },
+]
+
+const animes = [
+  { title: "Hunter X Hunter", image: "/images/anime/hxh.jpg",       rating: "9.1", genre: "Action, Adventure",        favoriteChar: "Killua Zoldyck",    bestArc: "Chimera Ant Arc",    quote: "You should enjoy the little detours to the fullest.", yearWatched: "2019" },
+  { title: "Monster",         image: "/images/anime/monster.jpg",    rating: "8.9", genre: "Psychological Thriller",   favoriteChar: "Dr. Kenzo Tenma",   bestArc: "The Perfect Suicide",quote: "The monster inside of me has grown this large.",      yearWatched: "2020" },
+  { title: "Bleach",          image: "/images/anime/bleach.jpg",     rating: "8.8", genre: "Action, Supernatural",     favoriteChar: "Byakuya Kuchiki",   bestArc: "Soul Society Arc",   quote: "If fate is a millstone, then we are the grist.",     yearWatched: "2018" },
+  { title: "Attack on Titan", image: "/images/anime/aot.jpg",        rating: "9.0", genre: "Dark Fantasy, Action",     favoriteChar: "Levi Ackerman",     bestArc: "Marley Arc",         quote: "If you win, you live. If you lose, you die.",        yearWatched: "2021" },
+  { title: "Jujutsu Kaisen",  image: "/images/anime/jjk.jpg",        rating: "8.7", genre: "Action, Supernatural",     favoriteChar: "Gojo Satoru",       bestArc: "Shibuya Incident",   quote: "Throughout heaven and earth, I alone am the honored one.", yearWatched: "2022" },
+  { title: "Death Note",      image: "/images/anime/deathnote.jpg",  rating: "9.0", genre: "Psychological Thriller",   favoriteChar: "L Lawliet",         bestArc: "L vs Light Arc",     quote: "I am Justice!",                                       yearWatched: "2017" },
+]
+
+const hobbies = [
+  { title: "Gaming",       image: "/images/hobbies/got.jpg",           icon: Gamepad2, rating: "Elite",       detail: "Ghost of Tsushima · RPG & Strategy", genre: "RPG & Strategy",  quote: "We end this together! — Yuna",               since: "2010" },
+  { title: "Photography",  image: "/images/hobbies/photography.jpg",   icon: Camera,   rating: "Amateur+",    detail: "Sony A7III · Northern Areas",        genre: "Street & Nature", quote: "The best camera is the one you have with you.", since: "2019" },
+  { title: "Reading",      image: "/images/hobbies/reading.jpg",       icon: Book,     rating: "Bookworm",    detail: "12 books/year · History & Science",  genre: "Non-fiction",     quote: "Knowledge is power, books are the battery.",  since: "2015" },
+  { title: "Music",        image: "/images/hobbies/musice.jpg",        icon: Music,    rating: "Enthusiast",  detail: "The Weeknd · Guitar",                genre: "Pop & Rock",      quote: "Music is how I debug my brain.",              since: "2016" },
+]
+
+const confLines = [
+  { type: "comment",  text: "# /etc/farhan.conf — system configuration" },
+  { type: "comment",  text: "# Last modified: 2024-11-12 by farhan (root)" },
+  { type: "blank",    text: "" },
+  { type: "section",  text: "[routines]" },
+  { type: "entry",    key: "wake_time      ", value: "06:00",      comment: "# early bird mode" },
+  { type: "entry",    key: "sleep_hours    ", value: "6",          comment: "# non-negotiable" },
+  { type: "entry",    key: "water_litres   ", value: "4",          comment: "# hydration > caffeination" },
+  { type: "entry",    key: "daily_calories ", value: "3000",       comment: "# fuel for deep work" },
+  { type: "entry",    key: "pushups_max    ", value: "50",         comment: "# daily PR" },
+  { type: "blank",    text: "" },
+  { type: "section",  text: "[developer_metrics]" },
+  { type: "entry",    key: "lines_of_code  ", value: "100_000+",   comment: "# and counting..." },
+  { type: "entry",    key: "debug_tool     ", value: '"rubber_duck"', comment: "# it works, trust me" },
+  { type: "entry",    key: "wpm            ", value: "120",        comment: "# measured, not estimated" },
+  { type: "entry",    key: "leetcode_solved", value: "500+",       comment: "# grind never stops" },
+  { type: "blank",    text: "" },
+  { type: "section",  text: "[misc]" },
+  { type: "entry",    key: "coffee_cups    ", value: "2190",       comment: "# lifetime total" },
+  { type: "entry",    key: "favorite_os   ", value: '"coffee-powered-linux"', comment: "" },
+]
+
+/* ════════════════════════════════════════════════════════════════
+   HERO — whoami terminal aesthetic
+════════════════════════════════════════════════════════════════ */
+
+function AboutHero() {
+  const ref    = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true })
+
   return (
-    <motion.div
-      className="fixed z-50 pointer-events-none"
-      animate={mousePosition}
-      transition={{
-        type: "spring",
-        damping: 20,
-        stiffness: 200
-      }}
-    >
-      <Cat className="w-12 h-12 text-purple-500" />
+    <section className="min-h-screen relative flex items-center px-6 pt-24 pb-12 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_30%_50%,rgba(168,85,247,0.1),transparent)]" />
+
+      <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
+        {/* Left: text */}
+        <motion.div
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-8"
+        >
+          <div className="space-y-2">
+            <div className="font-mono text-sm text-neutral-600 flex items-center gap-2">
+              <span className="text-green-400">$</span>
+              <span className="text-purple-400">farhan</span>
+              <span className="text-neutral-700">@</span>
+              <span className="text-cyan-400">portfolio</span>
+              <span className="text-neutral-700">:</span>
+              <span className="text-blue-400">~</span>
+              <span className="text-neutral-400"> $ whoami --verbose</span>
+            </div>
+            <span className="section-label">About Me</span>
+          </div>
+
+          <ScrambleText
+            as="h1"
+            text="Crafting Digital Excellence"
+            className="text-5xl md:text-6xl font-bold leading-tight"
+            speed={25}
+          />
+
+          <div className="space-y-2">
+            <div className="font-mono text-xs text-green-400 flex items-center gap-1.5">
+              <span>{">"}</span>
+              <span className="text-neutral-500">output:</span>
+            </div>
+            <p className="text-lg text-neutral-400 leading-relaxed pl-4 border-l border-neutral-800">
+              I'm a passionate Full Stack Developer with a love for building products that are fast, beautiful, and meaningful. My journey started with curiosity and has grown into expertise across the full stack — from pixel-perfect UIs to robust cloud architectures.
+            </p>
+          </div>
+
+          {/* Stats as terminal metrics */}
+          <div ref={ref} className="glass-card rounded-2xl overflow-hidden border border-neutral-800">
+            <div className="px-5 py-3 bg-neutral-900/80 border-b border-neutral-800 font-mono text-xs flex items-center gap-2">
+              <span className="text-green-400">$</span>
+              <span className="text-neutral-400">whoami --stats --format=json</span>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-3">
+              {personalStats.map(({ value, suffix, label, cmd }, i) => (
+                <motion.div
+                  key={label}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: i * 0.1 }}
+                  className="space-y-1"
+                >
+                  <div className="text-2xl font-bold gradient-text font-mono tabular-nums">
+                    {inView ? <CountUp end={value} duration={2} delay={i * 0.1} /> : 0}{suffix}
+                  </div>
+                  <div className="text-xs text-neutral-500">{label}</div>
+                  <div className="font-mono text-[10px] text-neutral-700 truncate">
+                    <span className="text-green-500/60">❯</span> {cmd}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <Link href="/contact" className="btn-primary text-sm">
+              <span>Let's Work Together</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <a href="/cv.pdf" download className="btn-ghost text-sm flex items-center gap-2">
+              <Download className="w-4 h-4" /> Download CV
+            </a>
+          </div>
+        </motion.div>
+
+        {/* Right: profile image */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.88 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="relative mx-auto lg:mx-0 w-72 md:w-80"
+        >
+          <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl" />
+          <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="absolute inset-0 rounded-3xl border border-purple-500/20 rotate-3 scale-95 glass-card" />
+          <div className="absolute inset-0 rounded-3xl border border-blue-500/15 -rotate-2 scale-[0.98] glass-card" />
+
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+            <Image src="/me-new.png" alt="Farhan Babar" width={360} height={480} priority className="object-cover object-top w-full" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            {/* scan line overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px)" }} />
+          </div>
+
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -right-4 top-8 glass-card rounded-xl px-4 py-3 border border-green-500/20"
+          >
+            <div className="flex items-center gap-2 text-xs text-neutral-400">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              Status
+            </div>
+            <div className="text-sm font-semibold text-white font-mono">Open to Work</div>
+          </motion.div>
+
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute -left-4 bottom-12 glass-card rounded-xl px-4 py-3 border border-blue-500/20"
+          >
+            <div className="text-xs text-neutral-400 font-mono">Location</div>
+            <div className="text-sm font-semibold text-white">🇵🇰 Pakistan</div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MARQUEE — all images
+════════════════════════════════════════════════════════════════ */
+
+const allImages = [
+  ...animes.map((a) => ({ src: a.image, label: a.title })),
+  ...hobbies.map((h) => ({ src: h.image, label: h.title })),
+]
+const doubledImages = [...allImages, ...allImages]
+
+function ImageMarquee() {
+  return (
+    <section className="py-16 overflow-hidden">
+      <div className="marquee-wrap relative mb-4">
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        <div className="marquee-track gap-4">
+          {doubledImages.map((img, i) => (
+            <div key={i} className="flex-shrink-0 relative w-52 h-36 rounded-2xl overflow-hidden border border-white/[0.06] group">
+              <Image src={img.src} alt={img.label} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="208px" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                <span className="text-xs text-white font-medium">{img.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="marquee-wrap relative">
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        <div className="marquee-track marquee-track-reverse gap-4">
+          {[...doubledImages].reverse().map((img, i) => (
+            <div key={i} className="flex-shrink-0 relative w-52 h-36 rounded-2xl overflow-hidden border border-white/[0.06] group">
+              <Image src={img.src} alt={img.label} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="208px" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                <span className="text-xs text-white font-medium">{img.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CORE VALUES — GitHub README.md viewer
+════════════════════════════════════════════════════════════════ */
+
+function CoreValues() {
+  return (
+    <section className="py-24 px-6">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center space-y-3 mb-14"
+        >
+          <span className="section-label mx-auto">Principles</span>
+          <ScrambleText as="h2" text="My Core Values" className="text-3xl md:text-4xl font-bold" speed={30} />
+          <p className="text-xs font-mono text-neutral-600">// rendered from xunzag/readme.md</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-2xl overflow-hidden border border-neutral-700/60 shadow-2xl shadow-black/40"
+          style={{ background: "#0d1117" }}
+        >
+          {/* GitHub repo header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-800/80" style={{ background: "#161b22" }}>
+            <div className="flex items-center gap-3 font-mono text-sm">
+              <span className="text-neutral-500">📁</span>
+              <span className="text-blue-400">xunzag</span>
+              <span className="text-neutral-600">/</span>
+              <span className="text-blue-400 font-semibold">developer-readme</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-neutral-500">
+              <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-yellow-500" /> 847</span>
+              <span className="flex items-center gap-1"><GitFork className="w-3.5 h-3.5" /> 23</span>
+              <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> 4.2k</span>
+            </div>
+          </div>
+
+          {/* File tab */}
+          <div className="flex items-center justify-between px-5 py-2 border-b border-neutral-800/60" style={{ background: "#0d1117" }}>
+            <div className="flex items-center gap-2 text-xs text-neutral-400">
+              <span className="text-neutral-600">📄</span>
+              <span className="font-mono">README.md</span>
+              <span className="text-neutral-700">·</span>
+              <span className="text-neutral-600">0 contributors</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              {["Raw", "Copy raw", "Download"].map((t) => (
+                <button key={t} className="text-neutral-500 hover:text-neutral-300 transition-colors font-mono">{t}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* README content — rendered markdown */}
+          <div className="p-8 md:p-12 space-y-10" style={{ color: "#e6edf3" }}>
+            {/* h1 */}
+            <div className="pb-4" style={{ borderBottom: "1px solid #21262d" }}>
+              <h2 className="text-2xl font-bold" style={{ color: "#e6edf3" }}>
+                👋 Developer README — Farhan Babar
+              </h2>
+              <p className="text-sm mt-2" style={{ color: "#8b949e" }}>
+                A quick guide to who I am, what I care about, and how I work.
+              </p>
+            </div>
+
+            {/* 3 sections */}
+            {coreValues.map((v, i) => (
+              <motion.div
+                key={v.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="space-y-4"
+              >
+                {/* h2 heading */}
+                <div className="flex items-center gap-3 pb-2" style={{ borderBottom: "1px solid #21262d" }}>
+                  <h3 className="text-lg font-bold" style={{ color: "#e6edf3" }}>
+                    {v.emoji} {v.title}
+                  </h3>
+                </div>
+
+                {/* blockquote */}
+                <div className="pl-4" style={{ borderLeft: "3px solid #30363d" }}>
+                  <p className="text-sm italic" style={{ color: "#8b949e" }}>{v.description}</p>
+                </div>
+
+                {/* bullet list */}
+                <ul className="space-y-2 pl-2">
+                  {v.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "#e6edf3" }}>
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#3fb950" }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* inline code example */}
+                <div className="text-xs font-mono px-3 py-2 rounded-md" style={{ background: "#161b22", color: "#79c0ff", border: "1px solid #30363d" }}>
+                  {"// "}<span style={{ color: "#a5d6ff" }}>{v.title.toLowerCase().replace(/ /g, "_")}</span>
+                  {" = true  "}
+                  <span style={{ color: "#8b949e" }}>/* always */</span>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* footer */}
+            <div className="pt-4" style={{ borderTop: "1px solid #21262d" }}>
+              <p className="text-xs font-mono" style={{ color: "#8b949e" }}>
+                <span style={{ color: "#3fb950" }}>●</span> Open to collaboration · Updated 2024-11-12 · MIT License
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SKILLS — Lighthouse / benchmark profiler terminal
+════════════════════════════════════════════════════════════════ */
+
+function scoreLabel(level: number) {
+  if (level >= 90) return { text: "Excellent", color: "text-green-400"  }
+  if (level >= 80) return { text: "Advanced",  color: "text-cyan-400"   }
+  if (level >= 70) return { text: "Proficient",color: "text-yellow-400" }
+  return                  { text: "Learning",  color: "text-orange-400" }
+}
+
+function scoreBarColor(level: number) {
+  if (level >= 90) return "from-green-500 to-emerald-500"
+  if (level >= 80) return "from-cyan-500 to-blue-500"
+  if (level >= 70) return "from-yellow-500 to-orange-500"
+  return "from-orange-500 to-red-500"
+}
+
+function Skills() {
+  const ref    = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
+  const avgScore = Math.round(
+    skills.flatMap((s) => s.items).reduce((a, b) => a + b.level, 0) /
+    skills.flatMap((s) => s.items).length
+  )
+
+  return (
+    <section className="py-24 px-6" ref={ref}>
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          className="text-center space-y-3 mb-14"
+        >
+          <span className="section-label mx-auto">Skills</span>
+          <ScrambleText as="h2" text="Technical Expertise" className="text-3xl md:text-4xl font-bold" speed={30} />
+          <p className="text-xs font-mono text-neutral-600">// npm run benchmark --suite=all</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="glass-card rounded-2xl overflow-hidden border border-neutral-700/40"
+        >
+          {/* Terminal chrome */}
+          <div className="flex items-center gap-2 px-5 py-3 bg-neutral-900/90 border-b border-neutral-800">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            </div>
+            <span className="ml-3 text-xs font-mono text-neutral-500">farhan@dev — benchmark runner</span>
+            <span className="ml-auto text-xs font-mono text-green-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              RUNNING
+            </span>
+          </div>
+
+          {/* Command line */}
+          <div className="px-6 py-3 border-b border-neutral-800/50 font-mono text-xs">
+            <span className="text-green-400">$</span>
+            <span className="text-neutral-400"> npm run benchmark </span>
+            <span className="text-cyan-400">--reporter=detailed</span>
+            <span className="text-neutral-400"> </span>
+            <span className="text-purple-400">--suite=all</span>
+          </div>
+
+          {/* Benchmark suites */}
+          <div className="divide-y divide-neutral-800/40">
+            {skills.map((cat, ci) => (
+              <div key={cat.category} className="p-6">
+                {/* Suite header */}
+                <div className="font-mono text-xs mb-4 space-y-1">
+                  <div className="text-neutral-600">{"━".repeat(48)}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-yellow-400">SUITE: {cat.label}</span>
+                    <span className="text-neutral-600">({cat.items.length} benchmarks)</span>
+                  </div>
+                  <div className="text-neutral-600">{"━".repeat(48)}</div>
+                </div>
+
+                {/* Benchmark rows */}
+                <div className="space-y-3">
+                  {cat.items.map((skill, si) => {
+                    const { text, color } = scoreLabel(skill.level)
+                    return (
+                      <motion.div
+                        key={skill.name}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={inView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ delay: ci * 0.15 + si * 0.08, duration: 0.5 }}
+                        className="font-mono"
+                      >
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="text-xs text-neutral-400 w-36 shrink-0">{skill.name}</span>
+                          <div className="flex-1 relative h-2 bg-neutral-900 rounded-sm overflow-hidden border border-neutral-800/60">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={inView ? { width: `${skill.level}%` } : {}}
+                              transition={{ duration: 1.2, delay: ci * 0.15 + si * 0.08 + 0.2, ease: [0.16, 1, 0.3, 1] }}
+                              className={cn("h-full bg-gradient-to-r", scoreBarColor(skill.level))}
+                            />
+                          </div>
+                          <span className="text-sm font-bold gradient-text w-14 text-right tabular-nums">
+                            {inView ? skill.level : 0}/100
+                          </span>
+                          <span className={cn("text-xs w-20 shrink-0", color)}>{text}</span>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Results footer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ delay: 1.2 }}
+            className="px-6 py-4 border-t border-neutral-800/50 font-mono text-xs space-y-1"
+          >
+            <div className="flex items-center gap-2 text-green-400">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>All {skills.flatMap(s => s.items).length} benchmarks passed (0 failed)</span>
+            </div>
+            <div className="flex items-center gap-2 text-cyan-400">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Average score: {avgScore}/100 — overall rating: Advanced</span>
+            </div>
+            <div className="text-neutral-700 mt-2">Time: 2.3s · Memory: 48MB</div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MORE ABOUT ME — enhanced tab section
+════════════════════════════════════════════════════════════════ */
+
+type Tab = "anime" | "hobbies" | "funfacts"
+
+interface MediaItem {
+  title: string; image: string; rating: string; genre: string; quote: string
+  badge: string; line1Label?: string; line1Value?: string; line2Label?: string; line2Value?: string; detail?: string; isAnime: boolean
+}
+
+function MediaCard({ item }: { item: MediaItem }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -6 }} className="glass-card rounded-2xl overflow-hidden group relative">
+      <div className="relative aspect-[3/4] overflow-hidden">
+        <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute top-3 right-3 flex gap-1.5">
+          <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/90 text-white font-bold backdrop-blur-sm">
+            {item.isAnime ? `★ ${item.rating}` : item.rating}
+          </span>
+          <span className="px-2 py-0.5 text-xs rounded-full bg-purple-500/90 text-white backdrop-blur-sm">{item.badge}</span>
+        </div>
+      </div>
+      <div className="p-5 space-y-3">
+        <div>
+          <h3 className="font-bold text-white text-base group-hover:gradient-text transition-all">{item.title}</h3>
+          <p className="text-xs text-purple-400 mt-0.5">{item.genre}</p>
+        </div>
+        <div className="space-y-1 text-xs">
+          {item.isAnime ? (
+            <>
+              {item.line1Label && <div className="text-neutral-400"><span className="text-neutral-600">{item.line1Label}: </span><span className="text-neutral-300">{item.line1Value}</span></div>}
+              {item.line2Label && <div className="text-neutral-400"><span className="text-neutral-600">{item.line2Label}: </span><span className="text-neutral-300">{item.line2Value}</span></div>}
+            </>
+          ) : (
+            <div className="text-neutral-300">{item.detail}</div>
+          )}
+        </div>
+        <div className="pt-2 border-t border-white/[0.05]">
+          <p className="text-xs text-neutral-500 italic">"{item.quote}"</p>
+        </div>
+      </div>
+      <div className="absolute inset-0 rounded-2xl border border-purple-500/0 group-hover:border-purple-500/20 transition-colors duration-300 pointer-events-none" />
     </motion.div>
   )
 }
 
-// Fun facts about me
-const funFacts = [
-  {
-    icon: Coffee,
-    fact: "I've consumed approximately 2,190 cups of coffee while coding",
-    color: "text-amber-500"
-  },
-  {
-    icon: Music,
-    fact: "I code better while listening to Lo-fi beats",
-    color: "text-blue-500"
-  },
-  {
-    icon: Gamepad,
-    fact: "I'm a casual gamer who loves strategy games",
-    color: "text-green-500"
-  },
-  {
-    icon: Book,
-    fact: "I read one technical book every month",
-    color: "text-red-500"
-  }
-]
-
-function AboutHeroSection() {
-  return (
-    <div className="min-h-[80vh] relative flex items-center">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(168,85,247,0.15),transparent_80%)]" />
-
-      <div className="relative max-w-7xl mx-auto px-4 py-32 grid lg:grid-cols-2 gap-16 items-center">
-        {/* Left Column - Text Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-8"
-        >
-          <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2"
-            >
-              <span className="h-px w-10 bg-gradient-to-r from-purple-500 to-transparent" />
-              <span className="text-purple-500 font-medium tracking-wider uppercase text-sm">
-                About Me
-              </span>
-            </motion.div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-              Crafting Digital{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-                Excellence
-              </span>
-            </h1>
-
-            <p className="text-xl text-neutral-400 leading-relaxed">
-              I'm a passionate Full Stack Developer with expertise in creating innovative solutions. 
-              My journey in tech has been driven by curiosity and a desire to build impactful applications.
-            </p>
-          </div>
-
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            {personalStats.map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="cosmic-card p-6 rounded-xl group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10">
-                    <stat.icon className="w-6 h-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                      {stat.number}
-                    </div>
-                    <div className="text-sm text-neutral-400">{stat.label}</div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Right Column - Image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative aspect-square rounded-2xl overflow-hidden"
-        >
-          <Image
-            src="/images/me.jpg"
-            alt="Farhan Ali"
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-        </motion.div>
-      </div>
-    </div>
-  )
-}
-
-function CoreValuesSection() {
-  const coreValues = [
-    {
-      title: "Innovation First",
-      description: "Always pushing boundaries with cutting-edge solutions",
-      icon: Brain,
-      gradient: "from-purple-500 to-blue-500",
-      metrics: [
-        { label: "New Technologies", value: "15+" },
-        { label: "Innovative Solutions", value: "25+" }
-      ],
-      principles: [
-        "Embrace emerging tech",
-        "Think outside the box",
-        "Challenge conventions"
-      ]
-    },
-    {
-      title: "Quality Driven",
-      description: "Delivering excellence in every line of code",
-      icon: Star,
-      gradient: "from-blue-500 to-cyan-500",
-      metrics: [
-        { label: "Code Quality", value: "A+" },
-        { label: "Test Coverage", value: "95%" }
-      ],
-      principles: [
-        "Clean architecture",
-        "Robust testing",
-        "Performance first"
-      ]
-    },
-    {
-      title: "User Focused",
-      description: "Creating intuitive and engaging experiences",
-      icon: Heart,
-      gradient: "from-cyan-500 to-green-500",
-      metrics: [
-        { label: "User Satisfaction", value: "98%" },
-        { label: "Retention Rate", value: "95%" }
-      ],
-      principles: [
-        "Intuitive design",
-        "Accessibility",
-        "User feedback driven"
-      ]
-    }
-  ]
-
-  return (
-    <div className="py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4 mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            My Core{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Values
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            Principles that guide my development process and ensure exceptional results
-          </p>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {coreValues.map((value, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="group relative"
-            >
-              <div className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-neutral-800 bg-neutral-900/50">
-                {/* Header with Icon */}
-                <div className={cn(
-                  "p-6",
-                  "bg-gradient-to-r bg-opacity-10",
-                  value.gradient
-                )}>
-                  <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "w-12 h-12 rounded-lg flex items-center justify-center",
-                      "bg-gradient-to-r",
-                      value.gradient
-                    )}>
-                      <value.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                        {value.title}
-                      </h3>
-                      <p className="text-sm text-neutral-400">
-                        {value.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-2 border-y border-neutral-800">
-                  {value.metrics.map((metric, metricIdx) => (
-                    <div
-                      key={metricIdx}
-                      className="p-4 text-center group-hover:bg-neutral-800/50 transition-colors"
-                    >
-                      <div className="text-xl font-bold text-white">{metric.value}</div>
-                      <div className="text-xs text-neutral-500">{metric.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Principles */}
-                <div className="p-6 space-y-3">
-                  {value.principles.map((principle, principleIdx) => (
-                    <motion.div
-                      key={principleIdx}
-                      className="flex items-center gap-3 group/item"
-                      whileHover={{ x: 5 }}
-                    >
-                      <div className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        "bg-gradient-to-r",
-                        value.gradient
-                      )} />
-                      <span className="text-sm text-neutral-400 group-hover/item:text-white transition-colors">
-                        {principle}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Hover Effects */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SkillsSection() {
-  const skills = [
-    {
-      category: "Frontend",
-      items: [
-        { name: "React", level: 95, icon: "⚛️" },
-        { name: "Next.js", level: 90, icon: "▲" },
-        { name: "TypeScript", level: 88, icon: "TS" },
-        { name: "TailwindCSS", level: 92, icon: "🎨" }
-      ],
-      gradient: "from-purple-500 to-blue-500"
-    },
-    {
-      category: "Backend",
-      items: [
-        { name: "Node.js", level: 85, icon: "🟢" },
-        { name: "Express", level: 88, icon: "🚂" },
-        { name: "Python", level: 80, icon: "🐍" },
-        { name: "MongoDB", level: 85, icon: "🍃" }
-      ],
-      gradient: "from-blue-500 to-cyan-500"
-    },
-    {
-      category: "Tools & Others",
-      items: [
-        { name: "Git", level: 90, icon: "🌳" },
-        { name: "AWS", level: 82, icon: "☁️" },
-        { name: "Docker", level: 85, icon: "🐳" },
-        { name: "CI/CD", level: 88, icon: "⚡" }
-      ],
-      gradient: "from-cyan-500 to-green-500"
-    }
-  ]
-
-  return (
-    <div className="py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4 mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Technical{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Expertise
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            A comprehensive set of skills honed through years of experience
-          </p>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {skills.map((category, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="cosmic-card p-6 rounded-xl backdrop-blur-sm border border-neutral-800 bg-neutral-900/50"
-            >
-              <div className="space-y-6">
-                <div className={cn(
-                  "text-xl font-bold bg-clip-text text-transparent",
-                  "bg-gradient-to-r",
-                  category.gradient
-                )}>
-                  {category.category}
-                </div>
-                
-                <div className="space-y-4">
-                  {category.items.map((skill, skillIdx) => (
-                    <motion.div
-                      key={skillIdx}
-                      className="group"
-                      whileHover={{ y: -2 }}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-800 group-hover:bg-neutral-700 transition-colors">
-                          <span className="text-lg">{skill.icon}</span>
-                        </div>
-                        <span className="text-neutral-300 font-medium group-hover:text-white transition-colors">
-                          {skill.name}
-                        </span>
-                        <span className="ml-auto text-sm text-neutral-500 group-hover:text-neutral-400">
-                          {skill.level}%
-                        </span>
-                      </div>
-                      
-                      <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${skill.level}%` }}
-                          transition={{ duration: 1, delay: idx * 0.1 + skillIdx * 0.1 }}
-                          className={cn(
-                            "h-full rounded-full",
-                            "bg-gradient-to-r",
-                            category.gradient
-                          )}
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function InterestsSection() {
-  const interests = [
-    {
-      title: "AI & Machine Learning",
-      description: "Exploring the frontiers of artificial intelligence and its applications in real-world scenarios",
-      icon: Brain,
-      gradient: "from-purple-500 to-blue-500",
-      stats: [
-        { label: "Projects", value: "15+" },
-        { label: "Papers Read", value: "50+" },
-        { label: "Models Trained", value: "25+" }
-      ],
-      tools: ["TensorFlow", "PyTorch", "Scikit-learn", "Keras"]
-    },
-    {
-      title: "Open Source",
-      description: "Contributing to the developer community and building public tools for everyone",
-      icon: Code,
-      gradient: "from-blue-500 to-cyan-500",
-      stats: [
-        { label: "Contributions", value: "200+" },
-        { label: "Stars", value: "1k+" },
-        { label: "Projects", value: "10+" }
-      ],
-      tools: ["GitHub", "Git", "Open Source", "Community"]
-    },
-    {
-      title: "Innovation",
-      description: "Building next-generation solutions that push the boundaries of technology",
-      icon: Rocket,
-      gradient: "from-cyan-500 to-green-500",
-      stats: [
-        { label: "Patents", value: "2" },
-        { label: "Research", value: "5+" },
-        { label: "POCs", value: "20+" }
-      ],
-      tools: ["Web3", "IoT", "Cloud Native", "Edge Computing"]
-    }
-  ]
-
-  return (
-    <div className="py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4 mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Areas of{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Interest
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            Exploring cutting-edge technologies and innovative solutions
-          </p>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {interests.map((interest, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="group relative"
-            >
-              <div className="relative rounded-xl overflow-hidden backdrop-blur-sm border border-neutral-800 bg-neutral-900/50">
-                {/* Header */}
-                <div className={cn(
-                  "p-6 flex items-start gap-4",
-                  "bg-gradient-to-r",
-                  interest.gradient,
-                  "bg-opacity-10"
-                )}>
-                  <div className={cn(
-                    "w-12 h-12 rounded-lg flex items-center justify-center",
-                    "bg-gradient-to-r",
-                    interest.gradient
-                  )}>
-                    <interest.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-                      {interest.title}
-                    </h3>
-                    <p className="text-sm text-neutral-400 mt-1">
-                      {interest.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-3 border-y border-neutral-800">
-                  {interest.stats.map((stat, statIdx) => (
-                    <div
-                      key={statIdx}
-                      className="p-4 text-center group-hover:bg-neutral-800/50 transition-colors"
-                    >
-                      <div className="text-xl font-bold text-white">{stat.value}</div>
-                      <div className="text-xs text-neutral-500">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tools */}
-                <div className="p-6">
-                  <div className="flex flex-wrap gap-2">
-                    {interest.tools.map((tool, toolIdx) => (
-                      <motion.span
-                        key={toolIdx}
-                        whileHover={{ y: -2 }}
-                        className={cn(
-                          "px-3 py-1 rounded-full text-xs",
-                          "bg-neutral-800 text-neutral-300",
-                          "hover:bg-gradient-to-r hover:text-white transition-colors",
-                          interest.gradient
-                        )}
-                      >
-                        {tool}
-                      </motion.span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Hover Effects */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function HobbiesSection() {
-  return (
-    <div className="py-32 relative">
-      <div className="max-w-7xl mx-auto px-4">
-        <motion.h2
-              initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-16"
-        >
-          When I'm Not{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-            Coding
-          </span>
-        </motion.h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Photography",
-              description: "Capturing moments through my lens",
-              icon: "📸",
-              gradient: "from-pink-500 to-rose-500"
-            },
-            {
-              title: "Traveling",
-              description: "Exploring new places and cultures",
-              icon: "✈️",
-              gradient: "from-blue-500 to-cyan-500"
-            },
-            {
-              title: "Music",
-              description: "Playing guitar in my free time",
-              icon: "🎸",
-              gradient: "from-purple-500 to-indigo-500"
-            }
-          ].map((hobby, idx) => (
-            <motion.div
-              key={hobby.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              className={cn(
-                "group relative p-6 rounded-xl overflow-hidden",
-                `bg-gradient-to-r ${hobby.gradient} opacity-10 group-hover:opacity-20`
-              )}
-            >
-              <div className="relative z-10">
-                <span className="text-4xl mb-4 block">{hobby.icon}</span>
-                <h3 className="text-xl font-semibold text-white mb-2">{hobby.title}</h3>
-                <p className="text-neutral-400">{hobby.description}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function FunFactsTicker() {
-  return (
-    <div className="py-16 relative overflow-hidden bg-neutral-900/50">
-      {/* Gradient Overlays */}
-      <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black to-transparent z-10" />
-      <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-black to-transparent z-10" />
-      
-      {/* RGB Lines */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
-
-      {/* Two rows of facts scrolling in opposite directions */}
-      <div className="flex flex-col gap-8">
-        <motion.div
-          animate={{
-            x: [-1000, 1000],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex gap-8 whitespace-nowrap"
-        >
-          {[...personalInterests.funFacts, ...personalInterests.funFacts].slice(0, 8).map((fact, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ scale: 1.05, y: -5 }}
-              className={cn(
-                "px-6 py-3 rounded-xl backdrop-blur-sm",
-                "border border-neutral-800",
-                "bg-neutral-900/50",
-                "flex items-center gap-4",
-                "group cursor-pointer"
-              )}
-            >
-              <motion.span 
-                className="text-3xl"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                {fact.icon}
-              </motion.span>
-              <div className="relative">
-                <p className="text-neutral-400 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
-                  {fact.fact}
-                </p>
-                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform" />
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          animate={{
-            x: [1000, -1000],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex gap-8 whitespace-nowrap"
-        >
-          {[...personalInterests.funFacts, ...personalInterests.funFacts].slice(8).map((fact, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ scale: 1.05, y: -5 }}
-              className={cn(
-                "px-6 py-3 rounded-xl backdrop-blur-sm",
-                "border border-neutral-800",
-                "bg-neutral-900/50",
-                "flex items-center gap-4",
-                "group cursor-pointer"
-              )}
-            >
-              <motion.span 
-                className="text-3xl"
-                animate={{ rotate: [0, -360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                {fact.icon}
-              </motion.span>
-              <div className="relative">
-                <p className="text-neutral-400 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
-                  {fact.fact}
-                </p>
-                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform" />
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Floating particles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-purple-500/20 rounded-full"
-            animate={{
-              x: ["0%", "100%"],
-              y: [
-                Math.random() * 100 + "%",
-                Math.random() * 100 + "%",
-              ],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 5 + 5,
-              repeat: Infinity,
-              ease: "linear",
-              delay: Math.random() * 5,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function CTASection() {
-  return (
-    <div className="py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-8"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Let's Create Something{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Amazing
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            Have a project in mind? Let's collaborate and bring your ideas to life.
-          </p>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="inline-block"
-          >
-            <Link
-              href="/contact"
-              className={cn(
-                "inline-flex items-center gap-2 px-8 py-4 rounded-full",
-                "bg-gradient-to-r from-purple-500 to-blue-500",
-                "text-white font-medium",
-                "hover:shadow-[0_0_30px_-5px] hover:shadow-purple-500/50",
-                "transition-all duration-300"
-              )}
-            >
-              Get in Touch
-              <motion.span
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                →
-              </motion.span>
-            </Link>
-          </motion.div>
-        </motion.div>
-      </div>
-    </div>
-  )
-}
-
-const personalInterests = {
-  animes: [
-    {
-      title: "Hunter X Hunter",
-      image: "/images/anime/hxh.jpg", // Updated path
-      rating: "9.1",
-      genre: "Action, Adventure",
-      description: "A masterpiece following Gon's journey, featuring complex characters and unique power systems",
-      favoriteChar: "Killua Zoldyck",
-      bestArc: "Chimera Ant Arc",
-      quote: "You should enjoy the little detours to the fullest. Because that's where you'll find the things more important than what you want.",
-      yearWatched: "2019"
-    },
-    {
-      title: "Monster",
-      image: "/images/anime/monster.jpg", // Updated path
-      rating: "8.9",
-      genre: "Psychological Thriller",
-      description: "A gripping tale of morality, identity, and the consequences of our choices",
-      favoriteChar: "Dr. Kenzo Tenma",
-      bestArc: "The Perfect Suicide",
-      quote: "The monster inside of me has grown this large.",
-      yearWatched: "2020"
-    },
-    {
-      title: "Bleach",
-      image: "/images/anime/bleach.jpg", // Updated path
-      rating: "8.8",
-      genre: "Action, Supernatural",
-      description: "Epic battles, stunning visuals, and deep character development",
-      favoriteChar: "Byakuya Kuchiki",
-      bestArc: "Soul Society Arc",
-      quote: "If fate is a millstone, then we are the grist. All we can do is turn.",
-      yearWatched: "2018"
-    },
-    {
-      title: "Attack on Titan",
-      image: "/images/anime/aot.jpg", // Updated path
-      rating: "9.0",
-      genre: "Dark Fantasy, Action",
-      description: "A masterpiece of storytelling that redefines the meaning of freedom",
-      favoriteChar: "Levi Ackerman",
-      bestArc: "Marley Arc",
-      quote: "If you win, you live. If you lose, you die. If you don't fight, you can't win!",
-      yearWatched: "2021"
-    },
-    {
-      title: "Jujutsu Kaisen",
-      image: "/images/anime/jjk.jpg", // Updated path
-      rating: "8.7",
-      genre: "Action, Supernatural",
-      description: "Modern dark fantasy with stunning animation and unique curse system",
-      favoriteChar: "Gojo Satoru",
-      bestArc: "Shibuya Incident",
-      quote: "Throughout heaven and earth, I alone am the honored one.",
-      yearWatched: "2022"
-    },
-    {
-      title: "Death Note",
-      image: "/images/anime/deathnote.jpg",
-      rating: "9.0",
-      genre: "Psychological Thriller, Supernatural",
-      description: "A brilliant cat-and-mouse game between Light Yagami and L, exploring morality and justice through supernatural means",
-      favoriteChar: "L Lawliet",
-      bestArc: "L vs Light Arc",
-      quote: "I am Justice! I protect the innocent and those who fear evil. I'm the one who will become the god of a new world that everyone desires!",
-      yearWatched: "2017"
-    }
-  ],
-  hobbies: [
-    {
-      title: "Gaming",
-      image: "/images/hobbies/got.jpg",
-      rating: "Elite",
-      genre: "RPG & Strategy",
-      description: "Dedicated gamer with a passion for complex storylines and strategic gameplay",
-      favoriteGame: "Ghost Of Tsushima",
-      platform: "PC Master Race",
-      quote: "We end this together! Yuna.",
-      yearStarted: "2010"
-    },
-    {
-      title: "Photography",
-      image: "/images/hobbies/photography.jpg",
-      rating: "Amateur+",
-      genre: "Street & Nature",
-      description: "Capturing moments and perspectives that tell unique stories through the lens",
-      favoriteCamera: "Sony A7III",
-      bestLocation: "Northern Areas",
-      quote: "The best camera is the one you have with you",
-      yearStarted: "2019"
-    },
-    {
-      title: "Reading",
-      image: "/images/hobbies/reading.jpg",
-      rating: "Bookworm",
-      genre: "History & Science",
-      description: "History is the best storyteller and science is the best teacher",
-      favoriteBook: "The History of the World",
-      readingPace: "12 Books/Year",
-      quote: "Knowledge is power, and books are the battery",
-      yearStarted: "2015"
-    },
-    {
-      title: "Music",
-      image: "/images/hobbies/musice.jpg",
-      rating: "Enthusiast",
-      genre: "Pop & Rock",
-      description: "Music is the way to code yourself out of bugs",
-      favoriteBand: "The Weeknd",
-      instrument: "Guitar",
-      quote: "I tried to find love, in someone else too many times.",
-      yearStarted: "2016"
-    }
-  ],
-  funFacts: [
-    {
-      fact: "I've written over 100,000 lines of code",
-      icon: "💻",
-      gradient: "from-yellow-500 to-orange-500"
-    },
-    {
-      fact: "I debug with rubber ducks",
-      icon: "🦆",
-      gradient: "from-purple-500 to-indigo-500"
-    },
-    {
-      fact: "I can type at 120 WPM",
-      icon: "⚡",
-      gradient: "from-green-500 to-teal-500"
-    },
-    {
-      fact: "I sleep exactly 6 hours a day",
-      icon: "😴",
-      gradient: "from-blue-500 to-cyan-500"
-    },
-    {
-      fact: "I consume 3000+ calories daily",
-      icon: "🍔",
-      gradient: "from-red-500 to-pink-500"
-    },
-    {
-      fact: "I've solved 500+ LeetCode problems",
-      icon: "🧩",
-      gradient: "from-emerald-500 to-teal-500"
-    },
-    {
-      fact: "I drink 4 liters of water daily",
-      icon: "💧",
-      gradient: "from-sky-500 to-blue-500"
-    },
-    {
-      fact: "I can do 50 push-ups in one go",
-      icon: "💪",
-      gradient: "from-orange-500 to-red-500"
-    }
-  ]
-}
-
-// Update the tabs order in MoreAboutMeSection
-const tabs = ["anime", "hobbies", "fun facts"]
-
-// Add this new component for the terminal
-function AnimeTerminal() {
-  const [currentLine, setCurrentLine] = useState(0)
-  const commands = [
-    "ani-cli",
-    "Searching for Hunter X Hunter...",
-    "Multiple results found:",
-    "1. Hunter x Hunter (2011)",
-    "2. Hunter x Hunter (1999)",
-    "Enter choice: 1",
-    "Selected: Hunter x Hunter (2011)",
-    "Episodes: 148",
-    "Select episode [1-148]: 1",
-    "Loading episode 1...",
-    "Playing episode in your default player...",
-    "Enjoy watching! 🎬"
-  ]
-
-  useEffect(() => {
-    if (currentLine < commands.length - 1) {
-      const timer = setTimeout(() => {
-        setCurrentLine(prev => prev + 1)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [currentLine])
-
+function FunFactsConfig() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mt-12 rounded-xl overflow-hidden"
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.35 }}
+      className="glass-card rounded-2xl overflow-hidden border border-neutral-700/40"
     >
-      <div className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800">
-        {/* Terminal Header */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-neutral-800/50 border-b border-neutral-700">
-          <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-          </div>
-          <span className="text-sm text-neutral-400">ani-cli terminal</span>
+      {/* Terminal chrome */}
+      <div className="flex items-center gap-2 px-5 py-3 bg-neutral-900/90 border-b border-neutral-800">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500/80" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+          <div className="w-3 h-3 rounded-full bg-green-500/80" />
         </div>
+        <span className="ml-3 font-mono text-xs text-neutral-500">farhan@portfolio — zsh</span>
+      </div>
+      <div className="px-6 py-3 border-b border-neutral-800/50 font-mono text-xs">
+        <span className="text-green-400">$</span>
+        <span className="text-neutral-400"> cat </span>
+        <span className="text-cyan-400">/etc/farhan.conf</span>
+      </div>
 
-        {/* Terminal Content */}
-        <div className="p-4 font-mono text-sm">
-        <div className="space-y-2">
-            {commands.slice(0, currentLine + 1).map((command, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex"
-              >
-                <span className="text-green-500 mr-2">$</span>
-                <TypewriterText text={command} delay={30} />
-              </motion.div>
-            ))}
-          </div>
+      {/* INI file content */}
+      <div className="p-6 font-mono text-xs leading-6 space-y-0">
+        {confLines.map((line, i) => (
           <motion.div
-            animate={{ opacity: [0, 1] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            className="inline-block w-2 h-4 bg-purple-500 ml-2"
-          />
+            key={i}
+            initial={{ opacity: 0, x: -5 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.04, duration: 0.2 }}
+          >
+            {line.type === "blank"   && <div className="h-4" />}
+            {line.type === "comment" && <div className="text-neutral-600">{line.text}</div>}
+            {line.type === "section" && <div className="text-yellow-400 mt-1">{line.text}</div>}
+            {line.type === "entry"   && (
+              <div className="flex gap-0 pl-2">
+                <span className="text-cyan-300">{line.key}</span>
+                <span className="text-neutral-500">= </span>
+                <span className="text-orange-400">{line.value}</span>
+                {line.comment && <span className="text-neutral-700 ml-4">{line.comment}</span>}
+              </div>
+            )}
+          </motion.div>
+        ))}
+        <div className="mt-4 flex items-center gap-1 text-neutral-700">
+          <span className="text-green-400">$</span>
+          <span className="animate-pulse">▌</span>
         </div>
       </div>
     </motion.div>
   )
 }
 
-// Add this component for the typewriter effect
-function TypewriterText({ text, delay }: { text: string; delay: number }) {
-  const [displayText, setDisplayText] = useState("")
-  const [currentIndex, setCurrentIndex] = useState(0)
+function MoreAboutMe() {
+  const [tab, setTab] = useState<Tab>("anime")
 
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex])
-        setCurrentIndex(prev => prev + 1)
-      }, delay)
-      return () => clearTimeout(timeout)
-    }
-  }, [currentIndex, text, delay])
+  type TabDef = { id: Tab; label: string; icon: React.FC<{ className?: string }>; file: string }
+  const tabs: TabDef[] = [
+    { id: "anime",    label: "Anime",     icon: Star,   file: "anime.list" },
+    { id: "hobbies",  label: "Hobbies",   icon: Heart,  file: "hobbies.json" },
+    { id: "funfacts", label: "Fun Facts", icon: Coffee, file: "/etc/farhan.conf" },
+  ]
 
   return (
-    <span className={cn(
-      "text-neutral-200",
-      text.startsWith("Searching") && "text-yellow-400",
-      text.startsWith("Selected") && "text-green-400",
-      text.startsWith("Loading") && "text-blue-400",
-      text.startsWith("Playing") && "text-purple-400",
-      text.startsWith("Enjoy") && "text-green-400 font-bold"
-    )}>
-      {displayText}
-    </span>
-  )
-}
-
-function MoreAboutMeSection() {
-  const [activeTab, setActiveTab] = useState("anime")
-
-  return (
-    <div className="py-32 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-900/5 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(168,85,247,0.15),transparent_80%)]" />
-      
-      <div className="relative max-w-7xl mx-auto px-4">
+    <section className="py-24 px-6 overflow-hidden">
+      <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="text-center space-y-4 mb-16"
+          viewport={{ once: true }}
+          className="text-center space-y-3 mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-bold">
-            More About{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-              Me
-            </span>
-          </h2>
-          <p className="text-neutral-400 max-w-2xl mx-auto">
-            Beyond coding, I'm a person with diverse interests and passions
-          </p>
+          <span className="section-label mx-auto">The Human</span>
+          <ScrambleText as="h2" text="Beyond the Code" className="text-3xl md:text-4xl font-bold" speed={30} />
+          <p className="text-neutral-400 max-w-xl mx-auto">Great developers have rich lives outside of work. Here's what keeps me inspired.</p>
         </motion.div>
 
-        {/* Interactive Tabs */}
-        <div className="flex justify-center gap-4 mb-12">
-          {tabs.map((tab) => (
-            <motion.button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "px-6 py-3 rounded-xl text-sm font-medium transition-all",
-                activeTab === tab
-                  ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-                  : "bg-neutral-900/50 text-neutral-400 hover:text-white"
-              )}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </motion.button>
-          ))}
+        {/* Tab bar — file-tab style */}
+        <div className="flex items-center gap-0 mb-8 overflow-x-auto">
+          <div className="glass-card rounded-xl overflow-hidden border border-neutral-700/40 flex">
+            {tabs.map(({ id, label, icon: Icon, file }) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-3 text-sm font-mono transition-all border-b-2 whitespace-nowrap",
+                  tab === id
+                    ? "bg-neutral-800 text-white border-purple-500"
+                    : "text-neutral-500 hover:text-neutral-300 border-transparent hover:bg-neutral-800/50",
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span className="text-neutral-700">~/</span>{file}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content */}
         <AnimatePresence mode="wait">
-          {activeTab === "hobbies" && (
-            <motion.div
-              key="hobbies"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {personalInterests.hobbies.map((hobby, idx) => (
-                <HobbyCard key={hobby.title} hobby={hobby} idx={idx} />
-              ))}
-            </motion.div>
-          )}
-
-          {activeTab === "anime" && (
-            <motion.div
-              key="anime"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-12"
-            >
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {personalInterests.animes.map((anime, idx) => (
-                  <AnimeCard key={anime.title} anime={anime} idx={idx} />
-                ))}
-      </div>
-
-              {/* Add the terminal section */}
-              <div className="max-w-3xl mx-auto">
-                <div className="text-center space-y-4 mb-8">
-                  <h3 className="text-2xl font-bold">
-                    How I Watch Anime
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
-                      {" "}via Terminal
-                    </span>
-                  </h3>
-                  <p className="text-neutral-400">
-                    Using ani-cli, a CLI tool to stream anime from the terminal
-                  </p>
-                </div>
-                <AnimeTerminal />
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === "fun facts" && (
-            <motion.div
-              key="funFacts"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="grid md:grid-cols-3 gap-8"
-            >
-              {personalInterests.funFacts.map((fact, idx) => (
-                <motion.div
-                  key={fact.fact}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="p-6 rounded-xl bg-neutral-900/50 border border-neutral-800 group"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-4xl">{fact.icon}</span>
-                    <p className="text-neutral-300 group-hover:text-white transition-colors">
-                      {fact.fact}
-                    </p>
-                  </div>
+          {tab === "anime" && (
+            <motion.div key="anime" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }} className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {animes.map((a, i) => (
+                <motion.div key={a.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                  <MediaCard item={{ title: a.title, image: a.image, rating: a.rating, genre: a.genre, quote: a.quote, badge: a.yearWatched, line1Label: "Fav. Character", line1Value: a.favoriteChar, line2Label: "Best Arc", line2Value: a.bestArc, isAnime: true }} />
                 </motion.div>
               ))}
             </motion.div>
           )}
+
+          {tab === "hobbies" && (
+            <motion.div key="hobbies" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {hobbies.map((h, i) => (
+                <motion.div key={h.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+                  <MediaCard item={{ title: h.title, image: h.image, rating: h.rating, genre: h.genre, quote: h.quote, badge: h.since, detail: h.detail, isAnime: false }} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {tab === "funfacts" && <FunFactsConfig />}
         </AnimatePresence>
       </div>
-    </div>
+    </section>
   )
 }
 
-function AnimeCard({ anime, idx }: { anime: typeof personalInterests.animes[0], idx: number }) {
+/* ════════════════════════════════════════════════════════════════
+   CTA — ssh terminal animation
+════════════════════════════════════════════════════════════════ */
+
+function CTA() {
   return (
-    <motion.div
-      key={anime.title}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: idx * 0.1 }}
-      className="group relative"
-    >
+    <section className="py-32 px-6">
       <motion.div
-        whileHover={{ y: -10 }}
-        className="relative rounded-xl overflow-hidden bg-neutral-900/50 backdrop-blur-sm border border-neutral-800"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-3xl mx-auto text-center space-y-8"
       >
-        {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden">
-          <Image
-            src={anime.image}
-            alt={anime.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            priority={idx < 2} // Prioritize loading first two images
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-          
-          {/* Badges */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="px-2 py-1 rounded-full bg-yellow-500/90 backdrop-blur-sm text-xs font-bold text-white flex items-center gap-1"
-            >
-              ★ {anime.rating}
-            </motion.div>
-            <div className="px-2 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm text-xs font-medium text-white">
-              {anime.yearWatched}
-            </div>
+        <ScrambleText
+          as="h2"
+          text="Let's Create Something Amazing"
+          className="text-4xl md:text-5xl font-bold"
+          speed={25}
+        />
+        <p className="text-neutral-400 text-lg">Have a project in mind? Let's collaborate and bring your ideas to life.</p>
+
+        {/* SSH terminal snippet */}
+        <div className="glass-card rounded-xl p-4 max-w-md mx-auto text-left border border-neutral-800 font-mono text-xs">
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+          </div>
+          <div className="space-y-1">
+            <div><span className="text-green-400">$</span> <span className="text-neutral-300">ssh farhan@portfolio.dev</span></div>
+            <div className="text-neutral-600">Welcome to Farhan's server 👋</div>
+            <div className="text-neutral-600">Last login: {new Date().toDateString()}</div>
+            <div><span className="text-purple-400">farhan@dev</span><span className="text-neutral-600">:~$</span> <span className="animate-pulse text-neutral-500">▌</span></div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-              {anime.title}
-            </h3>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-purple-400">{anime.genre}</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-sm text-neutral-400">{anime.description}</p>
-            <div className="pt-3 border-t border-neutral-800 space-y-2">
-              <div className="text-sm">
-                <span className="text-neutral-500">Favorite Character: </span>
-                <span className="text-white font-medium">{anime.favoriteChar}</span>
-              </div>
-              <div className="text-sm">
-                <span className="text-neutral-500">Best Arc: </span>
-                <span className="text-white font-medium">{anime.bestArc}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quote */}
-          <div className="pt-4 border-t border-neutral-800">
-            <p className="text-sm text-neutral-400 italic">
-              "{anime.quote}"
-            </p>
-          </div>
-        </div>
-
-        {/* Enhanced Hover Effects */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-purple-500/20 transition-all duration-300" />
+        <Link href="/contact" className="btn-primary text-base py-4 px-8 inline-flex mx-auto">
+          <span>Get in Touch</span>
+          <ArrowRight className="w-5 h-5" />
+        </Link>
       </motion.div>
-    </motion.div>
+    </section>
   )
 }
 
-// Add this new component for hobbies
-function HobbyCard({ hobby, idx }: { hobby: typeof personalInterests.hobbies[0], idx: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: idx * 0.1 }}
-      className="group relative"
-    >
-      <motion.div
-        whileHover={{ y: -10 }}
-        className="relative rounded-xl overflow-hidden bg-neutral-900/50 backdrop-blur-sm border border-neutral-800"
-      >
-        {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden">
-          <Image
-            src={hobby.image}
-            alt={hobby.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            priority={idx < 2}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-          
-          {/* Badges */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="px-2 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm text-xs font-bold text-white flex items-center gap-1"
-            >
-              {hobby.rating}
-            </motion.div>
-            <div className="px-2 py-1 rounded-full bg-blue-500/90 backdrop-blur-sm text-xs font-medium text-white">
-              {hobby.yearStarted}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-blue-500">
-              {hobby.title}
-            </h3>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-purple-400">{hobby.genre}</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-sm text-neutral-400">{hobby.description}</p>
-            <div className="pt-3 border-t border-neutral-800 space-y-2">
-              {hobby.favoriteGame && (
-                <div className="text-sm">
-                  <span className="text-neutral-500">Favorite Game: </span>
-                  <span className="text-white font-medium">{hobby.favoriteGame}</span>
-                </div>
-              )}
-              {hobby.favoriteCamera && (
-                <div className="text-sm">
-                  <span className="text-neutral-500">Camera: </span>
-                  <span className="text-white font-medium">{hobby.favoriteCamera}</span>
-                </div>
-              )}
-              {hobby.favoriteBook && (
-                <div className="text-sm">
-                  <span className="text-neutral-500">Favorite Book: </span>
-                  <span className="text-white font-medium">{hobby.favoriteBook}</span>
-                </div>
-              )}
-              {hobby.favoriteBand && (
-                <div className="text-sm">
-                  <span className="text-neutral-500">Favorite Band: </span>
-                  <span className="text-white font-medium">{hobby.favoriteBand}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Quote */}
-          <div className="pt-4 border-t border-neutral-800">
-            <p className="text-sm text-neutral-400 italic">
-              "{hobby.quote}"
-            </p>
-          </div>
-        </div>
-
-        {/* Enhanced Hover Effects */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-purple-500/20 transition-all duration-300" />
-      </motion.div>
-    </motion.div>
-  )
-}
+/* ════════════════════════════════════════════════════════════════
+   PAGE
+════════════════════════════════════════════════════════════════ */
 
 export default function AboutPage() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const { clientX, clientY } = e
-    setMousePosition({ x: clientX - 25, y: clientY - 25 })
-  }
-
   return (
-    <main className="bg-black text-white pt-20" onMouseMove={handleMouseMove}>
-      <MovingCat mousePosition={mousePosition} />
-      <AboutHeroSection />
-      <FunFactsTicker />
-      <CoreValuesSection />
-      <MoreAboutMeSection />
-      <SkillsSection />
-      <InterestsSection />
-      <CTASection />
+    <main className="relative text-white">
+      <AboutHero />
+      <ImageMarquee />
+      <CoreValues />
+      <Skills />
+      <MoreAboutMe />
+      <CTA />
     </main>
   )
 }
