@@ -123,7 +123,7 @@ const confLines = [
 ]
 
 /* ════════════════════════════════════════════════════════════════
-   HERO — whoami terminal aesthetic
+   HERO — editorial full-bleed split
 ════════════════════════════════════════════════════════════════ */
 
 function AboutHero() {
@@ -131,26 +131,31 @@ function AboutHero() {
   const inView = useInView(ref, { once: true })
 
   return (
-    <section className="min-h-screen relative flex items-center px-6 pt-24 pb-12 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_30%_50%,rgba(168,85,247,0.1),transparent)]" />
+    <section className="min-h-screen relative overflow-hidden grid lg:grid-cols-[53%_47%]">
+      {/* Ambient glow — left side only */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full bg-purple-500/10 blur-[120px]" />
+        <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] rounded-full bg-blue-500/08 blur-[80px]" />
+      </div>
 
-      <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
-        {/* Left: text */}
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-8"
-        >
+      {/* ── Left: text content ── */}
+      <motion.div
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex flex-col justify-center pl-8 pr-6 md:pl-16 md:pr-8 pt-28 pb-16"
+      >
+        <div className="space-y-8">
+          {/* Terminal prompt */}
           <div className="space-y-2">
-            <div className="font-mono text-sm text-neutral-600 flex items-center gap-2">
+            <div className="font-mono text-sm text-neutral-600 flex items-center gap-2 flex-wrap">
               <span className="text-green-400">$</span>
               <span className="text-purple-400">farhan</span>
               <span className="text-neutral-700">@</span>
               <span className="text-cyan-400">portfolio</span>
               <span className="text-neutral-700">:</span>
               <span className="text-blue-400">~</span>
-              <span className="text-neutral-400"> $ whoami --verbose</span>
+              <span className="text-neutral-400">$ whoami --verbose</span>
             </div>
             <span className="section-label">About Me</span>
           </div>
@@ -172,7 +177,7 @@ function AboutHero() {
             </p>
           </div>
 
-          {/* Stats as terminal metrics */}
+          {/* Stats terminal card */}
           <div ref={ref} className="glass-card rounded-2xl overflow-hidden border border-neutral-800">
             <div className="px-5 py-3 bg-neutral-900/80 border-b border-neutral-800 font-mono text-xs flex items-center gap-2">
               <span className="text-green-400">$</span>
@@ -208,49 +213,67 @@ function AboutHero() {
               <Download className="w-4 h-4" /> Download CV
             </a>
           </div>
-        </motion.div>
+        </div>
+      </motion.div>
 
-        {/* Right: profile image */}
+      {/* ── Right: full-bleed editorial image ── */}
+      <motion.div
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="relative hidden lg:block"
+      >
+        {/* Photo fills entire right column */}
+        <Image
+          src="/me-new.png"
+          alt="Farhan Babar"
+          fill
+          priority
+          className="object-cover object-top"
+          sizes="42vw"
+        />
+
+        {/* Left-edge gradient — blends image into background */}
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent pointer-events-none" />
+        {/* Bottom gradient */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
+        {/* Subtle dark vignette on right/top edges */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/30 pointer-events-none" />
+
+        {/* Floating badge — Open to Work */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.88 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mx-auto lg:mx-0 w-72 md:w-80"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-8 top-32 glass-card rounded-xl px-4 py-3 border border-green-500/20 backdrop-blur-xl"
         >
-          <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl" />
-          <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute inset-0 rounded-3xl border border-purple-500/20 rotate-3 scale-95 glass-card" />
-          <div className="absolute inset-0 rounded-3xl border border-blue-500/15 -rotate-2 scale-[0.98] glass-card" />
-
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-            <Image src="/me-new.png" alt="Farhan Babar" width={360} height={480} priority className="object-cover object-top w-full" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            {/* scan line overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px)" }} />
+          <div className="flex items-center gap-2 text-xs text-neutral-400">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            Status
           </div>
-
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -right-4 top-8 glass-card rounded-xl px-4 py-3 border border-green-500/20"
-          >
-            <div className="flex items-center gap-2 text-xs text-neutral-400">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              Status
-            </div>
-            <div className="text-sm font-semibold text-white font-mono">Open to Work</div>
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute -left-4 bottom-12 glass-card rounded-xl px-4 py-3 border border-blue-500/20"
-          >
-            <div className="text-xs text-neutral-400 font-mono">Location</div>
-            <div className="text-sm font-semibold text-white">🇵🇰 Pakistan</div>
-          </motion.div>
+          <div className="text-sm font-semibold text-white font-mono">Open to Work</div>
         </motion.div>
-      </div>
+
+        {/* Floating badge — Location */}
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute left-12 bottom-24 glass-card rounded-xl px-4 py-3 border border-blue-500/20 backdrop-blur-xl"
+        >
+          <div className="text-xs text-neutral-400 font-mono">Location</div>
+          <div className="text-sm font-semibold text-white">🇵🇰 Pakistan</div>
+        </motion.div>
+      </motion.div>
+
+      {/* Mobile-only: smaller image below text */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="lg:hidden relative mx-6 mb-12 h-72 rounded-3xl overflow-hidden border border-white/10"
+      >
+        <Image src="/me-new.png" alt="Farhan Babar" fill priority className="object-cover object-top" sizes="100vw" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      </motion.div>
     </section>
   )
 }

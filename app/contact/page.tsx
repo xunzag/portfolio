@@ -181,7 +181,7 @@ function InfoPanel() {
           <a
             href="/cv.pdf"
             download
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex-1 btn-primary text-sm py-2.5 justify-center"
           >
             <Download className="w-4 h-4" /> Download CV
           </a>
@@ -189,7 +189,7 @@ function InfoPanel() {
             href="https://github.com/xunzag"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glass-card text-neutral-400 hover:text-white transition-colors text-sm border border-neutral-800"
+            className="btn-ghost flex items-center justify-center px-4 py-2.5 text-sm"
           >
             <Github className="w-4 h-4" />
           </a>
@@ -197,7 +197,7 @@ function InfoPanel() {
             href="https://www.instagram.com/xunzag"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glass-card text-neutral-400 hover:text-white transition-colors text-sm border border-neutral-800"
+            className="btn-ghost flex items-center justify-center px-4 py-2.5 text-sm"
           >
             <Instagram className="w-4 h-4" />
           </a>
