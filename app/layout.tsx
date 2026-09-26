@@ -1,69 +1,35 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
-import { Navigation }          from "@/components/navigation"
-import { LenisProvider }        from "@/components/lenis-provider"
-import { CustomCursor }         from "@/components/custom-cursor"
-import { SceneWrapper }         from "@/components/scene-wrapper"
-import { Terminal }             from "@/components/terminal"
-import { PageTransition }       from "@/components/page-transition"
-import { CursorTrailWrapper }   from "@/components/cursor-trail-wrapper"
-import { CodeRainWrapper }      from "@/components/code-rain-wrapper"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" })
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
-  title: "Farhan Babar | Full Stack Developer",
+  title: "Farhan Babar — Full Stack Developer",
   description:
-    "Full Stack Developer specialising in building exceptional digital experiences with modern web technologies.",
+    "Step into Farhan Babar's 3D developer room: projects on the monitor, the stack inside the PC, anime on the walls. Full stack developer from Pakistan.",
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }],
+    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/favicon-32x32.png", type: "image/png" }],
     apple: { url: "/apple-touch-icon.png" },
   },
   openGraph: {
-    title: "Farhan Babar | Full Stack Developer",
-    description: "Full Stack Developer specialising in exceptional digital experiences.",
+    title: "Farhan Babar — Full Stack Developer",
+    description: "An interactive 3D developer room. Click around.",
     type: "website",
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export const viewport: Viewport = {
+  themeColor: "#07060d",
+  width: "device-width",
+  initialScale: 1,
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <head />
-      <body className={`${inter.variable} font-sans bg-black text-white antialiased`}>
-        <LenisProvider>
-          {/* Film grain */}
-          <div className="grain" aria-hidden />
-
-          {/* WebGL aurora */}
-          <SceneWrapper />
-
-          {/* Code rain — below aurora, very subtle */}
-          <CodeRainWrapper />
-
-          {/* Cursor systems */}
-          <CustomCursor />
-          <CursorTrailWrapper />
-
-          {/* Hidden terminal — Ctrl+` */}
-          <Terminal />
-
-          {/* Navigation */}
-          <Navigation />
-
-          {/* Page content with glitch transitions */}
-          <div className="relative z-10">
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </div>
-        </LenisProvider>
-      </body>
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+      <body>{children}</body>
     </html>
   )
 }
