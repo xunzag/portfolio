@@ -86,10 +86,10 @@ export function sample(s: number): Frame {
   if (s < RANGES.hero[1]) {
     const t = local(s, "hero")
     const e = ease.inOutSine(t)
-    const a = lerp(2.35, Math.PI * 2, e)
-    const r = lerp(8.2, 6.5, e)
-    pos.set(Math.sin(a) * r, lerp(2.4, 1.6, e), Math.cos(a) * r)
-    target.set(0, 1.1, lerp(0, -3, e))
+    const a = lerp(2.5, Math.PI * 2, e)
+    const r = lerp(6.4, 5.6, e)
+    pos.set(Math.sin(a) * r, lerp(1.5, 2.1, e), Math.cos(a) * r)
+    target.set(0, lerp(1.35, 1.5, e), lerp(0, -4, e))
     out.shift = -0.16 * (1 - e)
     out.fov = lerp(34, 40, e)
     out.chapter = "hero"

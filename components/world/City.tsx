@@ -145,7 +145,7 @@ const bFragment = /* glsl */ `
       vec2 id = floor(cell);
       vec2 g = fract(cell);
       float win = step(0.16, g.x) * step(g.x, 0.84) * step(0.22, g.y) * step(g.y, 0.78);
-      float h = hash(id + vSeed * 17.31);
+      float h = hash(mod(id, vec2(89.0, 97.0)) + floor(vSeed * 50.0));
       float lit = step(0.6, h);
       float blink = step(0.015, fract(h * 91.7 + uTime * 0.03 * step(0.985, h)));
       vec3 wc = mix(vec3(1.0, 0.7, 0.38), vec3(0.45, 0.72, 1.0), step(0.78, fract(h * 13.0)));
@@ -463,7 +463,7 @@ function Traffic() {
       // wrap traffic in a window around the camera
       if (car.z > camZ + 60) car.z -= 260
       if (car.z < camZ - 200) car.z += 260
-      o.position.set(car.lane, 0.45, car.z)
+      o.position.set(car.lane, 0.35, car.z)
       o.scale.set(1, 1, 1)
       o.updateMatrix()
       m.setMatrixAt(i, o.matrix)
@@ -472,8 +472,8 @@ function Traffic() {
   })
   return (
     <instancedMesh ref={ref} args={[undefined, undefined, cars.length]} frustumCulled={false}>
-      <boxGeometry args={[0.9, 0.08, 7]} />
-      <meshBasicMaterial toneMapped={false} transparent opacity={0.85} />
+      <boxGeometry args={[0.14, 0.05, 6]} />
+      <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
     </instancedMesh>
   )
 }

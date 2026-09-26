@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useProgress } from "@react-three/drei"
 import { useRoom } from "@/lib/store"
 
-const BOOT = ["igniting the engine", "wiring the neon", "wetting the asphalt", "waking the rubber duck 🦆", "syncing anime watchlist"]
+const BOOT = ["sharpening the dragonslayer", "wiring the neon", "wetting the asphalt", "waking the rubber duck 🦆", "syncing anime watchlist"]
 
 // Auto-dismissing boot screen: no click needed, never blocks longer than 9s.
 export function Loader() {

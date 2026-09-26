@@ -13,7 +13,7 @@ import { zones } from "./track"
 import { ScrollRig } from "./ScrollRig"
 import { Sky } from "./Sky"
 import { City, FOG } from "./City"
-import { Bike } from "./Bike"
+import { Hero } from "./Hero"
 import { SkyRoom } from "./SkyRoom"
 import { Realm } from "./Realm"
 import { Rooftop } from "./Rooftop"
@@ -24,7 +24,9 @@ export default function World() {
   const [dpr, setDpr] = useState(1.5)
 
   useEffect(() => {
-    const weak = window.matchMedia("(max-width: 700px)").matches || (navigator.hardwareConcurrency ?? 8) <= 4
+    const forced = new URLSearchParams(location.search).get("quality")
+    if (forced === "high") return
+    const weak = forced === "low" || window.matchMedia("(max-width: 700px)").matches || (navigator.hardwareConcurrency ?? 8) <= 4
     if (weak) {
       setQuality("low")
       setDpr(1.1)
@@ -66,7 +68,7 @@ export default function World() {
           <MaterialsProvider>
             <Zone name="city">
               <City />
-              <Bike />
+              <Hero />
             </Zone>
             <Zone name="room">
               <SkyRoom />

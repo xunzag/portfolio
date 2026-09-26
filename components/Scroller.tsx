@@ -20,8 +20,9 @@ export function Scroller() {
     const lenis = new Lenis({ lerp: reduced ? 1 : 0.075, wheelMultiplier: 0.9, touchMultiplier: 1.4, smoothWheel: !reduced })
 
     const update = () => {
-      const s = lenis.scroll / window.innerHeight
-      live.velocity = lenis.velocity / window.innerHeight
+      // chapters are measured in vh, so scroll is too
+      const s = (lenis.scroll / window.innerHeight) * 100
+      live.velocity = (lenis.velocity / window.innerHeight) * 100
       live.scroll = s
       live.frame = sample(s)
 
@@ -56,7 +57,7 @@ export function Scroller() {
     scrollBus.to = (chapter) => {
       const [a, b] = RANGES[chapter]
       // land a little into the chapter so the camera has arrived
-      const target = (a + (b - a) * (chapter === "hero" ? 0 : chapter === "work" ? 0.04 : 0.42)) * window.innerHeight
+      const target = ((a + (b - a) * (chapter === "hero" ? 0 : chapter === "work" ? 0.04 : 0.42)) / 100) * window.innerHeight
       lenis.scrollTo(target, { duration: 2.4, easing: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2) })
     }
 

@@ -98,7 +98,7 @@ function Hero() {
           <span className="grid h-10 w-6 place-items-start rounded-full border border-white/25 p-1">
             <span className="h-2 w-1 animate-bounce rounded-full bg-ink/80 [margin-left:6px]" />
           </span>
-          scroll to ride <ArrowDown size={13} />
+          scroll to enter <ArrowDown size={13} />
         </motion.div>
       </div>
     </section>
