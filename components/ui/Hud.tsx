@@ -14,7 +14,7 @@ export function Hud() {
   const chapter = useRoom((s) => s.chapter)
   const party = useRoom((s) => s.party)
   const active = (id: string) =>
-    chapter === id || (id === "work" && chapter === "ascend") || (id === "stack" && chapter === "portal")
+    chapter === id || (id === "stack" && chapter === "portal")
 
   return (
     <AnimatePresence>

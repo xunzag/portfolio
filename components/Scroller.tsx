@@ -3,8 +3,7 @@
 import { useEffect } from "react"
 import Lenis from "lenis"
 import gsap from "gsap"
-import { RANGES, chapterAt, local } from "@/lib/chapters"
-import { projects } from "@/lib/content"
+import { RANGES, chapterAt } from "@/lib/chapters"
 import { scrollBus, useRoom, type Section } from "@/lib/store"
 import { live } from "./world/live"
 import { sample } from "./world/track"
@@ -30,14 +29,9 @@ export function Scroller() {
       const { id, t } = chapterAt(s)
       const patch: Partial<ReturnType<typeof useRoom.getState>> = {}
       if (st.chapter !== id) patch.chapter = id
-      const focus: Section | null =
-        id === "about" && t > 0.18 ? "about" : id === "stack" && t > 0.22 ? "skills" : id === "life" ? "life" : id === "contact" ? "contact" : null
+      const focus: Section | null = id === "stack" && t > 0.3 ? "skills" : null
       if (st.focus !== focus) patch.focus = focus
-      if (!st.roomBuilt && s > RANGES.ascend[0] + 20) patch.roomBuilt = true
-      if (id === "work") {
-        const p = Math.min(projects.length - 1, Math.floor(local(s, "work") * projects.length))
-        if (p !== st.project) patch.project = p
-      }
+      if (!st.roomBuilt && s > RANGES.facts[0] + 120) patch.roomBuilt = true
       if (Object.keys(patch).length) useRoom.setState(patch)
     }
 
@@ -57,7 +51,7 @@ export function Scroller() {
     scrollBus.to = (chapter) => {
       const [a, b] = RANGES[chapter]
       // land a little into the chapter so the camera has arrived
-      const target = ((a + (b - a) * (chapter === "hero" ? 0 : chapter === "work" ? 0.04 : 0.42)) / 100) * window.innerHeight
+      const target = ((a + (b - a) * (chapter === "hero" ? 0 : chapter === "work" ? 0.05 : 0.45)) / 100) * window.innerHeight
       lenis.scrollTo(target, { duration: 2.4, easing: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2) })
     }
 

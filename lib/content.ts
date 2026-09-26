@@ -259,3 +259,31 @@ export const emailjsConfig = {
   templateId: "template_nodmfpa",
   publicKey: "pa51ET1DYIGze1RqM",
 }
+
+// ── "Cool things about me" — straight from Farhan's own /etc/farhan.conf ──
+export const facts = [
+  { value: "06:00", label: "wake-up call", note: "early bird mode" },
+  { value: "120", label: "WPM typing", note: "measured, not estimated" },
+  { value: "500+", label: "LeetCode solved", note: "the grind never stops" },
+  { value: "100k+", label: "lines of code", note: "and counting" },
+  { value: "2190", label: "cups of coffee", note: "lifetime total" },
+  { value: "4L", label: "water a day", note: "hydration > caffeination" },
+  { value: "50", label: "push-ups", note: "daily PR" },
+  { value: "6h", label: "sleep", note: "non-negotiable" },
+]
+
+export const setup = [
+  ["Machine", "MacBook Pro M3"],
+  ["Editor", "VS Code (neovim on weekends)"],
+  ["Shell", "zsh + oh-my-zsh"],
+  ["Debugger", "a rubber duck"],
+  ["Fuel", "chai, coffee, lo-fi"],
+  ["Camera", "Sony A7III"],
+] as const
+
+export const principles = [
+  "Ship end-to-end — not just frontend or backend.",
+  "Obsessed with performance.",
+  "Write code other devs actually want to maintain.",
+  "It works on my machine → so I ship the machine.",
+]

@@ -16,7 +16,7 @@ export function FxOverlay() {
     const loop = () => {
       const f = live.frame
       if (flash.current) flash.current.style.opacity = String(f.flash)
-      const moving = f.chapter === "work" || f.chapter === "ascend" || f.chapter === "portal"
+      const moving = f.chapter === "work" || f.chapter === "portal"
       const target = moving ? Math.min(1, Math.abs(live.velocity) * 0.09) : 0
       speed += (target - speed) * 0.12
       if (lines.current) lines.current.style.opacity = String(speed * 0.55 + (f.chapter === "portal" ? f.t * f.t * 0.6 : 0))

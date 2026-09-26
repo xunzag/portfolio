@@ -13,6 +13,8 @@ import { Hotspot } from "./Hotspot"
 import { useMat } from "./materials"
 import { createScreen, phoneTexture } from "./textures"
 import { BlobShadow } from "./Extras"
+import { live } from "../world/live"
+import { zones } from "../world/track"
 
 export function Desk() {
   const m = useMat()
@@ -82,6 +84,7 @@ function Monitor() {
   }, [screen])
 
   useFrame(({ clock }, dt) => {
+    if (!zones(live.scroll).room) return
     const { focus, project, party } = useRoom.getState()
     const st = state.current
     if (focus === "work") {
@@ -168,7 +171,7 @@ function Keyboard() {
   useEffect(() => useRoom.subscribe((s, p) => s.project !== p.project && (pulse.current = 1)), [])
 
   useFrame(({ clock }, dt) => {
-    if (!glow.current) return
+    if (!glow.current || !zones(live.scroll).room) return
     const { party } = useRoom.getState()
     const t = clock.elapsedTime
     pulse.current = Math.max(0, pulse.current - dt * 1.5)

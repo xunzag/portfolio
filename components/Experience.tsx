@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import { AnimatePresence } from "motion/react"
 import { scrollBus, sections, useRoom } from "@/lib/store"
 import { Scroller } from "./Scroller"
-import { Chapters } from "./Chapters"
+import { Overlay } from "./Overlay"
 import { FxOverlay } from "./FxOverlay"
 import { Loader } from "./ui/Loader"
 import { Hud } from "./ui/Hud"
@@ -55,7 +55,7 @@ export function Experience({ models }: { models: string[] }) {
       </div>
       <FxOverlay />
       <Scroller />
-      <Chapters />
+      <Overlay />
       <Hud />
       <AnimatePresence>{terminalOpen && <Terminal key="terminal" />}</AnimatePresence>
       <Loader />

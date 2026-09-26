@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
-import { MeshReflectorMaterial, RoundedBox } from "@react-three/drei"
+import { RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
 import { useRoom } from "@/lib/store"
 import { neonSignTexture, rugTexture } from "./textures"
@@ -12,7 +12,6 @@ import { useMat } from "./materials"
 
 export function Floor() {
   const m = useMat()
-  const quality = useRoom((s) => s.quality)
   const rug = useMemo(() => rugTexture(), [])
   const wood = m.walnut.map!
 
@@ -25,26 +24,7 @@ export function Floor() {
       {/* the walkable surface: reflective wood on capable GPUs */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.001, 0]} receiveShadow>
         <planeGeometry args={[10.4, 10.4]} />
-        {quality === "high" ? (
-          <MeshReflectorMaterial
-            map={wood}
-            color="#c9a27e"
-            normalMap={m.walnut.normalMap!}
-            normalScale={new THREE.Vector2(0.3, 0.3)}
-            roughness={0.55}
-            metalness={0.05}
-            blur={[400, 120]}
-            resolution={512}
-            mixBlur={1.2}
-            mixStrength={1.6}
-            mirror={0.6}
-            depthScale={0.6}
-            minDepthThreshold={0.4}
-            maxDepthThreshold={1.2}
-          />
-        ) : (
-          <meshStandardMaterial map={wood} color="#c9a27e" roughness={0.55} />
-        )}
+        <meshStandardMaterial map={wood} color="#c9a27e" roughness={0.45} metalness={0.05} />
       </mesh>
       {/* plinth under the diorama */}
       <mesh position={[0, -1.4, 0]}>

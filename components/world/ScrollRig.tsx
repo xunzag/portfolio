@@ -39,7 +39,8 @@ export function ScrollRig() {
       camera.updateProjectionMatrix()
     }
 
-    easing.damp(para, "shift", desktop ? f.shift : 0, 0.25, dt)
+    // hero only: nudge Guts right of the name on wide screens
+    easing.damp(para, "shift", desktop && f.chapter === "hero" ? -0.16 * (1 - f.t) : 0, 0.25, dt)
     const px = para.shift * size.width
     if (Math.abs(px) > 0.5) camera.setViewOffset(size.width, size.height, px, 0, size.width, size.height)
     else if (camera.view) camera.clearViewOffset()

@@ -13,6 +13,7 @@ import { GuitarSpot, PosterWall } from "../canvas/PosterWall"
 import { Beanbag, DiscoBall, Dust, FloorPlant } from "../canvas/Extras"
 import { Assemble } from "../canvas/Assemble"
 import { ROOM_ORIGIN } from "./track"
+import { SkillHolo } from "./SkillHolo"
 
 // The dev room, floating above the end of the highway like a lit apartment.
 export function SkyRoom() {
@@ -50,11 +51,7 @@ export function SkyRoom() {
       </Assemble>
       <DiscoBall />
       <Dust />
-      {/* anti-gravity glow under the floating slab */}
-      <mesh rotation-x={Math.PI / 2} position={[0, -2.45, 0]}>
-        <ringGeometry args={[5.2, 7.4, 64]} />
-        <meshBasicMaterial color={[1.4, 0.6, 3]} transparent opacity={0.35} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
-      </mesh>
+      <SkillHolo />
     </group>
   )
 }
@@ -64,8 +61,6 @@ function RoomLights() {
   const key = useRef<THREE.DirectionalLight>(null)
   const moon = useRef<THREE.DirectionalLight>(null)
   const target = useMemo(() => new THREE.Object3D(), [])
-  const high = useRoom((s) => s.quality === "high")
-  const size = high ? 2048 : 1024
 
   useFrame((_, dt) => {
     const { lightsOn, party } = useRoom.getState()
@@ -85,16 +80,6 @@ function RoomLights() {
         position={[9, 12, 7]}
         color="#ffd9b8"
         intensity={1.2}
-        castShadow
-        shadow-mapSize={[size, size]}
-        shadow-bias={-0.0004}
-        shadow-normalBias={0.02}
-        shadow-camera-left={-8}
-        shadow-camera-right={8}
-        shadow-camera-top={8}
-        shadow-camera-bottom={-8}
-        shadow-camera-near={1}
-        shadow-camera-far={40}
       />
       <directionalLight ref={moon} target={target} position={[-3, 6, -9]} color="#8fb0ff" intensity={0.9} />
       <pointLight position={[0.65, 2.6, -3.7]} color="#6fb5ff" intensity={3.5} distance={4.5} decay={1.6} />

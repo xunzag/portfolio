@@ -1,51 +1,34 @@
-# Farhan Babar — 3D Dev Room
+# Farhan Babar — Dreamscape
 
-An interactive 3D portfolio: a cosy late-night developer room you can click around in.
+A scroll-driven 3D portfolio. One continuous camera film through a glowing dreamscape:
 
-| Object | Opens |
-| --- | --- |
-| 🖥 Monitor | **Work**: the screen live-loads whichever project you pick |
-| 📚 Bookshelf | **About**: bio, stats, career `git log` |
-| 💻 Glass PC tower | **Stack**: skills and toolbelt |
-| 🖼 Poster wall / guitar | **Life**: anime and hobbies |
-| 📱 Phone | **Contact**: EmailJS form and socials |
+1. **Intro** — Guts (Berserk) crouched on a floating island, glowing Brand beneath him.
+2. **Work** — each project is a floating hologram on its own crystal island, with 3D type, metrics and clickable 3D buttons.
+3. **About** — bio, stats and a career timeline as light in the sky.
+4. **Facts** — an orbit of glowing numbers from `/etc/farhan.conf`, plus setup and principles.
+5. **Stack** — the dev room: the PC opens into an exploded view, the stack orbits it and skill bars grow beside it.
+6. **Life** — the camera dives through the monitor into an anime realm (posters, quotes, hobbies).
+7. **Contact** — a holographic form projected in 3D, plus 3D buttons.
 
-Easter eggs: <kbd>Ctrl</kbd>+<kbd>`</kbd> (or click the keyboard) opens a terminal, the desk lamp toggles the lights, the rubber duck on the PC gives debugging advice, and the Konami code (↑↑↓↓←→←→BA) starts a party.
+Everything visible is WebGL. The DOM only carries the hero type and a screen-reader/SEO copy of all the content.
 
 ## Stack
+Next.js 16 · React 19 · three.js / R3F / drei · postprocessing · GSAP + Lenis · zustand · Tailwind v4
 
-- Next.js 16 (App Router, Turbopack), React 19, TypeScript
-- three.js + @react-three/fiber + drei, with postprocessing bloom
-- zustand for room state, Motion for UI animation, Tailwind CSS v4
-
-Everything in the room is procedural (built in code, no model files). Downloaded
-assets are the photo/poster/screenshot textures and a few CC0 normal maps (`public/tex`),
-plus a CC0 HDRI for reflections (`public/env/apartment.exr`, via `@pmndrs/assets` / Poly Haven).
-
-### Motion
-- **Intro:** the room builds itself (floor rises, walls unfold, furniture drops in) with GSAP.
-- **Stack:** the PC's glass door swings open, the parts float out in an exploded view, and the toolbelt orbits it.
-- **About:** favourite books slide off the shelf and the photo frame floats out.
-- **Life:** the posters peel off the wall and fan out.
-- **Contact:** the phone lifts off its dock and turns to face you.
-- **Work:** a scanline wipe on the monitor and a ripple across the keyboard when you switch projects.
-- The desk lamp follows your cursor, and the chair spins when clicked.
+## Content
+All copy lives in `lib/content.ts`. Drop `char-1.glb` … `char-3.glb` into `public/models/` to place characters on the realm islands.
 
 ## Performance
+- Worlds outside the current scroll zone neither render nor animate.
+- One shadow-casting light. Bloom is the only heavy pass; the low tier drops the rest.
+- `?quality=low` or `?quality=high` in the URL forces a tier.
 
-- `PerformanceMonitor` and `AdaptiveDpr` drop the pixel ratio and turn off post-processing on slow GPUs.
-- Weak and small devices start in low-quality mode.
-- One shadow-casting light; instanced books and keycaps; blob contact shadows.
-- High tier adds N8AO ambient occlusion, a reflective floor, bloom and a hover outline. The low tier drops all of these.
-- The 3D canvas is client-only (`ssr: false`). A screen-reader-only copy of all content is server-rendered for SEO and accessibility.
+## Credits
+- Guts / Berserker Armor model: Sketchfab (see the model page for its author and license).
+- Inter font: OFL-1.1.
+- HDRI and normal maps: CC0 via @pmndrs/assets.
 
 ## Develop
-
 ```bash
-npm install
-npm run dev        # http://localhost:3000
-npm run build
-npm run typecheck
+npm install && npm run dev
 ```
-
-Content lives in `lib/content.ts`. Edit projects, experience, skills and anime there.

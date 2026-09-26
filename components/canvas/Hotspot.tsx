@@ -3,7 +3,6 @@
 import { useRef, type ReactNode } from "react"
 import { useFrame, type ThreeEvent, type ThreeElements } from "@react-three/fiber"
 import { Html } from "@react-three/drei"
-import { Select } from "@react-three/postprocessing"
 import { easing } from "maath"
 import type { Group } from "three"
 import { scrollBus, sections, useRoom, type Section } from "@/lib/store"
@@ -66,7 +65,7 @@ export function Hotspot({
   return (
     <group {...props} onPointerOver={over} onPointerOut={out} onClick={click}>
       <group ref={inner}>
-        <Select enabled={hovered && interactive}>{children}</Select>
+        {children}
       </group>
       {label && hovered && interactive && (
         <Html position={labelPosition} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>

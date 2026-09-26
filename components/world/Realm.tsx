@@ -4,8 +4,13 @@ import { Suspense, useLayoutEffect, useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { useTexture } from "@react-three/drei"
 import * as THREE from "three"
-import { animes } from "@/lib/content"
+import { animes, hobbies } from "@/lib/content"
+import { RANGES } from "@/lib/chapters"
+import { Type } from "./Type"
+import { usePresence, useReveal } from "./presence"
 import { useRoom } from "@/lib/store"
+import { live } from "./live"
+import { zones } from "./track"
 import { rng } from "../canvas/textures"
 import { Model } from "./Model"
 import { REALM } from "./track"
@@ -31,6 +36,8 @@ export function Realm() {
       <Sakura position={[1.2, 0, -1]} />
       <Torii position={[-1.6, 0, 3.2]} rotation-y={0.5} />
       <PosterRing />
+      <HobbyRing />
+      <RealmTitle />
       <Petals />
       <Lanterns />
     </group>
@@ -150,6 +157,17 @@ function PosterRing() {
               <planeGeometry args={[2.35, 3.25]} />
               <meshBasicMaterial color={[2.2, 1.2, 3]} toneMapped={false} side={THREE.DoubleSide} />
             </mesh>
+            <group position={[0, -1.85, 0.02]}>
+              <Type weight="bold" fontSize={0.26} anchorX="center" glow={1.4}>
+                {a.title}
+              </Type>
+              <Type weight="semi" fontSize={0.13} letterSpacing={0.14} anchorX="center" position={[0, -0.36, 0]} color="#ffcf7f" glow={1.6}>
+                {`RATED ${a.rating}   /   FAV: ${a.fav.toUpperCase()}`}
+              </Type>
+              <Type weight="light" fontSize={0.14} anchorX="center" textAlign="center" position={[0, -0.62, 0]} color="#ffe0f2" maxWidth={2.6} lineHeight={1.35}>
+                {`"${a.quote}"`}
+              </Type>
+            </group>
           </group>
         )
       })}
@@ -240,7 +258,7 @@ function Petals() {
   }, [data])
   useFrame(({ clock }, dt) => {
     const m = ref.current
-    if (!m) return
+    if (!m || !zones(live.scroll).realm) return
     const t = clock.elapsedTime
     data.forEach((p, i) => {
       p.y -= p.sp * dt
@@ -269,7 +287,7 @@ function Lanterns() {
   const o = useMemo(() => new THREE.Object3D(), [])
   useFrame(({ clock }, dt) => {
     const m = ref.current
-    if (!m) return
+    if (!m || !zones(live.scroll).realm) return
     data.forEach((l, i) => {
       l.y += l.sp * dt
       if (l.y > 22) l.y = -8
@@ -284,5 +302,78 @@ function Lanterns() {
       <cylinderGeometry args={[0.18, 0.24, 0.42, 10]} />
       <meshBasicMaterial color={[3, 1.5, 0.6]} toneMapped={false} />
     </instancedMesh>
+  )
+}
+
+// Hobbies orbit lower and the other way round.
+function HobbyRing() {
+  const textures = useTexture(hobbies.map((h) => h.image))
+  const ring = useRef<THREE.Group>(null)
+  useFrame((_, dt) => {
+    if (ring.current) ring.current.rotation.y -= dt * 0.06
+  })
+  return (
+    <group ref={ring} position={[0, -1.2, 0]}>
+      {hobbies.map((h, i) => {
+        const ang = (i / hobbies.length) * Math.PI * 2 + 0.4
+        textures[i].colorSpace = THREE.SRGBColorSpace
+        return (
+          <group key={h.title} position={[Math.sin(ang) * 13, Math.cos(i * 2.1) * 0.8, Math.cos(ang) * 13]} rotation-y={ang}>
+            <mesh>
+              <circleGeometry args={[1.25, 48]} />
+              <meshBasicMaterial map={textures[i]} toneMapped={false} side={THREE.DoubleSide} />
+            </mesh>
+            <mesh position={[0, 0, -0.02]}>
+              <ringGeometry args={[1.25, 1.36, 64]} />
+              <meshBasicMaterial color={[1.4, 2.6, 3.2]} toneMapped={false} side={THREE.DoubleSide} />
+            </mesh>
+            <group position={[0, -1.6, 0.02]}>
+              <Type weight="bold" fontSize={0.3} anchorX="center" glow={1.4}>
+                {h.title}
+              </Type>
+              <Type weight="semi" fontSize={0.13} letterSpacing={0.12} anchorX="center" position={[0, -0.4, 0]} color="#8fe3ff" glow={1.6}>
+                {`${h.detail.toUpperCase()}   /   SINCE ${h.since}`}
+              </Type>
+              <Type weight="light" fontSize={0.15} anchorX="center" textAlign="center" position={[0, -0.66, 0]} color="#e6f7ff" maxWidth={3}>
+                {`"${h.quote}"`}
+              </Type>
+            </group>
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
+function RealmTitle() {
+  const [a, b] = RANGES.life
+  const on = usePresence(a + 40, b, 40, 30)
+  const g = useRef<THREE.Group>(null)
+  useReveal(g, on, 1)
+  const look = useRef<THREE.Group>(null)
+  useFrame(({ camera }) => {
+    // always face the orbiting camera
+    if (look.current) look.current.quaternion.copy(camera.quaternion)
+  })
+  return (
+    <group ref={look} position={[0, 11.5, 0]}>
+      <group ref={g}>
+        <group>
+          <Type weight="semi" fontSize={0.3} letterSpacing={0.3} anchorX="center" color="#ffb7dd" glow={2}>
+            {"06   LIFE"}
+          </Type>
+        </group>
+        <group position={[0, -0.5, 0]}>
+          <Type weight="bold" fontSize={1.5} letterSpacing={-0.03} anchorX="center" glow={1.5}>
+            {"Off the clock"}
+          </Type>
+        </group>
+        <group position={[0, -2.3, 0]}>
+          <Type weight="light" fontSize={0.34} anchorX="center" color="#ffe0f2">
+            {"Anime I'd rewatch forever, and what I do when the laptop closes."}
+          </Type>
+        </group>
+      </group>
+    </group>
   )
 }

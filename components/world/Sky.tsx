@@ -43,11 +43,11 @@ const fragment = /* glsl */ `
 
     // ── neon night
     vec3 night = mix(vec3(0.11, 0.035, 0.16), vec3(0.008, 0.006, 0.02), smoothstep(-0.05, 0.55, y));
-    night += vec3(0.5, 0.1, 0.55) * pow(1.0 - clamp(abs(y), 0.0, 1.0), 14.0) * 0.55;
+    night += vec3(0.75, 0.2, 0.7) * pow(1.0 - clamp(abs(y), 0.0, 1.0), 10.0) * 0.6;
     float rib = smoothstep(0.5, 0.95, fbm(vec2(sph.x * 2.5 + uTime * 0.02, y * 3.0 + fbm(sph * 2.0) * 2.0)));
     vec3 aur = mix(vec3(0.35, 0.25, 0.95), vec3(0.15, 0.6, 0.95), fbm(sph * 1.5));
     aur = mix(aur, hue(fract(uTime * 0.1 + sph.x * 0.1)), uParty);
-    night += aur * rib * smoothstep(0.1, 0.35, y) * (1.0 - smoothstep(0.55, 0.9, y)) * 0.28;
+    night += aur * rib * smoothstep(0.05, 0.3, y) * (1.0 - smoothstep(0.6, 0.95, y)) * 0.5;
     night += st;
 
     // ── realm dusk over a sea of clouds
@@ -79,8 +79,8 @@ export function Sky() {
   useFrame(({ clock, camera }, dt) => {
     const f = live.frame
     uniforms.uTime.value = clock.elapsedTime
-    const realm = f.chapter === "life" || (f.chapter === "portal" && f.t > 0.97) ? 1 : 0
-    const sun = f.chapter === "contact" ? Math.min(1, 0.35 + f.t) : 0
+    const realm = f.chapter === "life" || f.chapter === "contact" || (f.chapter === "portal" && f.t > 0.97) ? 1 : 0
+    const sun = 0
     // cuts are hidden by the flash, so these can snap quickly
     uniforms.uRealm.value += (realm - uniforms.uRealm.value) * Math.min(1, dt * 8)
     uniforms.uSun.value += (sun - uniforms.uSun.value) * Math.min(1, dt * 8)
