@@ -11,6 +11,7 @@ import { live } from "./live"
 import { zones } from "./track"
 import { ScrollRig } from "./ScrollRig"
 import { Sky } from "./Sky"
+import { Atmosphere } from "./Atmosphere"
 import { Dream, Dust } from "./Dream"
 import { Hero } from "./Hero"
 import { AboutStation, FactsStation, ProjectStations } from "./Stations"
@@ -43,8 +44,8 @@ export default function World() {
       camera={{ fov: 36, near: 0.1, far: 900, position: [6, 2.4, 6] }}
       aria-hidden
     >
-      <color attach="background" args={["#07051a"]} />
-      <fogExp2 attach="fog" args={["#140a2a", 0.006]} />
+      <color attach="background" args={["#5a3d82"]} />
+      <fogExp2 attach="fog" args={["#6a4a94", 0.006]} />
       <PerformanceMonitor
         onDecline={() => {
           setQuality("low")
@@ -58,9 +59,12 @@ export default function World() {
       <AdaptiveDpr pixelated={false} />
 
       <Sky />
-      <ambientLight intensity={0.35} color="#a58cff" />
-      <hemisphereLight args={["#b69cff", "#1a0a2a", 0.6]} />
+      {/* the realm's soft pastel lighting, everywhere */}
+      <ambientLight intensity={0.3} color="#c9a8ff" />
+      <hemisphereLight args={["#ffc2ec", "#2a1250", 1.1]} />
+      <directionalLight position={[20, 40, 25]} intensity={1.6} color="#ffd6f0" />
       <Dust />
+      <Atmosphere />
 
       <Suspense fallback={null}>
         <NeonEnvironment />
@@ -119,7 +123,7 @@ function Effects({ high }: { high: boolean }) {
       <EffectComposer multisampling={0} enableNormalPass={false}>
         <Bloom mipmapBlur intensity={0.9} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.75} levels={5} />
         <Vignette darkness={0.5} offset={0.3} />
-        <ToneMapping mode={ToneMappingMode.AGX} />
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
     )
   return (
@@ -128,7 +132,7 @@ function Effects({ high }: { high: boolean }) {
       <ChromaticAberration offset={offset} radialModulation modulationOffset={0.25} />
       <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
       <Vignette darkness={0.5} offset={0.3} />
-      <ToneMapping mode={ToneMappingMode.AGX} />
+      <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <SMAA />
     </EffectComposer>
   )

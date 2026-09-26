@@ -51,12 +51,12 @@ const fragment = /* glsl */ `
     night += st;
 
     // ── realm dusk over a sea of clouds
-    vec3 dusk = mix(vec3(1.0, 0.56, 0.72), vec3(0.16, 0.07, 0.32), smoothstep(-0.02, 0.6, y));
+    vec3 dusk = mix(vec3(0.3, 0.15, 0.45), vec3(0.045, 0.02, 0.11), smoothstep(-0.05, 0.75, y));
     float m = length(vec2(sph.x - 1.1, sph.y - 0.32) * vec2(1.0, 1.0));
-    dusk += vec3(1.0, 0.95, 0.9) * smoothstep(0.075, 0.07, m) + vec3(1.0, 0.6, 0.85) * smoothstep(0.5, 0.0, m) * 0.25;
+    dusk += vec3(1.0, 0.95, 0.9) * smoothstep(0.075, 0.07, m) + vec3(1.0, 0.6, 0.85) * smoothstep(0.5, 0.0, m) * 0.18;
     float cl = fbm(vec2(sph.x * 3.0 + uTime * 0.01, y * 10.0));
-    vec3 clouds = mix(vec3(0.95, 0.6, 0.8), vec3(1.0, 0.88, 0.95), cl);
-    dusk = mix(dusk, clouds, smoothstep(0.02, -0.12, y) * 0.95);
+    vec3 clouds = mix(vec3(0.16, 0.08, 0.28), vec3(0.34, 0.19, 0.46), cl);
+    dusk = mix(dusk, clouds, smoothstep(0.02, -0.18, y) * 0.9);
     dusk += st * smoothstep(0.35, 0.6, y);
 
     // ── sunrise
@@ -75,11 +75,12 @@ const fragment = /* glsl */ `
 
 export function Sky() {
   const mesh = useRef<THREE.Mesh>(null)
-  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uRealm: { value: 0 }, uSun: { value: 0 }, uParty: { value: 0 } }), [])
+  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uRealm: { value: 1 }, uSun: { value: 0 }, uParty: { value: 0 } }), [])
   useFrame(({ clock, camera }, dt) => {
     const f = live.frame
     uniforms.uTime.value = clock.elapsedTime
-    const realm = f.chapter === "life" || f.chapter === "contact" || (f.chapter === "portal" && f.t > 0.97) ? 1 : 0
+    // the whole journey now lives in the realm's dusk
+    const realm = 1
     const sun = 0
     // cuts are hidden by the flash, so these can snap quickly
     uniforms.uRealm.value += (realm - uniforms.uRealm.value) * Math.min(1, dt * 8)
