@@ -28,8 +28,6 @@ const ISLANDS: { pos: [number, number, number]; r: number; slot?: number }[] = [
 export function Realm() {
   return (
     <group position={REALM}>
-      <hemisphereLight args={["#ffc2ec", "#2a1250", 1.1]} />
-      <directionalLight position={[20, 25, 10]} intensity={2.2} color="#ffd6f0" />
       {ISLANDS.map((isl, i) => (
         <Island key={i} {...isl} seed={i + 1} />
       ))}
@@ -38,8 +36,6 @@ export function Realm() {
       <PosterRing />
       <HobbyRing />
       <RealmTitle />
-      <Petals />
-      <Lanterns />
     </group>
   )
 }
@@ -236,74 +232,6 @@ function Torii(props: import("@react-three/fiber").ThreeElements["group"]) {
   )
 }
 
-function Petals() {
-  const ref = useRef<THREE.InstancedMesh>(null)
-  const count = useRoom((s) => (s.quality === "high" ? 500 : 220))
-  const data = useMemo(() => {
-    const r = rng(5)
-    return Array.from({ length: count }, () => ({
-      x: (r() - 0.5) * 50,
-      y: r() * 30 - 8,
-      z: (r() - 0.5) * 50,
-      sp: 0.6 + r() * 1.2,
-      rot: r() * 6,
-      sway: r() * 6,
-    }))
-  }, [count])
-  const o = useMemo(() => new THREE.Object3D(), [])
-  useLayoutEffect(() => {
-    const c = new THREE.Color()
-    data.forEach((_, i) => ref.current!.setColorAt(i, c.set(i % 3 ? "#ffc2e0" : "#ff8fc8")))
-    ref.current!.instanceColor!.needsUpdate = true
-  }, [data])
-  useFrame(({ clock }, dt) => {
-    const m = ref.current
-    if (!m || !zones(live.scroll).realm) return
-    const t = clock.elapsedTime
-    data.forEach((p, i) => {
-      p.y -= p.sp * dt
-      if (p.y < -10) p.y = 22
-      o.position.set(p.x + Math.sin(t * 0.8 + p.sway) * 1.2, p.y, p.z + Math.cos(t * 0.6 + p.sway) * 1.2)
-      o.rotation.set(t * p.sp + p.rot, t * 0.7 + p.rot, 0)
-      o.updateMatrix()
-      m.setMatrixAt(i, o.matrix)
-    })
-    m.instanceMatrix.needsUpdate = true
-  })
-  return (
-    <instancedMesh ref={ref} args={[undefined, undefined, count]} frustumCulled={false}>
-      <planeGeometry args={[0.16, 0.11]} />
-      <meshStandardMaterial side={THREE.DoubleSide} roughness={0.6} emissive="#ff7fbf" emissiveIntensity={0.35} />
-    </instancedMesh>
-  )
-}
-
-function Lanterns() {
-  const ref = useRef<THREE.InstancedMesh>(null)
-  const data = useMemo(() => {
-    const r = rng(8)
-    return Array.from({ length: 36 }, () => ({ x: (r() - 0.5) * 44, y: r() * 26 - 6, z: (r() - 0.5) * 44, sp: 0.3 + r() * 0.5, ph: r() * 6 }))
-  }, [])
-  const o = useMemo(() => new THREE.Object3D(), [])
-  useFrame(({ clock }, dt) => {
-    const m = ref.current
-    if (!m || !zones(live.scroll).realm) return
-    data.forEach((l, i) => {
-      l.y += l.sp * dt
-      if (l.y > 22) l.y = -8
-      o.position.set(l.x + Math.sin(clock.elapsedTime * 0.3 + l.ph) * 0.8, l.y, l.z)
-      o.updateMatrix()
-      m.setMatrixAt(i, o.matrix)
-    })
-    m.instanceMatrix.needsUpdate = true
-  })
-  return (
-    <instancedMesh ref={ref} args={[undefined, undefined, data.length]} frustumCulled={false}>
-      <cylinderGeometry args={[0.18, 0.24, 0.42, 10]} />
-      <meshBasicMaterial color={[3, 1.5, 0.6]} toneMapped={false} />
-    </instancedMesh>
-  )
-}
 
 // Hobbies orbit lower and the other way round.
 function HobbyRing() {
