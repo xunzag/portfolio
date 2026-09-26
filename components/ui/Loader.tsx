@@ -5,96 +5,54 @@ import { AnimatePresence, motion } from "motion/react"
 import { useProgress } from "@react-three/drei"
 import { useRoom } from "@/lib/store"
 
-const BOOT = [
-  "[ ok ] mounting /home/farhan",
-  "[ ok ] brewing chai ☕",
-  "[ ok ] untangling headphone cable",
-  "[ ok ] waking up the rubber duck 🦆",
-  "[ ok ] syncing anime watchlist",
-  "[ ok ] compiling the room — shaders, lights, vibes",
-]
+const BOOT = ["igniting the engine", "wiring the neon", "wetting the asphalt", "waking the rubber duck 🦆", "syncing anime watchlist"]
 
+// Auto-dismissing boot screen: no click needed, never blocks longer than 9s.
 export function Loader() {
   const { progress, active } = useProgress()
   const phase = useRoom((s) => s.phase)
-  const setPhase = useRoom((s) => s.setPhase)
-  const [lines, setLines] = useState(0)
-  const [minTimeDone, setMinTimeDone] = useState(false)
+  const [line, setLine] = useState(0)
+  const [minDone, setMinDone] = useState(false)
 
   useEffect(() => {
-    const id = setInterval(() => setLines((n) => Math.min(n + 1, BOOT.length)), 260)
-    const t = setTimeout(() => setMinTimeDone(true), 1500)
+    const id = setInterval(() => setLine((n) => (n + 1) % BOOT.length), 420)
+    const t = setTimeout(() => setMinDone(true), 1600)
+    const bail = setTimeout(() => useRoom.getState().setPhase("room"), 9000)
     return () => {
       clearInterval(id)
       clearTimeout(t)
+      clearTimeout(bail)
     }
   }, [])
 
-  const loaded = (!active && progress >= 100) || (minTimeDone && progress === 0 && !active)
   useEffect(() => {
-    if (phase === "loading" && loaded && minTimeDone) setPhase("ready")
-  }, [loaded, minTimeDone, phase, setPhase])
-
-  // Never trap anyone behind the loader.
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (useRoom.getState().phase === "loading") setPhase("ready")
-    }, 9000)
-    return () => clearTimeout(t)
-  }, [setPhase])
-
-  const pct = Math.round(phase === "loading" ? progress : 100)
+    if (phase === "loading" && minDone && !active && (progress >= 100 || progress === 0)) {
+      const t = setTimeout(() => useRoom.getState().setPhase("room"), 250)
+      return () => clearTimeout(t)
+    }
+  }, [phase, minDone, active, progress])
 
   return (
     <AnimatePresence>
-      {(phase === "loading" || phase === "ready") && (
+      {phase === "loading" && (
         <motion.div
           key="loader"
-          className="absolute inset-0 z-50 flex items-center justify-center bg-bg/80 px-4 backdrop-blur-sm"
-          exit={{ opacity: 0, transition: { duration: 0.8 } }}
+          className="fixed inset-0 z-50 flex items-end justify-between bg-bg px-5 pb-8 sm:px-[6vw] sm:pb-12"
+          exit={{ clipPath: "inset(0 0 100% 0)", transition: { duration: 1.1, ease: [0.76, 0, 0.24, 1] } }}
+          style={{ clipPath: "inset(0 0 0% 0)" }}
         >
-          <div className="w-full max-w-md">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted">farhan-os v2.0 · booting</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-              Farhan <span className="bg-gradient-to-r from-violet to-cyan bg-clip-text text-transparent">Babar</span>
-            </h1>
-            <p className="mt-2 text-muted">Full stack developer. Welcome to my room.</p>
-
-            <div className="mt-8 space-y-1 font-mono text-xs text-muted" aria-hidden>
-              {BOOT.slice(0, lines).map((l) => (
-                <motion.p key={l} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}>
-                  <span className="text-mint">{l.slice(0, 6)}</span>
-                  {l.slice(6)}
-                </motion.p>
-              ))}
-            </div>
-
-            <div className="mt-6 h-1 overflow-hidden rounded-full bg-white/10">
-              <motion.div className="h-full rounded-full bg-gradient-to-r from-violet to-cyan" animate={{ width: `${pct}%` }} transition={{ ease: "easeOut" }} />
-            </div>
-            <div className="mt-2 flex justify-between font-mono text-[11px] text-muted">
-              <span>{phase === "ready" ? "ready" : "loading assets"}</span>
-              <span>{pct}%</span>
-            </div>
-
-            <AnimatePresence>
-              {phase === "ready" && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
-                  <button
-                    autoFocus
-                    onClick={() => setPhase("intro")}
-                    className="focus-ring group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-4 text-base font-semibold text-bg transition hover:scale-[1.02] active:scale-[0.99]"
-                  >
-                    <span className="relative z-10">Enter the room →</span>
-                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-violet/0 via-violet/30 to-violet/0 transition duration-700 group-hover:translate-x-full" />
-                  </button>
-                  <p className="mt-3 text-center text-xs text-muted">
-                    Click objects to explore · keys <span className="kbd">1</span>–<span className="kbd">5</span> · <span className="kbd">Esc</span> to step back
-                  </p>
-                </motion.div>
-              )}
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">farhan-os · booting</p>
+            <AnimatePresence mode="wait">
+              <motion.p key={line} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-2 font-mono text-sm text-cyan">
+                › {BOOT[line]}
+              </motion.p>
             </AnimatePresence>
           </div>
+          <p className="font-semibold tabular-nums tracking-tighter text-[clamp(4rem,14vw,11rem)] leading-none">
+            {Math.round(progress)}
+            <span className="text-violet">%</span>
+          </p>
         </motion.div>
       )}
     </AnimatePresence>

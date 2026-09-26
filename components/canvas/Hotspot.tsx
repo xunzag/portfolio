@@ -6,7 +6,7 @@ import { Html } from "@react-three/drei"
 import { Select } from "@react-three/postprocessing"
 import { easing } from "maath"
 import type { Group } from "three"
-import { useRoom, type Section } from "@/lib/store"
+import { scrollBus, sections, useRoom, type Section } from "@/lib/store"
 
 type Id = Section | "lamp" | "duck" | "keyboard" | "chair"
 
@@ -34,7 +34,7 @@ export function Hotspot({
 } & Omit<ThreeElements["group"], "id">) {
   const inner = useRef<Group>(null)
   const hovered = useRoom((s) => s.hovered === id)
-  const interactive = useRoom((s) => s.phase === "room" && s.focus === null)
+  const interactive = useRoom((s) => s.phase === "room")
 
   useFrame((_, dt) => {
     if (!inner.current) return
@@ -44,7 +44,7 @@ export function Hotspot({
   const over = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
     const s = useRoom.getState()
-    if (s.phase !== "room" || s.focus) return
+    if (s.phase !== "room") return
     s.setHovered(id)
     setCursor("pointer")
   }
@@ -58,7 +58,9 @@ export function Hotspot({
     if (s.phase !== "room") return
     setCursor("auto")
     if (onActivate) return onActivate()
-    if (!s.focus) s.setFocus(id as Section)
+    // clicking a room object glides the scroll to its chapter
+    const sec = sections.find((x) => x.id === (id as Section))
+    if (sec) scrollBus.to(sec.chapter)
   }
 
   return (

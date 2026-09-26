@@ -16,12 +16,35 @@
 
 html,
 body {
-  height: 100%;
   background: var(--color-bg);
   color: var(--color-ink);
-  overflow: hidden;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* warp speed lines */
+.speed-lines {
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgb(255 255 255 / 0.55) 0deg 0.35deg, transparent 0.35deg 5deg);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0 28%, black 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 28%, black 75%);
+  mix-blend-mode: screen;
+  animation: speed-spin 0.9s linear infinite;
+}
+@keyframes speed-spin {
+  to {
+    transform: rotate(5deg) scale(1.02);
+  }
 }
 
 ::selection {

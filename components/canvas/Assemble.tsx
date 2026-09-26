@@ -48,9 +48,10 @@ export function Assemble({ children, mode = "drop", delay = 0, pivot = [0, 0, 0]
       if (mode === "unfoldX") gsap.to(g.rotation, { x: 0, duration: 1.1, delay: d, ease: "elastic.out(1, 0.75)" })
       if (mode === "unfoldZ") gsap.to(g.rotation, { z: 0, duration: 1.1, delay: d, ease: "elastic.out(1, 0.75)" })
     }
-    if (useRoom.getState().phase === "intro" || useRoom.getState().phase === "room") run()
+    // The room builds itself the moment the camera starts flying up to it.
+    if (useRoom.getState().roomBuilt) run()
     return useRoom.subscribe((s) => {
-      if (s.phase === "intro" || s.phase === "room") run()
+      if (s.roomBuilt) run()
     })
   }, [mode, delay])
 

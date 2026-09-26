@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { motion } from "motion/react"
-import { useRoom, sections, type Section } from "@/lib/store"
+import { scrollBus, useRoom, sections, type Section } from "@/lib/store"
 import { animes, experience, profile, projects, skillGroups } from "@/lib/content"
 
 const C = ({ c, children }: { c: string; children: ReactNode }) => <span className={c}>{children}</span>
@@ -31,7 +31,8 @@ function run(raw: string): Out {
   const s = useRoom.getState()
   const goto = (id: Section) => {
     s.setTerminal(false)
-    s.setFocus(id)
+    const sec = sections.find((x) => x.id === id)
+    if (sec) scrollBus.to(sec.chapter)
   }
 
   if (!lower) return null
