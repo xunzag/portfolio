@@ -3,14 +3,14 @@ import { PROJECT_VH, RANGES, clamp01, local, type ChapterId } from "@/lib/chapte
 import { projects } from "@/lib/content"
 
 // ── World layout (one continuous dreamscape) ──────────────────────────
-export const ROOM_ORIGIN = new THREE.Vector3(0, 18, -300)
+export const STACK = new THREE.Vector3(-6, 16, -296)
+export const PORTAL = new THREE.Vector3(0, 20, -352)
 export const ABOUT = new THREE.Vector3(-4, 7, -214)
 export const FACTS = new THREE.Vector3(16, 11, -254)
 export const REALM = new THREE.Vector3(0, 400, 0)
 export const CONTACT = new THREE.Vector3(0, 416, -30)
 
 const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
-const room = (x: number, y: number, z: number) => v3(x, y, z).add(ROOM_ORIGIN)
 
 // Project stations alternate either side of the light path, rising gently.
 export function projectStation(i: number) {
@@ -58,12 +58,12 @@ function buildTrack(): Key[] {
   K.push({ s: f0 + 80, pos: FACTS.clone().add(v3(0, 0, 14)), target: FACTS, fov: 42, roll: 0.03 })
   K.push({ s: f0 + 220, pos: FACTS.clone().add(v3(-1.6, 0.6, 9.5)), target: FACTS.clone().add(v3(0.4, 0, 0)), fov: 40, roll: -0.03 })
   const [st0] = RANGES.stack
-  K.push({ s: st0 + 70, pos: room(9.6, 7.6, 9.4), target: room(-0.4, 2.1, -1.2), fov: 36 })
-  K.push({ s: st0 + 150, pos: room(13.2, 3.5, 2.6), target: room(4.0, 1.8, 0.4), fov: 42 })
-  K.push({ s: st0 + 260, pos: room(12.6, 3.3, 1.8), target: room(4.0, 1.7, 0.1), fov: 42 })
+  K.push({ s: st0 + 80, pos: STACK.clone().add(v3(3, 1.8, 20.5)), target: STACK.clone().add(v3(0.4, 0.8, 0)), fov: 40, roll: -0.02 })
+  K.push({ s: st0 + 240, pos: STACK.clone().add(v3(-1.5, 1.1, 18)), target: STACK.clone().add(v3(0.6, 0.6, 0)), fov: 40, roll: 0.02 })
   const [p0, p1] = RANGES.portal
-  K.push({ s: p0 + 45, pos: room(0.65, 2.72, -1.25), target: room(0.65, 2.62, -4.62), fov: 36 })
-  K.push({ s: p1, pos: room(0.65, 2.63, -4.45), target: room(0.65, 2.63, -4.7), fov: 100, flash: 1 })
+  // line up with the ring, then fly straight through it
+  K.push({ s: p0 + 55, pos: PORTAL.clone().add(v3(0, 0.4, 26)), target: PORTAL, fov: 42 })
+  K.push({ s: p1, pos: PORTAL.clone().add(v3(0, 0, -2)), target: PORTAL.clone().add(v3(0, 0, -20)), fov: 95, flash: 1, roll: 0.35 })
   return K
 }
 
@@ -148,8 +148,7 @@ export function sample(s: number): Frame {
 /** Which worlds should render near this scroll position (cheap culling). */
 export function zones(s: number) {
   return {
-    dream: s < RANGES.stack[0] + 40,
-    room: s >= RANGES.facts[0] + 60 && s < RANGES.portal[1],
+    dream: s < RANGES.portal[1] - 2,
     realm: s >= RANGES.portal[1] - 4,
   }
 }

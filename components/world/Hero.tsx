@@ -6,7 +6,7 @@ import { useAnimations, useGLTF } from "@react-three/drei"
 import { SkeletonUtils } from "three-stdlib"
 import * as THREE from "three"
 import { local } from "@/lib/chapters"
-import { rng } from "../canvas/textures"
+import { rng } from "@/lib/rng"
 import { live } from "./live"
 
 useGLTF.preload("/models/guts.glb")

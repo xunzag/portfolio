@@ -11,7 +11,7 @@ import { usePresence, useReveal } from "./presence"
 import { useRoom } from "@/lib/store"
 import { live } from "./live"
 import { zones } from "./track"
-import { rng } from "../canvas/textures"
+import { rng } from "@/lib/rng"
 import { Model } from "./Model"
 import { REALM } from "./track"
 
@@ -100,7 +100,7 @@ function CharacterSlot({ index, y }: { index: number; y: number }) {
       </mesh>
       {has ? (
         <Suspense fallback={null}>
-          <Model url={`/models/${file}`} size={2.4} />
+          <Model url={`/models/${file}`} height={3.2} />
         </Suspense>
       ) : (
         <Standee image={animes[(index - 1) % animes.length].image} />

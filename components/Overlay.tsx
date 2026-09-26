@@ -31,7 +31,6 @@ export function Overlay() {
     <div className="pointer-events-none relative z-10" style={{ height: `${TOTAL_VH}vh` }}>
       <Hero />
       <div style={{ height: `${before - vh("hero")}vh` }} />
-      <PortalLine />
       <ScreenReaderCopy />
     </div>
   )
@@ -85,24 +84,6 @@ function SplitWord({ word, delay, gradient }: { word: string; delay: number; gra
         </motion.span>
       ))}
     </span>
-  )
-}
-
-function PortalLine() {
-  const ref = useChapterVar("portal")
-  return (
-    <section style={{ height: `${vh("portal")}vh` }} className="relative" aria-hidden>
-      <div
-        ref={ref}
-        className="sticky top-0 flex h-[100svh] flex-col items-center justify-center px-6 text-center"
-        style={{ opacity: "calc(min(var(--t, 0) * 4, 1) * min((1 - var(--t, 0)) * 2.5, 1))", transform: "scale(calc(0.9 + var(--t, 0) * 0.25))" }}
-      >
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-cyan">through the screen</p>
-        <p className="mt-4 max-w-4xl text-balance text-[clamp(2.2rem,6vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.03em] [text-shadow:0_0_40px_rgba(143,216,255,0.5)]">
-          Enough code. Let me show you what I love.
-        </p>
-      </div>
-    </section>
   )
 }
 

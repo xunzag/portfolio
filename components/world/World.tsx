@@ -7,7 +7,6 @@ import { Bloom, ChromaticAberration, EffectComposer, Noise, SMAA, ToneMapping, V
 import { BlendFunction, ToneMappingMode } from "postprocessing"
 import * as THREE from "three"
 import { useRoom } from "@/lib/store"
-import { MaterialsProvider } from "../canvas/materials"
 import { live } from "./live"
 import { zones } from "./track"
 import { ScrollRig } from "./ScrollRig"
@@ -15,7 +14,8 @@ import { Sky } from "./Sky"
 import { Dream, Dust } from "./Dream"
 import { Hero } from "./Hero"
 import { AboutStation, FactsStation, ProjectStations } from "./Stations"
-import { SkyRoom } from "./SkyRoom"
+import { StackShrine } from "./StackShrine"
+import { Portal } from "./Portal"
 import { Realm } from "./Realm"
 import { ContactStation } from "./ContactStation"
 
@@ -64,22 +64,19 @@ export default function World() {
 
       <Suspense fallback={null}>
         <NeonEnvironment />
-        <MaterialsProvider>
-          <Zone name="dream">
-            <Dream />
-            <Hero />
-            <ProjectStations />
-            <AboutStation />
-            <FactsStation />
-          </Zone>
-          <Zone name="room">
-            <SkyRoom />
-          </Zone>
-          <Zone name="realm">
-            <Realm />
-            <ContactStation />
-          </Zone>
-        </MaterialsProvider>
+        <Zone name="dream">
+          <Dream />
+          <Hero />
+          <ProjectStations />
+          <AboutStation />
+          <FactsStation />
+          <StackShrine />
+          <Portal />
+        </Zone>
+        <Zone name="realm">
+          <Realm />
+          <ContactStation />
+        </Zone>
         <Preload all />
       </Suspense>
       <ScrollRig />

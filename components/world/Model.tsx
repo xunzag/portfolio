@@ -5,44 +5,35 @@ import { useAnimations, useGLTF } from "@react-three/drei"
 import { SkeletonUtils } from "three-stdlib"
 import * as THREE from "three"
 
-/**
- * Drop-in slot for a user-supplied .glb. It is cloned, auto-scaled so its
- * longest horizontal side (or height) matches `size`, sat on the ground and
- * centred, and its first animation clip (if any) loops.
- */
-export function Model({ url, size, fit = "height", rotationY = 0 }: { url: string; size: number; fit?: "height" | "length"; rotationY?: number }) {
+/** A user GLB, auto-scaled to `height`, sat on the ground, centred, first clip looping. */
+export function Model({ url, height, rotationY = 0 }: { url: string; height: number; rotationY?: number }) {
   const gltf = useGLTF(url)
   const scene = useMemo(() => {
-    const clone = SkeletonUtils.clone(gltf.scene) as THREE.Group
-    clone.rotation.y = rotationY
-    clone.updateMatrixWorld(true)
-    const box = new THREE.Box3().setFromObject(clone)
-    const dim = box.getSize(new THREE.Vector3())
-    const current = fit === "height" ? dim.y : Math.max(dim.x, dim.z)
-    const k = size / (current || 1)
-    clone.scale.setScalar(k)
-    clone.updateMatrixWorld(true)
-    const b2 = new THREE.Box3().setFromObject(clone)
+    const s = SkeletonUtils.clone(gltf.scene) as THREE.Group
+    s.rotation.y = rotationY
+    s.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(s)
+    s.scale.setScalar(height / (box.max.y - box.min.y || 1))
+    s.updateMatrixWorld(true)
+    const b2 = new THREE.Box3().setFromObject(s)
     const c = b2.getCenter(new THREE.Vector3())
-    clone.position.set(-c.x, -b2.min.y, -c.z)
-    clone.traverse((o) => {
+    s.position.set(-c.x, -b2.min.y, -c.z)
+    s.traverse((o) => {
       const m = o as THREE.Mesh
-      if (m.isMesh) {
-        m.castShadow = true
-        m.receiveShadow = true
-      }
+      if (!m.isMesh) return
+      m.frustumCulled = false
+      const mat = m.material as THREE.MeshStandardMaterial
+      if (mat && "envMapIntensity" in mat) mat.envMapIntensity = 1.4
     })
-    return clone
-  }, [gltf.scene, size, fit, rotationY])
-
+    return s
+  }, [gltf.scene, height, rotationY])
   const { actions, names } = useAnimations(gltf.animations, scene)
   useEffect(() => {
-    const first = names.length ? actions[names[0]] : null
-    first?.reset().fadeIn(0.4).play()
+    const a = names.length ? actions[names[0]] : null
+    a?.reset().play()
     return () => {
-      first?.fadeOut(0.3)
+      a?.stop()
     }
   }, [actions, names])
-
   return <primitive object={scene} />
 }

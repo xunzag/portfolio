@@ -46,6 +46,9 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
 
   return (
     <group position={st.center} rotation-y={st.yaw}>
+      <Type weight="bold" fontSize={7} anchorX="center" anchorY="middle" position={[inner * 2.2, 1.2, -3]} color={p.accent} opacity={0.1}>
+        {String(i + 1).padStart(2, "0")}
+      </Type>
       <group ref={screen}>
         <HoloScreen map={map} accent={p.accent} width={W} height={W * 0.5625} on={on} />
       </group>
@@ -102,6 +105,9 @@ export function AboutStation() {
 
   return (
     <group position={ABOUT}>
+      <Type weight="bold" fontSize={9} anchorX="center" anchorY="middle" position={[1.5, 1, -4]} color="#7fd8ff" opacity={0.07}>
+        {"03"}
+      </Type>
       <group ref={frame} position={[-4.9, 1.9, 0]}>
         <HoloScreen map={photo} accent="#7fd8ff" width={2.6} height={3.25} on={on} />
       </group>
@@ -207,6 +213,9 @@ export function FactsStation() {
 
   return (
     <group position={FACTS}>
+      <Type weight="bold" fontSize={9} anchorX="center" anchorY="middle" position={[0, 0.5, -4]} color="#ffcf7f" opacity={0.07}>
+        {"04"}
+      </Type>
       <group ref={g}>
         <group position={[0, 1.05, 0]}>
           <Type weight="semi" fontSize={0.16} letterSpacing={0.24} anchorX="center" color="#ffcf7f" glow={1.8}>

@@ -6,8 +6,8 @@ A scroll-driven 3D portfolio. One continuous camera film through a glowing dream
 2. **Work** — each project is a floating hologram on its own crystal island, with 3D type, metrics and clickable 3D buttons.
 3. **About** — bio, stats and a career timeline as light in the sky.
 4. **Facts** — an orbit of glowing numbers from `/etc/farhan.conf`, plus setup and principles.
-5. **Stack** — the dev room: the PC opens into an exploded view, the stack orbits it and skill bars grow beside it.
-6. **Life** — the camera dives through the monitor into an anime realm (posters, quotes, hobbies).
+5. **Stack** — a floating shrine: the Ghost of Tsushima Storm Blade hovers, the toolbelt orbits it, skill bars of light grow beside it.
+6. **Life** — the camera flies through a vortex gate into an anime realm (Eren, Hisoka, posters, quotes, hobbies).
 7. **Contact** — a holographic form projected in 3D, plus 3D buttons.
 
 Everything visible is WebGL. The DOM only carries the hero type and a screen-reader/SEO copy of all the content.
@@ -16,7 +16,7 @@ Everything visible is WebGL. The DOM only carries the hero type and a screen-rea
 Next.js 16 · React 19 · three.js / R3F / drei · postprocessing · GSAP + Lenis · zustand · Tailwind v4
 
 ## Content
-All copy lives in `lib/content.ts`. Drop `char-1.glb` … `char-3.glb` into `public/models/` to place characters on the realm islands.
+All copy lives in `lib/content.ts`. Realm characters are `public/models/char-1.glb` (Eren) and `char-2.glb` (Hisoka); add `char-3.glb` for the third island. Models are compressed with `npx @gltf-transform/cli optimize in.glb out.glb --texture-compress webp --texture-size 1024 --compress meshopt`.
 
 ## Performance
 - Worlds outside the current scroll zone neither render nor animate.
@@ -24,9 +24,8 @@ All copy lives in `lib/content.ts`. Drop `char-1.glb` … `char-3.glb` into `pub
 - `?quality=low` or `?quality=high` in the URL forces a tier.
 
 ## Credits
-- Guts / Berserker Armor model: Sketchfab (see the model page for its author and license).
+- Guts (Berserker Armor), Eren, Hisoka and the Storm Blade models: Sketchfab (see each model page for its author and license).
 - Inter font: OFL-1.1.
-- HDRI and normal maps: CC0 via @pmndrs/assets.
 
 ## Develop
 ```bash

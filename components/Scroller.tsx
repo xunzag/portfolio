@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import Lenis from "lenis"
 import gsap from "gsap"
 import { RANGES, chapterAt } from "@/lib/chapters"
-import { scrollBus, useRoom, type Section } from "@/lib/store"
+import { scrollBus, useRoom } from "@/lib/store"
 import { live } from "./world/live"
 import { sample } from "./world/track"
 
@@ -26,12 +26,9 @@ export function Scroller() {
       live.frame = sample(s)
 
       const st = useRoom.getState()
-      const { id, t } = chapterAt(s)
+      const { id } = chapterAt(s)
       const patch: Partial<ReturnType<typeof useRoom.getState>> = {}
       if (st.chapter !== id) patch.chapter = id
-      const focus: Section | null = id === "stack" && t > 0.3 ? "skills" : null
-      if (st.focus !== focus) patch.focus = focus
-      if (!st.roomBuilt && s > RANGES.facts[0] + 120) patch.roomBuilt = true
       if (Object.keys(patch).length) useRoom.setState(patch)
     }
 

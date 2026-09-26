@@ -5,9 +5,9 @@ import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 import { projects } from "@/lib/content"
 import { useRoom } from "@/lib/store"
-import { rng } from "../canvas/textures"
+import { rng } from "@/lib/rng"
 import { live } from "./live"
-import { ABOUT, FACTS, ROOM_ORIGIN, projectStation } from "./track"
+import { ABOUT, FACTS, STACK, projectStation } from "./track"
 
 // ── Shared: a floating rock island ─────────────────────────────────────
 export function rockGeometry(radius: number, seed: number) {
@@ -88,8 +88,7 @@ export function Dream() {
       })}
       <Island radius={5.5} seed={31} position={[ABOUT.x, ABOUT.y - 4.9, ABOUT.z]} rim="#7fd8ff" />
       <Island radius={3.2} seed={37} position={[FACTS.x, FACTS.y - 5.8, FACTS.z]} rim="#ffcf7f" />
-      {/* the room's floating slab gets a matching rim */}
-      <Island radius={7.4} seed={41} position={[ROOM_ORIGIN.x, ROOM_ORIGIN.y - 2.45, ROOM_ORIGIN.z]} rim="#9d7bff" />
+      <Island radius={4.6} seed={41} position={[STACK.x, STACK.y - 4.2, STACK.z]} rim="#9d7bff" />
     </group>
   )
 }
@@ -171,7 +170,8 @@ function LightPath() {
     })
     pts.push(new THREE.Vector3(ABOUT.x * 0.5, ABOUT.y - 2.4, ABOUT.z + 12))
     pts.push(new THREE.Vector3(FACTS.x * 0.5, FACTS.y - 3, FACTS.z + 12))
-    pts.push(new THREE.Vector3(ROOM_ORIGIN.x + 4, ROOM_ORIGIN.y - 1, ROOM_ORIGIN.z + 12))
+    pts.push(new THREE.Vector3(STACK.x + 2, STACK.y - 3, STACK.z + 12))
+    pts.push(new THREE.Vector3(0, 17.5, -330))
     const curve = new THREE.CatmullRomCurve3(pts, false, "centripetal")
     return new THREE.TubeGeometry(curve, 600, 0.06, 6, false)
   }, [])
