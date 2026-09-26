@@ -1,40 +1,37 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "farhan-dev-room",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "@react-three/drei": "^10.0.1",
-    "@react-three/fiber": "^9.0.4",
-    "@react-three/postprocessing": "^3.0.4",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.4.7",
-    "lenis": "^1.3.23",
-    "lucide-react": "^0.475.0",
-    "next": "^16.2.6",
-    "next-themes": "^0.4.4",
-    "react": "^19.0.0",
-    "react-countup": "^6.5.3",
-    "react-dom": "^19.0.0",
-    "react-tsparticles": "^2.12.2",
-    "react-typewriter-effect": "^1.1.0",
-    "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7",
-    "three": "^0.173.0"
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.1",
+    "@react-three/postprocessing": "^3.1.2",
+    "lucide-react": "^1.48.0",
+    "maath": "^0.10.8",
+    "motion": "^13.4.4",
+    "next": "^16.3.6",
+    "postprocessing": "^6.39.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "three": "^0.186.1",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "postcss": "^8.5.28",
+    "sharp": "^0.35.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
   }
 }
