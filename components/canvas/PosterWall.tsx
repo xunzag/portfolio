@@ -8,6 +8,7 @@ import * as THREE from "three"
 import { animes } from "@/lib/content"
 import { useRoom } from "@/lib/store"
 import { Hotspot } from "./Hotspot"
+import { BlobShadow } from "./Extras"
 
 const TILTS = [0.03, -0.04, 0.02, -0.02, 0.05, -0.03]
 
@@ -16,7 +17,7 @@ export function PosterWall() {
   textures.forEach((t) => (t.colorSpace = THREE.SRGBColorSpace))
 
   return (
-    <Hotspot id="life" label="Anime & hobbies" hint="4" labelPosition={[-4.6, 5.3, -2.85]} lift={0}>
+    <Hotspot id="life" label="Anime & hobbies" hint="4" labelPosition={[-4.6, 5.5, -2.85]} lift={0}>
       <group position={[-5.17, 0, -2.85]} rotation-y={Math.PI / 2}>
         {animes.map((a, i) => {
           const col = i % 3
@@ -34,6 +35,14 @@ export function PosterWall() {
         {/* string lights across the top */}
         <FairyLights />
       </group>
+    </Hotspot>
+  )
+}
+
+export function GuitarSpot() {
+  return (
+    <Hotspot id="life" lift={0.03}>
+      <BlobShadow position={[-4.45, 0, -0.55]} scale={[0.9, 0.9]} />
       <Guitar />
     </Hotspot>
   )
@@ -41,26 +50,31 @@ export function PosterWall() {
 
 function Poster({ texture, position, tilt, index }: { texture: THREE.Texture; position: [number, number, number]; tilt: number; index: number }) {
   const ref = useRef<THREE.Group>(null)
+  // On "Life" the posters peel off the wall and fan out towards the camera.
+  const col = index % 3
+  const row = Math.floor(index / 3)
+  const fan: [number, number, number] = [(col - 1) * 1.25 - position[0], 3.35 - row * 1.45 - position[1] + (col === 1 ? 0.12 : 0), 1.3 - Math.abs(col - 1) * 0.25]
   useFrame(({ clock }, dt) => {
     if (!ref.current) return
     const { hovered, focus } = useRoom.getState()
-    const lit = hovered === "life" || focus === "life"
-    // posters pop off the wall one after another when the wall is active
-    const wave = lit ? 0.08 + Math.sin(clock.elapsedTime * 2 + index) * 0.015 : 0
-    easing.damp(ref.current.position, "z", wave, 0.2, dt)
+    const active = focus === "life"
+    const t = clock.elapsedTime
+    const peek = hovered === "life" ? 0.08 + Math.sin(t * 2 + index) * 0.015 : 0
+    const smooth = 0.35 + index * 0.05
+    easing.damp3(ref.current.position, active ? [fan[0], fan[1] + Math.sin(t * 1.3 + index) * 0.04, fan[2]] : [0, 0, peek], smooth, dt)
+    easing.dampE(ref.current.rotation, active ? [0, (1 - col) * 0.28, -tilt + Math.sin(t + index) * 0.02] : [0, 0, 0], smooth, dt)
   })
   return (
     <group position={position} rotation-z={tilt}>
       <group ref={ref}>
-        <mesh position={[0, 0, 0.005]}>
+        <mesh position={[0, 0, 0.005]} castShadow>
           <boxGeometry args={[0.9, 1.26, 0.02]} />
           <meshStandardMaterial color="#0d0b18" />
         </mesh>
         <mesh position={[0, 0, 0.017]}>
           <planeGeometry args={[0.84, 1.2]} />
-          <meshStandardMaterial map={texture} roughness={0.55} />
+          <meshPhysicalMaterial map={texture} roughness={0.35} clearcoat={0.5} clearcoatRoughness={0.3} />
         </mesh>
-        {/* tape */}
         <mesh position={[0, 0.6, 0.02]} rotation-z={0.1}>
           <planeGeometry args={[0.2, 0.06]} />
           <meshStandardMaterial color="#f3e9c6" transparent opacity={0.8} />

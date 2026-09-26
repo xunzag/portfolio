@@ -13,7 +13,7 @@ export const sections: { id: Section; label: string; object: string; key: string
 type State = {
   phase: "loading" | "ready" | "intro" | "room"
   focus: Section | null
-  hovered: Section | "lamp" | "duck" | "keyboard" | null
+  hovered: Section | "lamp" | "duck" | "keyboard" | "chair" | null
   lightsOn: boolean
   party: boolean
   terminalOpen: boolean

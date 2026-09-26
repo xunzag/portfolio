@@ -2,59 +2,76 @@
 
 import { useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
-import { RoundedBox } from "@react-three/drei"
+import { MeshReflectorMaterial, RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
 import { useRoom } from "@/lib/store"
-import { neonSignTexture, rugTexture, woodTexture } from "./textures"
+import { neonSignTexture, rugTexture } from "./textures"
+import { useMat } from "./materials"
 
-const WALL = "#27234a"
-const WALL_SIDE = "#221f42"
-const TRIM = "#171432"
+// ── Floor ──────────────────────────────────────────────────────────
 
-export function RoomShell() {
-  const wood = useMemo(() => woodTexture(), [])
+export function Floor() {
+  const m = useMat()
+  const quality = useRoom((s) => s.quality)
   const rug = useMemo(() => rugTexture(), [])
+  const wood = m.walnut.map!
 
   return (
     <group>
-      {/* floor slab */}
       <mesh position={[0, -0.2, 0]} receiveShadow>
         <boxGeometry args={[10.4, 0.4, 10.4]} />
-        <meshStandardMaterial color="#c9a27e" map={wood} roughness={0.75} />
+        <meshStandardMaterial color="#6d4a33" roughness={0.6} />
       </mesh>
-      <mesh position={[0, -0.9, 0]}>
-        <boxGeometry args={[10.1, 1, 10.1]} />
-        <meshStandardMaterial color="#120f26" roughness={1} />
+      {/* the walkable surface: reflective wood on capable GPUs */}
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.001, 0]} receiveShadow>
+        <planeGeometry args={[10.4, 10.4]} />
+        {quality === "high" ? (
+          <MeshReflectorMaterial
+            map={wood}
+            color="#c9a27e"
+            normalMap={m.walnut.normalMap!}
+            normalScale={new THREE.Vector2(0.3, 0.3)}
+            roughness={0.55}
+            metalness={0.05}
+            blur={[400, 120]}
+            resolution={512}
+            mixBlur={1.2}
+            mixStrength={1.6}
+            mirror={0.6}
+            depthScale={0.6}
+            minDepthThreshold={0.4}
+            maxDepthThreshold={1.2}
+          />
+        ) : (
+          <meshStandardMaterial map={wood} color="#c9a27e" roughness={0.55} />
+        )}
       </mesh>
-
-      {/* back wall */}
-      <mesh position={[0, 3, -5.35]}>
-        <boxGeometry args={[10.4, 6.4, 0.3]} />
-        <meshStandardMaterial color={WALL} roughness={0.95} />
+      {/* plinth under the diorama */}
+      <mesh position={[0, -1.4, 0]}>
+        <boxGeometry args={[10.1, 2, 10.1]} />
+        <meshStandardMaterial color="#0d0b1c" roughness={0.9} />
       </mesh>
-      {/* left wall */}
-      <mesh position={[-5.35, 3, 0]}>
-        <boxGeometry args={[0.3, 6.4, 10.4]} />
-        <meshStandardMaterial color={WALL_SIDE} roughness={0.95} />
-      </mesh>
-
-      {/* baseboards */}
-      <mesh position={[0, 0.12, -5.17]}>
-        <boxGeometry args={[10.4, 0.24, 0.06]} />
-        <meshStandardMaterial color={TRIM} />
-      </mesh>
-      <mesh position={[-5.17, 0.12, 0]}>
-        <boxGeometry args={[0.06, 0.24, 10.4]} />
-        <meshStandardMaterial color={TRIM} />
-      </mesh>
-
-      {/* rug */}
-      <mesh rotation-x={-Math.PI / 2} position={[0.6, 0.01, -2.1]}>
+      <mesh rotation-x={-Math.PI / 2} position={[0.6, 0.012, -2.1]} receiveShadow>
         <circleGeometry args={[2.4, 64]} />
-        <meshStandardMaterial map={rug} roughness={1} />
+        <meshStandardMaterial map={rug} roughness={1} normalMap={m.fabric.normalMap!} normalScale={new THREE.Vector2(1, 1)} />
       </mesh>
+    </group>
+  )
+}
 
-      <LedStrip />
+// ── Walls (wall-mounted decor rides along so it unfolds with the wall) ──
+
+export function BackWall() {
+  const m = useMat()
+  return (
+    <group>
+      <mesh position={[0, 3.2, -5.35]} material={m.wall} receiveShadow>
+        <boxGeometry args={[10.4, 6.4, 0.3]} />
+      </mesh>
+      <mesh position={[0, 0.12, -5.17]} material={m.trim}>
+        <boxGeometry args={[10.4, 0.24, 0.06]} />
+      </mesh>
+      <Led position={[0, 6.36, -5.18]} size={[10.4, 0.05, 0.05]} animated />
       <Window />
       <NeonSign />
       <Clock />
@@ -63,29 +80,39 @@ export function RoomShell() {
   )
 }
 
+export function LeftWall({ children }: { children?: React.ReactNode }) {
+  const m = useMat()
+  return (
+    <group>
+      <mesh position={[-5.35, 3.2, 0]} material={m.wallSide} receiveShadow>
+        <boxGeometry args={[0.3, 6.4, 10.4]} />
+      </mesh>
+      <mesh position={[-5.17, 0.12, 0]} material={m.trim}>
+        <boxGeometry args={[0.06, 0.24, 10.4]} />
+      </mesh>
+      <Led position={[-5.18, 6.36, 0]} size={[0.05, 0.05, 10.4]} />
+      {children}
+    </group>
+  )
+}
+
 // Neon strip along the top edge of the walls — glows through bloom.
-function LedStrip() {
+function Led({ position, size, animated }: { position: [number, number, number]; size: [number, number, number]; animated?: boolean }) {
   const mat = useRef<THREE.MeshBasicMaterial>(null)
   const color = useMemo(() => new THREE.Color(), [])
   useFrame(({ clock }) => {
     const { party, lightsOn } = useRoom.getState()
     const t = clock.elapsedTime
-    if (party) color.setHSL((t * 0.4) % 1, 1, 0.55)
+    if (party) color.setHSL((t * 0.4 + (animated ? 0 : 0.5)) % 1, 1, 0.55)
     else color.set("#8b7bff")
-    color.multiplyScalar(lightsOn ? 2.2 : 1.1)
+    color.multiplyScalar(lightsOn ? 1.6 : 2.2)
     mat.current?.color.copy(color)
   })
   return (
-    <group>
-      <mesh position={[0, 6.16, -5.18]}>
-        <boxGeometry args={[10.4, 0.06, 0.06]} />
-        <meshBasicMaterial ref={mat} toneMapped={false} />
-      </mesh>
-      <mesh position={[-5.18, 6.16, 0]}>
-        <boxGeometry args={[0.06, 0.06, 10.4]} />
-        <meshBasicMaterial color={[0.8, 0.65, 2]} toneMapped={false} />
-      </mesh>
-    </group>
+    <mesh position={position} userData={{ noShadow: true }}>
+      <boxGeometry args={size} />
+      <meshBasicMaterial ref={mat} toneMapped={false} />
+    </mesh>
   )
 }
 
@@ -177,6 +204,7 @@ function Window() {
 }
 
 function Curtain({ flip, ...props }: { flip?: boolean } & JSX_Group) {
+  const m = useMat()
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     if (ref.current) ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.7 + (flip ? 1 : 0)) * 0.012
@@ -185,9 +213,8 @@ function Curtain({ flip, ...props }: { flip?: boolean } & JSX_Group) {
     <group {...props}>
       <group ref={ref} position={[0, 1.45, 0]}>
         {Array.from({ length: 5 }, (_, i) => (
-          <mesh key={i} position={[(i - 2) * 0.13, -1.5, (i % 2) * 0.05]}>
-            <cylinderGeometry args={[0.085, 0.1, 3, 10]} />
-            <meshStandardMaterial color="#4a2f73" roughness={0.9} />
+          <mesh key={i} position={[(i - 2) * 0.13, -1.5, (i % 2) * 0.05]} material={m.fabric}>
+            <cylinderGeometry args={[0.085, 0.1, 3, 16]} />
           </mesh>
         ))}
       </group>

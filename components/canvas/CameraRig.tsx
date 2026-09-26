@@ -9,14 +9,17 @@ import { useRoom, type Section } from "@/lib/store"
 type Shot = { pos: [number, number, number]; target: [number, number, number] }
 
 export const SHOTS: Record<"room" | "intro" | Section, Shot> = {
-  intro: { pos: [26, 20, 26], target: [0, 1.5, -1] },
-  room: { pos: [10.8, 8.2, 10.8], target: [-0.3, 2, -1.1] },
+  intro: { pos: [4, 34, 10], target: [0, 0, -1] },
+  room: { pos: [10.8, 8.2, 10.8], target: [-0.4, 2.1, -1.2] },
   work: { pos: [0.65, 2.72, -1.25], target: [0.65, 2.6, -4.6] },
-  about: { pos: [-0.9, 2.75, 1.35], target: [-4.6, 2.35, 1.35] },
-  skills: { pos: [6.2, 2.9, -0.9], target: [3.35, 1.25, -4.0] },
-  life: { pos: [-0.6, 3.4, -2.2], target: [-4.9, 3.25, -2.2] },
-  contact: { pos: [2.45, 2.45, -2.55], target: [2.25, 1.75, -3.8] },
+  about: { pos: [2.6, 3.3, 1.9], target: [-4.4, 2.5, 0.9] },
+  skills: { pos: [10.9, 3.0, -3.3], target: [3.8, 1.3, -3.9] },
+  life: { pos: [2.6, 3.5, -2.2], target: [-4.9, 3.3, -2.3] },
+  contact: { pos: [2.6, 2.5, -2.4], target: [2.3, 2.0, -3.8] },
 }
+
+// Radius (world units) the overview must keep in frame. Smaller = tighter, fuller page.
+const ROOM_RADIUS = 4.9
 
 export function CameraRig() {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
@@ -25,6 +28,7 @@ export function CameraRig() {
   const look = useMemo(() => new THREE.Vector3(...SHOTS.intro.target), [])
   const goal = useMemo(() => new THREE.Vector3(), [])
   const goalLook = useMemo(() => new THREE.Vector3(), [])
+  const dir = useMemo(() => new THREE.Vector3(), [])
   const offset = useMemo(() => ({ x: 0, y: 0 }), [])
   const introTime = useRef(0)
 
@@ -36,34 +40,39 @@ export function CameraRig() {
   useFrame((_, dt) => {
     const { phase, focus, setPhase } = useRoom.getState()
     dt = Math.min(dt, 0.25)
-    const portrait = size.width < size.height
+    const aspect = size.width / size.height
+    const portrait = aspect < 1
     const mobile = size.width < 900
 
     const shot = phase === "loading" || phase === "ready" ? SHOTS.intro : focus ? SHOTS[focus] : SHOTS.room
     goal.set(...shot.pos)
     goalLook.set(...shot.target)
 
-    if (!focus && phase !== "loading" && phase !== "ready") {
-      // Pull back on narrow screens so the whole room fits.
-      if (portrait) goal.sub(goalLook).multiplyScalar(size.width / size.height < 0.6 ? 2.35 : 1.8).add(goalLook)
-      // Gentle parallax so the room feels alive under the cursor.
+    if (!focus && (phase === "intro" || phase === "room")) {
+      // Fit the diorama to the viewport: the limiting FOV decides the distance.
+      const vfov = THREE.MathUtils.degToRad(camera.fov)
+      const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect)
+      const dist = (portrait ? ROOM_RADIUS * 1.12 : ROOM_RADIUS) / Math.sin(Math.min(vfov, hfov) / 2)
+      dir.copy(goal).sub(goalLook).normalize()
+      goal.copy(goalLook).addScaledVector(dir, dist)
       if (phase === "room") {
-        goal.x += pointer.x * 0.9
-        goal.z -= pointer.x * 0.9
-        goal.y += pointer.y * 0.6
+        // gentle parallax under the cursor
+        goal.x += pointer.x * 1.1
+        goal.z -= pointer.x * 1.1
+        goal.y += pointer.y * 0.7
       }
     } else if (focus && portrait) {
       goal.sub(goalLook).multiplyScalar(1.9).add(goalLook)
     }
 
-    const smooth = phase === "intro" ? 1.1 : 0.45
+    const smooth = phase === "intro" ? 0.95 : 0.5
     easing.damp3(camera.position, goal, smooth, dt)
     easing.damp3(look, goalLook, smooth * 0.9, dt)
     camera.lookAt(look)
 
     if (phase === "intro") {
       introTime.current += dt
-      if (camera.position.distanceTo(goal) < 1.2 || introTime.current > 3.2) setPhase("room")
+      if (introTime.current > 3.4) setPhase("room")
     }
 
     // Shift the rendered frame so the focused object sits beside (not under) the panel.

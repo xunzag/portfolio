@@ -64,3 +64,17 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.chip-in {
+  animation: chip-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

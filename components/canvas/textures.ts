@@ -118,7 +118,7 @@ const COLORS: Record<string, string> = {
 export type ScreenPainter = {
   texture: THREE.CanvasTexture
   paintCode: (dt: number) => void
-  paintImage: (img: HTMLImageElement, url: string, accent: string) => void
+  paintImage: (img: HTMLImageElement, url: string, accent: string, reveal?: number) => void
 }
 
 export function createScreen(): ScreenPainter {
@@ -196,7 +196,7 @@ export function createScreen(): ScreenPainter {
       g.fillText("⎇ main   ✓ 0 problems   TypeScript   Ln " + line, 14, H - 9)
       texture.needsUpdate = true
     },
-    paintImage(img, url, accent) {
+    paintImage(img, url, accent, reveal = 1) {
       chrome("")
       // url bar
       g.fillStyle = "#12304b"
@@ -225,6 +225,17 @@ export function createScreen(): ScreenPainter {
       g.restore()
       g.fillStyle = accent
       g.fillRect(0, 38, W, 3)
+      if (reveal < 1) {
+        // scanline wipe: dark below the beam, a hot line at the edge
+        const y = 38 + (H - 38) * reveal
+        g.fillStyle = "#010812"
+        g.fillRect(0, y, W, H - y)
+        const beam = g.createLinearGradient(0, y - 24, 0, y + 4)
+        beam.addColorStop(0, "rgba(130,170,255,0)")
+        beam.addColorStop(1, accent)
+        g.fillStyle = beam
+        g.fillRect(0, y - 24, W, 28)
+      }
       texture.needsUpdate = true
     },
   }
@@ -266,5 +277,23 @@ export function phoneTexture() {
   g.font = "700 30px system-ui, sans-serif"
   g.textAlign = "center"
   g.fillText("✉", 128, 441)
+  return finish(c)
+}
+
+export function spineTexture(title: string, color: string, ink: string) {
+  const [c, g] = canvas(64, 448)
+  g.fillStyle = color
+  g.fillRect(0, 0, 64, 448)
+  g.fillStyle = ink
+  g.fillRect(0, 24, 64, 3)
+  g.fillRect(0, 421, 64, 3)
+  g.save()
+  g.translate(32, 224)
+  g.rotate(Math.PI / 2)
+  g.font = "700 26px system-ui, sans-serif"
+  g.textAlign = "center"
+  g.textBaseline = "middle"
+  g.fillText(title, 0, 0)
+  g.restore()
   return finish(c)
 }

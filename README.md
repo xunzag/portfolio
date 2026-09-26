@@ -18,14 +18,25 @@ Easter eggs: <kbd>Ctrl</kbd>+<kbd>`</kbd> (or click the keyboard) opens a termin
 - three.js + @react-three/fiber + drei, with postprocessing bloom
 - zustand for room state, Motion for UI animation, Tailwind CSS v4
 
-Everything in the room is procedural (built in code, no model files). Only the
-photo, poster and project-screenshot textures are downloaded (~700 KB of WebP in `public/tex`).
+Everything in the room is procedural (built in code, no model files). Downloaded
+assets are the photo/poster/screenshot textures and a few CC0 normal maps (`public/tex`),
+plus a CC0 HDRI for reflections (`public/env/apartment.exr`, via `@pmndrs/assets` / Poly Haven).
+
+### Motion
+- **Intro:** the room builds itself (floor rises, walls unfold, furniture drops in) with GSAP.
+- **Stack:** the PC's glass door swings open, the parts float out in an exploded view, and the toolbelt orbits it.
+- **About:** favourite books slide off the shelf and the photo frame floats out.
+- **Life:** the posters peel off the wall and fan out.
+- **Contact:** the phone lifts off its dock and turns to face you.
+- **Work:** a scanline wipe on the monitor and a ripple across the keyboard when you switch projects.
+- The desk lamp follows your cursor, and the chair spins when clicked.
 
 ## Performance
 
 - `PerformanceMonitor` and `AdaptiveDpr` drop the pixel ratio and turn off post-processing on slow GPUs.
 - Weak and small devices start in low-quality mode.
-- Instanced meshes for books and keycaps; baked contact shadows (`frames={1}`); no real-time shadow maps.
+- One shadow-casting light; instanced books and keycaps; blob contact shadows.
+- High tier adds N8AO ambient occlusion, a reflective floor, bloom and a hover outline. The low tier drops all of these.
 - The 3D canvas is client-only (`ssr: false`). A screen-reader-only copy of all content is server-rendered for SEO and accessibility.
 
 ## Develop

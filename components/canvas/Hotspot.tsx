@@ -3,11 +3,12 @@
 import { useRef, type ReactNode } from "react"
 import { useFrame, type ThreeEvent, type ThreeElements } from "@react-three/fiber"
 import { Html } from "@react-three/drei"
+import { Select } from "@react-three/postprocessing"
 import { easing } from "maath"
 import type { Group } from "three"
 import { useRoom, type Section } from "@/lib/store"
 
-type Id = Section | "lamp" | "duck" | "keyboard"
+type Id = Section | "lamp" | "duck" | "keyboard" | "chair"
 
 const setCursor = (c: string) => {
   document.body.style.cursor = c
@@ -62,7 +63,9 @@ export function Hotspot({
 
   return (
     <group {...props} onPointerOver={over} onPointerOut={out} onClick={click}>
-      <group ref={inner}>{children}</group>
+      <group ref={inner}>
+        <Select enabled={hovered && interactive}>{children}</Select>
+      </group>
       {label && hovered && interactive && (
         <Html position={labelPosition} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
           <div className="whitespace-nowrap rounded-full glass px-3 py-1.5 text-xs font-medium text-ink shadow-[0_0_30px_rgba(139,123,255,0.35)]">

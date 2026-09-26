@@ -1,28 +1,27 @@
 "use client"
 
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { RoundedBox, Sparkles } from "@react-three/drei"
 import { easing } from "maath"
 import * as THREE from "three"
 import { useRoom } from "@/lib/store"
+import { useMat } from "./materials"
 
 export function Beanbag() {
+  const m = useMat()
   return (
     <group position={[-2.6, 0, 2.9]} rotation-y={0.6}>
-      <mesh position={[0, 0.45, 0]} scale={[1, 0.62, 1]}>
-        <sphereGeometry args={[0.85, 32, 24]} />
-        <meshStandardMaterial color="#3a8fb7" roughness={0.9} />
+      <BlobShadow position={[0, 0, 0]} scale={[2.3, 2.3]} />
+      <mesh position={[0, 0.45, 0]} scale={[1, 0.62, 1]} material={m.fabricBlue}>
+        <sphereGeometry args={[0.85, 48, 32]} />
       </mesh>
-      <mesh position={[0, 0.72, 0.3]} scale={[0.85, 0.35, 0.6]}>
-        <sphereGeometry args={[0.6, 24, 16]} />
-        <meshStandardMaterial color="#347fa3" roughness={0.9} />
+      <mesh position={[0, 0.72, 0.3]} scale={[0.85, 0.35, 0.6]} material={m.fabricBlue}>
+        <sphereGeometry args={[0.6, 32, 24]} />
       </mesh>
       {/* controller */}
       <group position={[0.1, 0.92, 0.1]} rotation={[-0.2, 0.4, 0.1]}>
-        <RoundedBox args={[0.34, 0.07, 0.18]} radius={0.03}>
-          <meshStandardMaterial color="#e9e6ff" roughness={0.4} />
-        </RoundedBox>
+        <RoundedBox args={[0.34, 0.07, 0.18]} radius={0.03} material={m.plasticWhite} />
         {[-0.14, 0.14].map((x) => (
           <mesh key={x} position={[x, 0, 0.08]} scale={[1, 0.6, 1]}>
             <sphereGeometry args={[0.07, 12, 10]} />
@@ -73,6 +72,7 @@ export function Dust() {
 }
 
 export function FloorPlant() {
+  const m = useMat()
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     if (ref.current) ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.6) * 0.02
@@ -82,9 +82,10 @@ export function FloorPlant() {
   ]
   return (
     <group position={[-4.2, 0, 4.2]}>
+      <BlobShadow position={[0, 0, 0]} scale={[1.3, 1.3]} />
       <mesh position={[0, 0.35, 0]}>
-        <cylinderGeometry args={[0.38, 0.3, 0.7, 20]} />
-        <meshStandardMaterial color="#e9e6ff" roughness={0.6} />
+        <cylinderGeometry args={[0.38, 0.3, 0.7, 32]} />
+        <primitive object={m.ceramicWhite} attach="material" />
       </mesh>
       <mesh position={[0, 0.69, 0]} rotation-x={-Math.PI / 2}>
         <circleGeometry args={[0.36, 20]} />
@@ -97,13 +98,39 @@ export function FloorPlant() {
               <cylinderGeometry args={[0.012, 0.018, len, 5]} />
               <meshStandardMaterial color="#2f7a52" />
             </mesh>
-            <mesh position={[0.18, len + 0.05, 0]} rotation={[Math.PI / 2, 0, -0.5]} scale={[1, 1.4, 1]}>
-              <circleGeometry args={[0.24, 12]} />
-              <meshStandardMaterial color={i % 2 ? "#3f9e6a" : "#358c5c"} side={THREE.DoubleSide} roughness={0.6} />
+            <mesh position={[0.18, len + 0.05, 0]} rotation={[Math.PI / 2, 0, -0.5]} scale={[1, 1.4, 1]} material={i % 2 ? m.leaf : m.leafDark}>
+              <circleGeometry args={[0.24, 16]} />
             </mesh>
           </group>
         ))}
       </group>
     </group>
+  )
+}
+
+let blobTex: THREE.Texture | null = null
+function blob() {
+  if (blobTex) return blobTex
+  const c = document.createElement("canvas")
+  c.width = c.height = 128
+  const g = c.getContext("2d")!
+  const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64)
+  grd.addColorStop(0, "rgba(0,0,0,0.75)")
+  grd.addColorStop(0.55, "rgba(0,0,0,0.35)")
+  grd.addColorStop(1, "rgba(0,0,0,0)")
+  g.fillStyle = grd
+  g.fillRect(0, 0, 128, 128)
+  blobTex = new THREE.CanvasTexture(c)
+  return blobTex
+}
+
+// Cheap soft contact shadow that grounds objects the key light doesn't.
+export function BlobShadow({ position, scale = [1, 1], opacity = 0.8 }: { position: [number, number, number]; scale?: [number, number]; opacity?: number }) {
+  const tex = useMemo(() => blob(), [])
+  return (
+    <mesh rotation-x={-Math.PI / 2} position={[position[0], 0.016, position[2]]} scale={[scale[0], scale[1], 1]} userData={{ noShadow: true }} renderOrder={1}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={tex} transparent opacity={opacity} depthWrite={false} toneMapped={false} />
+    </mesh>
   )
 }

@@ -3,10 +3,13 @@
 import { useLayoutEffect, useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { RoundedBox, useTexture } from "@react-three/drei"
+import { easing } from "maath"
 import * as THREE from "three"
 import { profile } from "@/lib/content"
+import { useRoom } from "@/lib/store"
+import { useMat } from "./materials"
 import { Hotspot } from "./Hotspot"
-import { rng } from "./textures"
+import { rng, spineTexture } from "./textures"
 
 const FRAME = "#5b3d2a"
 const PALETTE = ["#8b7bff", "#4cc9ff", "#ff6b8b", "#ffb547", "#3ee39a", "#e9e6ff", "#c77dff", "#2a2548", "#ff8c42"]
@@ -18,6 +21,7 @@ const D = 0.8
 const LEVELS = [0.1, 1.15, 2.2, 3.25]
 
 export function Shelf() {
+  const m = useMat()
   return (
     <Hotspot id="about" label="About me" hint="2" labelPosition={[-4.4, 4.9, 1.35]}>
       <group position={[-4.78, 0, 1.35]}>
@@ -25,12 +29,12 @@ export function Shelf() {
         {[-W / 2, W / 2].map((z) => (
           <mesh key={z} position={[0, H / 2, z]}>
             <boxGeometry args={[D, H, 0.08]} />
-            <meshStandardMaterial color={FRAME} roughness={0.7} />
+            <primitive object={m.shelfWood} attach="material" />
           </mesh>
         ))}
         <mesh position={[0, H, 0]}>
           <boxGeometry args={[D + 0.06, 0.08, W + 0.1]} />
-          <meshStandardMaterial color={FRAME} roughness={0.7} />
+          <primitive object={m.shelfWood} attach="material" />
         </mesh>
         <mesh position={[-D / 2 + 0.02, H / 2, 0]}>
           <boxGeometry args={[0.03, H, W]} />
@@ -39,10 +43,11 @@ export function Shelf() {
         {LEVELS.map((y) => (
           <mesh key={y} position={[0, y, 0]}>
             <boxGeometry args={[D, 0.06, W]} />
-            <meshStandardMaterial color={FRAME} roughness={0.7} />
+            <primitive object={m.shelfWood} attach="material" />
           </mesh>
         ))}
         <Books />
+        <FeaturedBooks />
         <PhotoFrame />
         <Trophy position={[0.05, 3.28, -0.95]} />
         <Camera position={[0.05, H + 0.04, -0.7]} />
@@ -60,7 +65,7 @@ function Books() {
     const out: { pos: THREE.Vector3; scale: THREE.Vector3; tilt: number; color: string }[] = []
     LEVELS.forEach((y, level) => {
       // leave room for trinkets on some shelves
-      const start = level === 3 ? -0.55 : -W / 2 + 0.1
+      const start = level === 3 ? -0.55 : level === 2 ? -0.82 : -W / 2 + 0.1
       const end = level === 1 || level === 2 ? 0.55 : level === 3 ? W / 2 - 0.1 : W / 2 - 0.1
       let z = start
       while (z < end - 0.1) {
@@ -95,9 +100,9 @@ function Books() {
   }, [books])
 
   return (
-    <instancedMesh ref={ref} args={[undefined, undefined, books.length]}>
+    <instancedMesh ref={ref} args={[undefined, undefined, books.length]} castShadow receiveShadow>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial roughness={0.75} />
+      <meshPhysicalMaterial roughness={0.6} clearcoat={0.3} clearcoatRoughness={0.5} />
     </instancedMesh>
   )
 }
@@ -105,8 +110,16 @@ function Books() {
 function PhotoFrame() {
   const tex = useTexture(profile.photo)
   tex.colorSpace = THREE.SRGBColorSpace
+  const ref = useRef<THREE.Group>(null)
+  useFrame(({ clock }, dt) => {
+    if (!ref.current) return
+    const on = useRoom.getState().focus === "about"
+    easing.damp3(ref.current.position, on ? [1.25, 2.55 + Math.sin(clock.elapsedTime) * 0.04, 0.55] : [0.05, 1.57, 1.0], 0.45, dt)
+    easing.dampE(ref.current.rotation, on ? [0, Math.PI / 2 + 0.25, 0] : [0, Math.PI / 2, 0.08], 0.45, dt)
+    easing.damp3(ref.current.scale, on ? [1.5, 1.5, 1.5] : [1, 1, 1], 0.45, dt)
+  })
   return (
-    <group position={[0.05, 1.57, 1.0]} rotation={[0, Math.PI / 2, 0.08]}>
+    <group ref={ref} position={[0.05, 1.57, 1.0]} rotation={[0, Math.PI / 2, 0.08]}>
       <RoundedBox args={[0.62, 0.76, 0.05]} radius={0.015}>
         <meshStandardMaterial color="#e9e6ff" roughness={0.5} />
       </RoundedBox>
@@ -191,6 +204,45 @@ function Plant(props: G) {
         )
       })}
     </group>
+  )
+}
+
+const FEATURED = [
+  { title: "CLEAN CODE", color: "#e9e6ff", ink: "#1b1638" },
+  { title: "ATOMIC HABITS", color: "#ffb547", ink: "#1b1638" },
+  { title: "SAPIENS", color: "#ff6b8b", ink: "#fff" },
+]
+
+// Three favourite books slide off the shelf and float when About opens.
+function FeaturedBooks() {
+  const refs = useRef<(THREE.Group | null)[]>([])
+  const textures = useMemo(() => FEATURED.map((b) => spineTexture(b.title, b.color, b.ink)), [])
+  useFrame(({ clock }, dt) => {
+    const on = useRoom.getState().focus === "about"
+    const t = clock.elapsedTime
+    refs.current.forEach((g, i) => {
+      if (!g) return
+      const rest: [number, number, number] = [0.05, 2.23 + 0.42, -1.25 + i * 0.13]
+      const out: [number, number, number] = [1.1 + i * 0.12, 3.35 + i * 0.36 + Math.sin(t * 1.1 + i) * 0.05, -0.75 + i * 0.1]
+      easing.damp3(g.position, on ? out : rest, 0.35 + i * 0.08, dt)
+      easing.dampE(g.rotation, on ? [0.1, 0.9 - i * 0.2, Math.sin(t * 0.7 + i) * 0.08] : [0, 0, 0], 0.4 + i * 0.08, dt)
+    })
+  })
+  return (
+    <>
+      {FEATURED.map((b, i) => (
+        <group key={b.title} ref={(g) => { refs.current[i] = g }}>
+          <RoundedBox args={[0.6, 0.84, 0.12]} radius={0.012} castShadow>
+            <meshPhysicalMaterial color={b.color} roughness={0.5} clearcoat={0.4} />
+          </RoundedBox>
+          {/* spine faces the room (+x) */}
+          <mesh position={[0.301, 0, 0]} rotation-y={Math.PI / 2}>
+            <planeGeometry args={[0.12, 0.84]} />
+            <meshStandardMaterial map={textures[i]} roughness={0.6} />
+          </mesh>
+        </group>
+      ))}
+    </>
   )
 }
 
