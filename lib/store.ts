@@ -26,6 +26,8 @@ type State = {
   project: number
   quality: "high" | "low"
   models: string[]
+  /** what the visitor scored on the loading screen */
+  loaderScore: { kind: "wpm" | "petals"; value: number } | null
   setPhase: (p: State["phase"]) => void
   setFocus: (s: Section | null) => void
   setHovered: (h: State["hovered"]) => void
@@ -49,6 +51,7 @@ export const useRoom = create<State>((set) => ({
   project: 0,
   quality: "high",
   models: [],
+  loaderScore: null,
   setPhase: (phase) => set({ phase }),
   setFocus: (focus) => set({ focus }),
   setHovered: (hovered) => set({ hovered }),

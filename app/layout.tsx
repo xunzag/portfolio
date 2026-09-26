@@ -29,6 +29,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${mono.variable}`}>
+      <head>
+        {/* start the heaviest downloads before any JS runs */}
+        <link rel="preload" href="/models/guts.glb" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/inter-bold.woff" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body>{children}</body>
     </html>
   )
