@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { FileDown, TerminalSquare } from "lucide-react"
 import { CHAPTERS } from "@/lib/chapters"
@@ -25,6 +26,7 @@ export function Hud() {
               <p className="text-base font-semibold tracking-tight">{profile.name}</p>
               <p className="font-mono text-[10px] text-muted">{party ? "party mode 🪩" : profile.role.toLowerCase()}</p>
             </button>
+            <ScoreChip />
           </header>
 
           {/* chapter rail */}
@@ -84,5 +86,30 @@ function IconLink({ label, href, children }: { label: string; href: string; chil
     <a aria-label={label} title={label} href={href} target="_blank" rel="noopener noreferrer" className={`${iconCls} hidden sm:grid`}>
       {children}
     </a>
+  )
+}
+
+function ScoreChip() {
+  const score = useRoom((s) => s.loaderScore)
+  const [show, setShow] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setShow(false), 12000)
+    return () => clearTimeout(t)
+  }, [])
+  return (
+    <AnimatePresence>
+      {score && show && (
+        <motion.p
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 2 } }}
+          exit={{ opacity: 0 }}
+          className="mt-2 inline-block rounded-full glass px-3 py-1 font-mono text-[10px] text-ink/80"
+        >
+          {score.kind === "wpm"
+            ? `you ${score.value} wpm · farhan 120${score.value > 120 ? " · you win 🫡" : ""}`
+            : `🌸 ${score.value} petal${score.value === 1 ? "" : "s"} caught`}
+        </motion.p>
+      )}
+    </AnimatePresence>
   )
 }
