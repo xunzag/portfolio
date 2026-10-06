@@ -13,8 +13,11 @@ import { useLive } from "./useLive"
 const KANJI = ["壱", "弐", "参", "肆", "伍", "陸", "漆", "捌", "玖"]
 
 // the cut runs corner to corner, slightly off-axis
-const CUT_A = "polygon(0 0, 100% 0, 100% 38%, 0 66%)"
-const CUT_B = "polygon(0 66%, 100% 38%, 100% 100%, 0 100%)"
+const CUT_A = "polygon(0 0, 100% 0, 100% 40%, 0 64%)"
+const CUT_B = "polygon(0 64%, 100% 40%, 100% 100%, 0 100%)"
+
+// manga sound effects, one per chapter
+const SFX = ["ドン", "ゴゴゴ", "バン", "ズン", "ドドド", "シュッ", "ギン"]
 
 export function WorkAct() {
   const root = useRef<HTMLDivElement>(null)
@@ -97,15 +100,15 @@ function CaseFile({ p, i, ref }: { p: Project; i: number; ref: (el: HTMLElement 
         {KANJI[i]}
       </span>
 
-      {/* media panel */}
+      {/* the manga page */}
       <div
-        className="absolute left-4 right-4 top-[11vh] aspect-[16/10] sm:left-auto sm:right-[5vw] sm:top-1/2 sm:w-[min(50vw,62rem)] sm:-translate-y-1/2"
+        className="manga-page absolute left-4 right-4 top-[9vh] aspect-[10/8.6] sm:left-auto sm:right-[4.5vw] sm:top-1/2 sm:w-[min(50vw,64rem)] sm:-translate-y-1/2"
         style={{ perspective: "1400px" }}
       >
         <div
           className="relative h-full w-full"
           style={{
-            transform: "rotateX(var(--rx)) rotateY(var(--ry)) scale(calc(1.06 - var(--enter) * 0.06))",
+            transform: "rotateX(var(--rx)) rotateY(var(--ry))",
             transformStyle: "preserve-3d",
             transition: "transform 0.2s linear",
           }}
@@ -113,7 +116,8 @@ function CaseFile({ p, i, ref }: { p: Project; i: number; ref: (el: HTMLElement 
           {[CUT_A, CUT_B].map((clip, k) => (
             <div
               key={k}
-              className="absolute inset-0 overflow-hidden"
+              className="absolute inset-0"
+              aria-hidden={k === 1}
               style={{
                 clipPath: clip,
                 transform:
@@ -123,38 +127,20 @@ function CaseFile({ p, i, ref }: { p: Project; i: number; ref: (el: HTMLElement 
                 opacity: "calc(1 - var(--part) * var(--part))",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.image}
-                alt={k === 0 ? `${p.title} screenshot` : ""}
-                aria-hidden={k === 1}
-                loading={i < 2 ? "eager" : "lazy"}
-                decoding="async"
-                className="h-full w-full object-cover"
-                style={{
-                  transform: "scale(calc(1.12 - var(--drift) * 0.08))",
-                  filter: "brightness(calc(0.25 + var(--enter) * 0.75)) saturate(calc(0.5 + var(--enter) * 0.5))",
-                }}
-              />
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.18)_0_1px,transparent_1px_3px)] mix-blend-multiply" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+              <MangaPage p={p} i={i} primary={k === 0} />
             </div>
-          ))}
-          {/* frame + corner brackets */}
-          <div className="pointer-events-none absolute inset-0 border border-white/10" style={{ opacity: "calc(1 - var(--part))" }} />
-          {["left-0 top-0 border-l border-t", "right-0 top-0 border-r border-t", "bottom-0 left-0 border-b border-l", "bottom-0 right-0 border-b border-r"].map((c) => (
-            <span key={c} className={`absolute h-6 w-6 ${c}`} style={{ borderColor: accent, opacity: "calc(var(--enter) * (1 - var(--part)))" }} />
           ))}
           {/* the slash */}
           <span
             className="slash absolute left-[-6%] top-[52%] h-[3px] w-[112%] origin-left"
-            style={{ transform: "translateY(-50%) rotate(-9.93deg) scaleX(var(--cut))", opacity: "calc(var(--cut) * (1 - var(--part) * 1.4))" }}
+            style={{ transform: "translateY(-50%) rotate(-11.6deg) scaleX(var(--cut))", opacity: "calc(var(--cut) * (1 - var(--part) * 1.4))" }}
           />
         </div>
         <p className="smallcaps mt-3 flex justify-between text-white/40" style={{ opacity: "calc(var(--enter) * (1 - var(--exit) * 2))" }}>
           <span>
-            fig. {String(i + 1).padStart(2, "0")} — {p.slug}
+            ch. {String(i + 1).padStart(2, "0")} — {p.slug}
           </span>
+          <span className="hidden sm:inline">hover the page for colour</span>
           <span>
             {p.category} · {p.year}
           </span>
@@ -209,5 +195,73 @@ function CaseFile({ p, i, ref }: { p: Project; i: number; ref: (el: HTMLElement 
         </div>
       </div>
     </article>
+  )
+}
+
+// One manga page per project: a big establishing panel, a close-up, a sound-
+// effect panel with the headline number, and a speech bubble. Screentone
+// (halftone) and greyscale by default; hovering the page inks it in colour.
+function MangaPage({ p, i, primary }: { p: Project; i: number; primary: boolean }) {
+  // each panel slams in a little after the last
+  const slam = (k: number, rot: number) =>
+    ({
+      opacity: `clamp(0, var(--enter) * 4 - ${k * 0.55}, 1)`,
+      transform: `scale(calc(1 + (1 - clamp(0, var(--enter) * 2.6 - ${k * 0.35}, 1)) * 0.22)) rotate(calc((1 - clamp(0, var(--enter) * 2.6 - ${k * 0.35}, 1)) * ${rot}deg))`,
+    }) as React.CSSProperties
+  const [big, sub] = p.metrics
+  return (
+    <div className="absolute inset-0 bg-[#050304]">
+      <div className="speedlines absolute inset-0" style={{ opacity: "calc(var(--enter) * 0.5)" }} />
+      {/* A — establishing shot */}
+      <Panel className="left-[1.5%] top-[1.5%] h-[63%] w-[65%]" clip="polygon(0 0, 100% 0, 100% 88%, 0 100%)" style={slam(0, -4)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={p.image} alt={primary ? `${p.title} screenshot` : ""} loading={i < 2 ? "eager" : "lazy"} decoding="async" className="panel-img h-full w-full object-cover object-top" style={{ transform: "scale(calc(1.1 - var(--drift) * 0.08))" }} />
+      </Panel>
+      {/* B — close-up */}
+      <Panel className="left-[68%] top-[1.5%] h-[50%] w-[30.5%]" clip="polygon(0 0, 100% 0, 100% 100%, 0 93%)" style={slam(1, 5)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={p.image} alt="" loading="lazy" decoding="async" className="panel-img h-full w-full object-cover" style={{ objectPosition: "85% 35%", transform: "scale(2.1)" }} />
+        <div className="speedlines-focus absolute inset-0" />
+      </Panel>
+      {/* C — the sound effect + headline number */}
+      <Panel className="left-[68%] top-[53.5%] h-[45%] w-[30.5%]" clip="polygon(0 4%, 100% 0, 100% 100%, 0 100%)" style={slam(2, -6)} tone={p.accent}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className="font-jp text-[clamp(1.6rem,3.2vw,3.2rem)] font-medium leading-none tracking-tight text-white [text-shadow:3px_3px_0_#000,-1px_-1px_0_#000]" style={{ transform: "rotate(-8deg)" }}>
+            {SFX[i % SFX.length]}
+          </span>
+          {big && (
+            <>
+              <span className="mt-2 font-serif text-[clamp(2rem,4.4vw,4.4rem)] font-semibold italic leading-none text-white [text-shadow:4px_4px_0_#000]">{big[0]}</span>
+              <span className="smallcaps mt-1 bg-black px-2 py-0.5 !text-[9px] text-white">{big[1]}</span>
+            </>
+          )}
+        </div>
+      </Panel>
+      {/* D — second angle + speech bubble */}
+      <Panel className="left-[1.5%] top-[62%] h-[36.5%] w-[65%]" clip="polygon(0 17%, 100% 0, 100% 100%, 0 100%)" style={slam(3, 3)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={p.image} alt="" loading="lazy" decoding="async" className="panel-img h-full w-full object-cover" style={{ objectPosition: "20% 80%", transform: "scale(1.5)" }} />
+        <div className="absolute bottom-[12%] right-[5%] z-10 max-w-[62%]">
+          <div className="bubble relative rounded-[50%] bg-white px-5 py-3 text-center font-serif text-[clamp(0.8rem,1.15vw,1.05rem)] italic leading-snug text-black">
+            {p.tagline}
+            {sub && <span className="mt-0.5 block font-mono text-[9px] not-italic uppercase tracking-widest text-black/60">{sub[0]} {sub[1]}</span>}
+          </div>
+        </div>
+      </Panel>
+    </div>
+  )
+}
+
+function Panel({ className, clip, style, tone, children }: { className: string; clip: string; style: React.CSSProperties; tone?: string; children: React.ReactNode }) {
+  return (
+    <div className={`absolute ${className}`} style={style}>
+      {/* white ink border = the same shape, 2px bigger */}
+      <div className="absolute inset-0 bg-[#f4efe9]" style={{ clipPath: clip }} />
+      <div className="manga-panel absolute inset-[2px] overflow-hidden bg-black" style={{ clipPath: clip }}>
+        {tone && <div className="absolute inset-0" style={{ background: `radial-gradient(circle, ${tone} 0 1.6px, transparent 2px) 0 0 / 7px 7px, #0a0608` }} />}
+        {children}
+        <div className="halftone pointer-events-none absolute inset-0" />
+      </div>
+    </div>
   )
 }

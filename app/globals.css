@@ -198,3 +198,47 @@ a {
   -webkit-user-select: text;
   user-select: text;
 }
+/* ── manga pages ─────────────────────────────── */
+.speedlines {
+  background: repeating-conic-gradient(from 0deg at 72% 40%, rgb(255 255 255 / 0.16) 0deg 0.6deg, transparent 0.6deg 4deg);
+  mask-image: radial-gradient(circle at 72% 40%, transparent 0 18%, black 70%);
+  -webkit-mask-image: radial-gradient(circle at 72% 40%, transparent 0 18%, black 70%);
+}
+.speedlines-focus {
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgb(0 0 0 / 0.75) 0deg 0.8deg, transparent 0.8deg 5deg);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0 32%, black 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 32%, black 80%);
+  transition: opacity 0.5s;
+}
+.manga-panel .panel-img {
+  filter: grayscale(1) contrast(1.45) brightness(0.88);
+  transition: filter 0.7s var(--ease-out-expo), scale 0.9s var(--ease-out-expo);
+}
+.halftone {
+  background: radial-gradient(circle, rgb(0 0 0 / 0.7) 0 1.05px, transparent 1.45px) 0 0 / 4px 4px;
+  mix-blend-mode: multiply;
+  transition: opacity 0.6s;
+}
+.manga-page:hover .panel-img {
+  filter: none;
+  scale: 1.04;
+}
+.manga-page:hover .halftone {
+  opacity: 0.12;
+}
+.manga-page:hover .speedlines-focus {
+  opacity: 0.3;
+}
+.bubble {
+  border: 2px solid #000;
+  box-shadow: 0 0 0 2px #f4efe9;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  bottom: -14px;
+  border: 9px solid transparent;
+  border-top: 16px solid #fff;
+  transform: skewX(-25deg);
+}

@@ -49,7 +49,7 @@ const frag = /* glsl */ `
     c *= 0.9 + 0.1 * sin(vUv.y * 1400.0);
     c += vec3(0.6, 0.2, 0.4) * smoothstep(0.985, 1.0, hash(vec2(floor(vUv.y * 300.0), floor(uTime * 20.0)))) * min(1.0, abs(uVel) / 60.0) * 0.5;
     // values are linear: keep the void genuinely black
-    gl_FragColor = vec4(c * c * 6.0 * uAlpha, 1.0);
+    gl_FragColor = vec4(c * c * 4.0 * uAlpha, 1.0);
     #include <colorspace_fragment>
   }
 `
