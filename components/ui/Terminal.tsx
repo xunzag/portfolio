@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { motion } from "motion/react"
-import { scrollBus, useRoom, sections, type Section } from "@/lib/store"
+import { scrollBus, useRoom } from "@/lib/store"
+import { sections, type Section } from "@/lib/acts"
 import { animes, experience, profile, projects, skillGroups } from "@/lib/content"
 
 const C = ({ c, children }: { c: string; children: ReactNode }) => <span className={c}>{children}</span>
@@ -14,11 +15,11 @@ const HELP: [string, string][] = [
   ["whoami", "who is this guy?"],
   ["neofetch", "system info, the good stuff"],
   ["ls", "list projects"],
-  ["open <work|about|stack|life|contact>", "fly the camera somewhere"],
+  ["open <work|about|stack|life|contact>", "fly somewhere"],
   ["skills", "technical skills tree"],
   ["git log", "career history"],
   ["anime", "current rankings"],
-  ["lights", "toggle the desk lamp"],
+  ["lights", "toggle the monitor light"],
   ["party", "…you'll see"],
   ["sudo hire farhan", "you know you want to"],
   ["clear", "clear the screen"],
@@ -32,7 +33,7 @@ function run(raw: string): Out {
   const goto = (id: Section) => {
     s.setTerminal(false)
     const sec = sections.find((x) => x.id === id)
-    if (sec) scrollBus.to(sec.chapter)
+    if (sec) scrollBus.to(sec.id)
   }
 
   if (!lower) return null
@@ -68,7 +69,7 @@ function run(raw: string): Out {
    ▀▄▄▄▀
   ▄█████▄`}</pre>
         <div>
-          <C c="font-bold text-violet">farhan</C>@<C c="font-bold text-violet">dev-room</C>
+          <C c="font-bold text-violet">farhan</C>@<C c="font-bold text-violet">eclipse</C>
           <br />
           ─────────────────
           {[
@@ -99,7 +100,7 @@ function run(raw: string): Out {
     )
   if (lower.startsWith("open ") || lower.startsWith("cd ")) {
     const arg = lower.split(" ")[1]
-    const alias: Record<string, Section> = { stack: "skills", projects: "work", hobbies: "life", anime: "life", hire: "contact" }
+    const alias: Record<string, Section> = { stack: "skills", arsenal: "skills", projects: "work", hobbies: "life", anime: "life", hire: "contact" }
     const target = (alias[arg] ?? arg) as Section
     if (sections.some((x) => x.id === target)) {
       setTimeout(() => goto(target), 250)
@@ -151,7 +152,7 @@ function run(raw: string): Out {
     )
   if (lower === "lights" || lower === "lights off" || lower === "lights on") {
     s.toggleLights()
-    return <C c="text-amber">💡 lamp {useRoom.getState().lightsOn ? "on" : "off"}</C>
+    return <C c="text-amber">💡 monitor {useRoom.getState().lightsOn ? "on" : "off"}</C>
   }
   if (lower === "party" || lower === "disco") {
     s.setParty(!s.party)
@@ -170,12 +171,12 @@ function run(raw: string): Out {
     )
   }
   if (lower === "hire farhan") return <span>Permission denied. Try <C c="text-cyan">sudo hire farhan</C></span>
-  if (lower === "rm -rf /" || lower === "sudo rm -rf /") return <C c="text-red-400">Nice try. The room is load-bearing. 😄</C>
+  if (lower === "rm -rf /" || lower === "sudo rm -rf /") return <C c="text-red-400">Nice try. The eclipse is load-bearing. 😄</C>
   if (lower === "coffee" || lower === "chai") return <C c="text-amber">☕ brewing… ahh. ready to ship.</C>
   if (lower === "duck" || lower === "quack") return <C c="text-amber">🦆 “Have you tried explaining it to me line by line?”</C>
   if (lower === "vim") return <span>You are now trapped in vim. <C c="text-muted">(type exit — we&apos;re merciful)</C></span>
   if (lower === "date") return new Date().toString()
-  if (lower === "pwd") return "/home/farhan/dev-room"
+  if (lower === "pwd") return "/home/farhan/eclipse"
   if (lower === "clear" || lower === "cls") return "__CLEAR__"
   if (lower === "exit") {
     setTimeout(() => s.setTerminal(false), 150)
@@ -260,7 +261,7 @@ export function Terminal() {
         <button aria-label="Close terminal" onClick={() => useRoom.getState().setTerminal(false)} className="h-3 w-3 rounded-full bg-[#ff5f57]" />
         <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
         <span className="h-3 w-3 rounded-full bg-[#28c840]" />
-        <span className="flex-1 text-center font-mono text-[11px] text-muted">farhan@dev-room: ~</span>
+        <span className="flex-1 text-center font-mono text-[11px] text-muted">farhan@eclipse: ~</span>
       </div>
       <div className="scroll-thin flex-1 overflow-y-auto p-4 font-mono text-[12.5px] leading-relaxed text-ink/85">
         {lines.map((l) => (

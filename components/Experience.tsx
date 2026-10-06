@@ -3,24 +3,26 @@
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 import { AnimatePresence } from "motion/react"
-import { scrollBus, sections, useRoom } from "@/lib/store"
+import { TOTAL_VH, sections } from "@/lib/acts"
+import { scrollBus, useRoom } from "@/lib/store"
 import { Scroller } from "./Scroller"
-import { Overlay } from "./Overlay"
-import { FxOverlay } from "./FxOverlay"
+import { HeroAct } from "./acts/HeroAct"
+import { WorkAct } from "./acts/WorkAct"
+import { ArsenalAct } from "./acts/ArsenalAct"
+import { FinaleAct } from "./acts/FinaleAct"
+import { ArtLabels } from "./acts/ArtLabels"
+import { Flash } from "./acts/Flash"
+import { ScreenReader } from "./acts/ScreenReader"
 import { Loader } from "./ui/Loader"
 import { Hud } from "./ui/Hud"
 import { Terminal } from "./ui/Terminal"
 
-const World = dynamic(() => import("./world/World"), { ssr: false })
+const Stage = dynamic(() => import("./stage/Stage"), { ssr: false })
 
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"]
 
-export function Experience({ models }: { models: string[] }) {
+export function Experience() {
   const terminalOpen = useRoom((s) => s.terminalOpen)
-
-  useEffect(() => {
-    useRoom.setState({ models })
-  }, [models])
 
   useEffect(() => {
     let konami = 0
@@ -40,9 +42,9 @@ export function Experience({ models }: { models: string[] }) {
         s.setParty(!s.party)
         return
       }
-      if (s.terminalOpen) return
+      if (s.terminalOpen || s.phase !== "room") return
       const sec = sections.find((x) => x.key === e.key)
-      if (sec) scrollBus.to(sec.chapter)
+      if (sec) scrollBus.to(sec.id)
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -50,13 +52,20 @@ export function Experience({ models }: { models: string[] }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-0">
-        <World />
+      <div className="fixed inset-0 z-0" aria-hidden>
+        <Stage />
       </div>
-      <FxOverlay />
       <Scroller />
-      <Overlay />
+      <HeroAct />
+      <WorkAct />
+      <ArsenalAct />
+      <FinaleAct />
+      <Flash />
+      <ArtLabels />
       <Hud />
+      {/* the page is only as tall as the film */}
+      <div style={{ height: `${TOTAL_VH}vh` }} aria-hidden />
+      <ScreenReader />
       <AnimatePresence>{terminalOpen && <Terminal key="terminal" />}</AnimatePresence>
       <Loader />
     </>
