@@ -17,13 +17,21 @@ type State = {
   setQuality: (q: State["quality"]) => void
 }
 
+// decided once, synchronously, so textures load at the right size from the start
+function initialQuality(): State["quality"] {
+  if (typeof window === "undefined") return "high"
+  const q = new URLSearchParams(location.search).get("quality")
+  if (q === "low" || q === "high") return q
+  return (navigator.hardwareConcurrency ?? 8) <= 4 || window.innerWidth < 768 ? "low" : "high"
+}
+
 export const useRoom = create<State>((set) => ({
   phase: "loading",
   act: "hero",
   lightsOn: true,
   party: false,
   terminalOpen: false,
-  quality: "high",
+  quality: initialQuality(),
   loaderScore: null,
   setPhase: (phase) => set({ phase }),
   toggleLights: () => set((s) => ({ lightsOn: !s.lightsOn })),

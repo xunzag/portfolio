@@ -22,9 +22,7 @@ export default function Stage() {
   const [dpr, setDpr] = useState(1.5)
 
   useEffect(() => {
-    const q = new URLSearchParams(location.search).get("quality")
-    const weak = q === "low" || (q !== "high" && (navigator.hardwareConcurrency ?? 8) <= 4) || window.innerWidth < 768
-    if (weak) useRoom.getState().setQuality("low")
+    const weak = useRoom.getState().quality === "low"
     setDpr(weak ? 1 : Math.min(1.5, window.devicePixelRatio))
   }, [])
 

@@ -123,11 +123,14 @@ const frag = /* glsl */ `
 `
 
 export function Painting() {
-  const [heroMap, heroDepth, arsMap, arsDepth] = useTexture(["/art/hero.webp", "/art/hero-depth.webp", "/art/arsenal.webp", "/art/arsenal-depth.webp"])
+  // phones and weak GPUs get the 2k paintings, everyone else the full 3344px
+  const hd = useRoom((s) => s.quality === "high")
+  const k = hd ? "" : "-2k"
+  const [heroMap, heroDepth, arsMap, arsDepth] = useTexture([`/art/hero${k}.webp`, "/art/hero-depth.webp", `/art/arsenal${k}.webp`, "/art/arsenal-depth.webp"])
   useMemo(() => {
     for (const t of [heroMap, arsMap]) {
       t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 4
+      t.anisotropy = 8
     }
     for (const t of [heroMap, heroDepth, arsMap, arsDepth]) {
       t.generateMipmaps = true
