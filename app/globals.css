@@ -242,3 +242,13 @@ a {
   border-top: 16px solid #fff;
   transform: skewX(-25deg);
 }
+@media (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+  html.has-cursor input,
+  html.has-cursor textarea {
+    cursor: text !important;
+  }
+}

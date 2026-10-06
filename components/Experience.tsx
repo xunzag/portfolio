@@ -16,6 +16,7 @@ import { Slash } from "./acts/Slash"
 import { ScreenReader } from "./acts/ScreenReader"
 import { Loader } from "./ui/Loader"
 import { Hud } from "./ui/Hud"
+import { Cursor } from "./ui/Cursor"
 import { Terminal } from "./ui/Terminal"
 
 const Stage = dynamic(() => import("./stage/Stage"), { ssr: false })
@@ -70,6 +71,7 @@ export function Experience() {
       <ScreenReader />
       <AnimatePresence>{terminalOpen && <Terminal key="terminal" />}</AnimatePresence>
       <Loader />
+      <Cursor />
     </>
   )
 }

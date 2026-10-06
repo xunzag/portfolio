@@ -263,7 +263,10 @@ function useNameTexture() {
     const family = getComputedStyle(probe).fontFamily
     probe.remove()
     let alive = true
-    document.fonts.load(`300px ${family}`).finally(() => {
+    document.fonts
+      .load(`300px ${family}`)
+      .catch(() => [])
+      .then(() => {
       if (!alive) return
       const c = tex.image as HTMLCanvasElement
       const g = c.getContext("2d")!

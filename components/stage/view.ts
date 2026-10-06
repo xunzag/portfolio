@@ -96,15 +96,15 @@ export function view(s: number): View {
     out.art = 1
     out.backdrop = 1 - ss(w1 - CASE_VH * 0.2, w1, s)
     out.bright = ss(w1 - CASE_VH * 0.25, w1 - CASE_VH * 0.05, s) * (1 - ss(0.94, 1, out.arsenalT))
-    out.flash = ss(0.9, 1, out.arsenalT) * 0.85
+    out.flash = 0
   } else {
     // Act IV: the eclipse
     Object.assign(out, path(ARSENAL_PATH, 1))
     out.art = 1
     out.bright = 0
     out.backdrop = 0
-    out.flash = (1 - ss(f0, f0 + 16, s)) * 0.85
-    out.finale = ss(f0, f0 + 10, s)
+    out.flash = 0
+    out.finale = ss(f0 + 8, f0 + 22, s)
   }
   return out
 }

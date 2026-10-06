@@ -72,7 +72,10 @@ export function HeroAct() {
       <div ref={hint} className={`rise${go} absolute inset-x-0 bottom-[7vh] flex flex-col items-center`}>
         <div style={{ animationDelay: "3.2s" }} className="flex flex-col items-center gap-3">
           <span className="smallcaps text-white/60">scroll to enter</span>
-          <span className="smallcaps -mt-1 !text-[9px] text-blood/80">or drag across the screen to slash</span>
+          <span className="smallcaps -mt-1 !text-[9px] text-blood/80">
+            <span className="pointer-coarse:hidden">or drag across the screen to slash</span>
+            <span className="hidden pointer-coarse:inline">or swipe sideways to slash</span>
+          </span>
           <span className="relative block h-12 w-px overflow-hidden bg-white/15">
             <span className="absolute inset-x-0 top-0 h-1/2 animate-[drip_1.8s_ease-in-out_infinite] bg-gradient-to-b from-transparent to-blood" />
           </span>

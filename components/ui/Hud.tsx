@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { FileDown, TerminalSquare } from "lucide-react"
+import { FileDown, TerminalSquare, Volume2, VolumeX } from "lucide-react"
 import { RANGES, TOTAL_VH, local, sections, type ActId, type Section } from "@/lib/acts"
 import { profile } from "@/lib/content"
 import { scrollBus, useRoom } from "@/lib/store"
+import { sound } from "@/lib/sound"
 import { live } from "../live"
 import { useLive } from "../acts/useLive"
 import { Github, Linkedin } from "./icons"
@@ -50,7 +51,7 @@ export function Hud() {
             <ScoreChip />
           </header>
 
-          <nav aria-label="Sections" className="pointer-events-auto absolute right-[13.5rem] top-6 hidden gap-6 lg:flex">
+          <nav aria-label="Sections" className="pointer-events-auto absolute right-[16.5rem] top-6 hidden gap-6 lg:flex">
             {sections.map((s) => (
               <button
                 key={s.id}
@@ -65,6 +66,7 @@ export function Hud() {
           </nav>
 
           <div className="pointer-events-auto absolute right-4 top-4 flex gap-2 sm:right-6 sm:top-5">
+            <SoundBtn />
             <IconBtn label="Open terminal (ctrl + `)" onClick={() => useRoom.getState().setTerminal(true)}>
               <TerminalSquare size={15} />
             </IconBtn>
@@ -143,5 +145,28 @@ function ScoreChip() {
         </motion.p>
       )}
     </AnimatePresence>
+  )
+}
+
+function SoundBtn() {
+  const [on, setOn] = useState(sound.on)
+  useEffect(() => sound.subscribe(setOn), [])
+  // the heartbeat swells as we approach the eclipse
+  useLive(() => {
+    const s = live.scroll
+    const a = local(s, "arsenal")
+    const heart = s >= RANGES.finale[0] ? 0.9 : s >= RANGES.arsenal[0] ? 0.15 + Math.max(0, a - 0.8) * 3.5 : 0
+    sound.setHeart(heart)
+  })
+  return (
+    <button
+      aria-label={on ? "Mute sound" : "Turn sound on"}
+      title={on ? "Mute" : "Sound on"}
+      onClick={() => sound.toggle()}
+      className={`${iconCls} relative ${on ? "text-white" : ""}`}
+    >
+      {on ? <Volume2 size={15} /> : <VolumeX size={15} />}
+      {!on && <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px] uppercase tracking-widest text-white/40">sound</span>}
+    </button>
   )
 }
