@@ -6,7 +6,7 @@ import { useProgress } from "@react-three/drei"
 import { useRoom } from "@/lib/store"
 
 // The loading screen is a tiny game so nobody bounces while the world downloads:
-// desktop races Farhan's 120 WPM, phones catch falling sakura petals.
+// desktop races Farhan's 120 WPM, phones catch falling maple leaves.
 // "Enter" appears as soon as the world is ready; idle visitors are let in automatically.
 
 const FARHAN_WPM = 120
@@ -63,7 +63,7 @@ export function Loader() {
       {phase === "loading" && (
         <motion.div
           key="loader"
-          className="fixed inset-0 z-50 overflow-hidden bg-[radial-gradient(ellipse_at_50%_120%,#3a1f5c_0%,#150b26_55%,#07051a_100%)]"
+          className="fixed inset-0 z-50 overflow-hidden bg-[radial-gradient(ellipse_at_50%_120%,#3a0910_0%,#12060a_50%,#030204_100%)]"
           exit={{ clipPath: "circle(0% at 50% 50%)", transition: { duration: 1.1, ease: [0.76, 0, 0.24, 1] } }}
           style={{ clipPath: "circle(150% at 50% 50%)" }}
         >
@@ -72,9 +72,9 @@ export function Loader() {
           {/* footer: progress + enter */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-5 pb-6 sm:px-[6vw] sm:pb-10">
             <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted">
-              <p className="hidden sm:block">farhan babar · portfolio</p>
+              <p className="hidden sm:block">farhan ali · portfolio</p>
               <div className="mt-2 h-px w-40 overflow-hidden bg-white/10 sm:w-56">
-                <motion.div className="h-full bg-gradient-to-r from-[#ff4fd8] to-cyan" animate={{ width: `${pct}%` }} transition={{ ease: "easeOut" }} />
+                <motion.div className="h-full bg-gradient-to-r from-[#5ab0ff] to-blood" animate={{ width: `${pct}%` }} transition={{ ease: "easeOut" }} />
               </div>
               <p className="mt-2 text-[10px] normal-case tracking-normal text-muted/80">{ready ? "world ready" : `building the world… ${pct}%`}</p>
             </div>
@@ -84,9 +84,9 @@ export function Loader() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={enter}
-                  className="focus-ring pointer-events-auto shrink-0 whitespace-nowrap rounded-full bg-ink px-5 py-3 text-sm font-semibold text-bg shadow-[0_0_40px_rgba(255,79,216,0.45)] transition hover:scale-105"
+                  className="focus-ring pointer-events-auto shrink-0 whitespace-nowrap bg-ink px-6 py-3 text-xs uppercase tracking-[0.25em] font-semibold text-bg shadow-[0_0_40px_rgba(224,36,47,0.5)] transition hover:scale-105"
                 >
-                  Enter the world →
+                  Enter →
                 </motion.button>
               )}
             </AnimatePresence>
@@ -148,19 +148,19 @@ function TypeRace({ onPlay, ready }: { onPlay: () => void; ready: boolean }) {
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-6" onClick={() => input.current?.focus()}>
-      <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-[#ff7fc8]">while the world loads</p>
-      <h1 className="mt-3 text-center text-[clamp(2rem,5vw,3.6rem)] font-semibold leading-none tracking-tight">
-        Beat my <span className="bg-gradient-to-r from-[#ff4fd8] to-cyan bg-clip-text text-transparent">{FARHAN_WPM} WPM</span>
+      <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blood">while the world loads</p>
+      <h1 className="mt-3 text-center font-serif text-[clamp(2.4rem,6vw,4.4rem)] font-light leading-none">
+        Beat my <span className="italic text-blood">{FARHAN_WPM} WPM</span>
       </h1>
       <p className="mt-3 text-sm text-muted">{start ? "go go go" : "start typing — the clock starts on your first key"}</p>
 
-      <div className="relative mt-10 max-w-3xl rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 font-mono text-[clamp(1rem,1.8vw,1.35rem)] leading-relaxed shadow-[0_0_80px_-20px_rgba(177,140,255,0.5)]">
+      <div className="relative mt-10 max-w-3xl border border-white/10 bg-white/[0.03] px-6 py-5 font-mono text-[clamp(1rem,1.8vw,1.35rem)] leading-relaxed shadow-[0_0_80px_-20px_rgba(224,36,47,0.45)]">
         {[...line].map((ch, i) => {
           const t = typed[i]
           const cls = t === undefined ? "text-white/35" : t === ch ? "text-ink" : "bg-red-500/30 text-red-300"
           return (
             <span key={i} className={`relative ${cls}`}>
-              {i === typed.length && !done && <span className="absolute -left-[1px] top-[0.15em] h-[1.1em] w-[2px] animate-pulse bg-[#ff7fc8]" />}
+              {i === typed.length && !done && <span className="absolute -left-[1px] top-[0.15em] h-[1.1em] w-[2px] animate-pulse bg-blood" />}
               {ch === " " ? " " : ch}
             </span>
           )
@@ -180,8 +180,8 @@ function TypeRace({ onPlay, ready }: { onPlay: () => void; ready: boolean }) {
 
       <div className="mt-8 flex items-end gap-10 font-mono">
         <Stat label="you" value={done ? done.wpm : liveWpm} accent={beat ? "#6fffc0" : "#ffffff"} />
-        <Stat label="farhan" value={FARHAN_WPM} accent="#ff7fc8" />
-        {done && <Stat label="accuracy" value={`${done.acc}%`} accent="#8fd8ff" />}
+        <Stat label="farhan" value={FARHAN_WPM} accent="#ff4a55" />
+        {done && <Stat label="accuracy" value={`${done.acc}%`} accent="#9fd8ff" />}
       </div>
 
       <AnimatePresence>
@@ -199,7 +199,7 @@ function TypeRace({ onPlay, ready }: { onPlay: () => void; ready: boolean }) {
 function Stat({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
     <div className="text-center">
-      <p className="text-4xl font-semibold tabular-nums sm:text-5xl" style={{ color: accent, textShadow: `0 0 30px ${accent}66` }}>
+      <p className="font-serif text-5xl tabular-nums sm:text-6xl" style={{ color: accent, textShadow: `0 0 30px ${accent}66` }}>
         {value}
       </p>
       <p className="mt-1 text-[10px] uppercase tracking-[0.3em] text-muted">{label}</p>
@@ -261,12 +261,10 @@ function PetalGame({ onPlay }: { onPlay: () => void }) {
         g.save()
         g.translate(p.x, p.y)
         g.rotate(p.rot)
-        g.shadowColor = "#ff7fc8"
+        g.shadowColor = "#ff2a20"
         g.shadowBlur = 14
-        g.fillStyle = p.hue > 0.5 ? "#ffc2e0" : "#ff8fc8"
-        g.beginPath()
-        g.ellipse(0, 0, p.r, p.r * 0.6, 0, 0, Math.PI * 2)
-        g.fill()
+        g.fillStyle = p.hue > 0.5 ? "#e0242f" : "#ff5a3a"
+        leaf(g, p.r * 1.3)
         g.restore()
       }
       for (let i = pops.length - 1; i >= 0; i--) {
@@ -276,7 +274,7 @@ function PetalGame({ onPlay }: { onPlay: () => void }) {
           pops.splice(i, 1)
           continue
         }
-        g.strokeStyle = `rgba(255,190,240,${1 - q.t * 2})`
+        g.strokeStyle = `rgba(255,120,100,${1 - q.t * 2})`
         g.lineWidth = 2
         g.beginPath()
         g.arc(q.x, q.y, 10 + q.t * 70, 0, Math.PI * 2)
@@ -320,13 +318,28 @@ function PetalGame({ onPlay }: { onPlay: () => void }) {
 
   return (
     <div className="relative h-full">
-      <canvas ref={canvas} className="absolute inset-0 h-full w-full touch-none" aria-label="Tap the falling petals to catch them" />
+      <canvas ref={canvas} className="absolute inset-0 h-full w-full touch-none" aria-label="Tap the falling leaves to catch them" />
       <div className="pointer-events-none absolute inset-x-0 top-[18%] text-center">
-        <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-[#ff7fc8]">while the world loads</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight">Catch the petals</h1>
-        <p className="mt-2 text-sm text-muted">tap them before they fall 🌸</p>
-        <p className="mt-6 text-6xl font-semibold tabular-nums [text-shadow:0_0_30px_#ff7fc8]">{score}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blood">while the world loads</p>
+        <h1 className="mt-3 font-serif text-5xl font-light">Catch the leaves</h1>
+        <p className="mt-2 text-sm text-muted">tap them before they fall</p>
+        <p className="mt-6 font-serif text-7xl tabular-nums [text-shadow:0_0_30px_#e0242f]">{score}</p>
       </div>
     </div>
   )
+}
+
+// five-lobed momiji leaf
+function leaf(g: CanvasRenderingContext2D, r: number) {
+  g.beginPath()
+  for (let i = 0; i <= 60; i++) {
+    const th = (i / 60) * Math.PI * 2
+    const rr = r * (0.45 + 0.55 * Math.pow(Math.abs(Math.cos(2.5 * th)), 2))
+    const x = Math.sin(th) * rr
+    const y = -Math.cos(th) * rr
+    if (i) g.lineTo(x, y)
+    else g.moveTo(x, y)
+  }
+  g.fill()
+  g.fillRect(-0.6, 0, 1.2, r * 0.9)
 }

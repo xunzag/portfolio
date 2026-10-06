@@ -1,15 +1,16 @@
-// Single source of truth for everything the room talks about.
+// Single source of truth for everything the site says.
 
 export const profile = {
-  name: "Farhan Babar",
+  name: "Farhan Ali",
   handle: "xunzag",
-  role: "Full Stack Developer",
-  roles: ["Full Stack Developer", "AI Enthusiast", "Open Source Contributor", "Problem Solver", "anime enjoyer 🍜"],
-  tagline: "I build fast, delightful products — from pixels to servers.",
+  role: "Full-Stack Developer",
+  roles: ["Full-Stack Developer", "IT & Cloud Support", "Aspiring Data Scientist"],
+  motto: ["Building things", "Solving problems", "Leveling up"],
+  tagline: "Not just a developer. A problem solver.",
   bio: [
-    "I'm a full stack developer from Pakistan who likes shipping things people actually use — e-commerce engines, learning platforms, analytics dashboards and mobile apps.",
-    "My sweet spot is the space where clean architecture meets obsessive UI polish: typed end-to-end, fast by default, and fun to click around in.",
-    "When I'm not coding you'll find me re-watching Hunter x Hunter, shooting photos up north, or playing The Weeknd badly on guitar.",
+    "I'm a full-stack developer from Pakistan who also keeps the systems behind the product alive — Microsoft 365 tenants, Active Directory, Exchange, servers and the tickets nobody else wants to touch.",
+    "I like owning the whole stack: the interface people touch, the API underneath and the cloud it all runs on. Typed end-to-end, fast by default, automated wherever a human would get bored.",
+    "Next on the list: data science. Same discipline, more math.",
   ],
   location: "Pakistan · Remote OK",
   timezone: "UTC +5 (PKT)",
@@ -287,3 +288,24 @@ export const principles = [
   "Write code other devs actually want to maintain.",
   "It works on my machine → so I ship the machine.",
 ]
+
+// ── The arsenal (mirrors the panels in the paintings) ──────────────────
+export const arsenal = [
+  { name: "Build", kanji: "創", items: ["Next.js", "React", "React Native", "Expo", "TypeScript", "Tailwind", "Node.js", "NestJS", "Express", "GraphQL"] },
+  { name: "Data & APIs", kanji: "理", items: ["Python", "FastAPI", "Django", "Flask", "PostgreSQL", "Redis", "Supabase", "MongoDB"] },
+  { name: "Cloud", kanji: "雲", items: ["AWS", "Azure", "Vercel", "Netlify", "Docker", "Linux", "Git", "CI/CD"] },
+  { name: "Microsoft & IT", kanji: "守", items: ["Microsoft 365", "Exchange Online", "Active Directory", "Microsoft Graph", "PowerShell", "Intune"] },
+]
+
+export const ops = ["Cloud", "Servers", "Security", "Monitoring", "Networks", "IT Support", "Automation"]
+
+export const shelf = {
+  studying: ["Clean Code", "System Design", "Design Patterns", "Computer Networks", "Linux Administration", "Cloud Architecture", "Cybersecurity", "Data Science"],
+  reading: ["The Psychology of Money", "Atomic Habits", "Sapiens", "The Martian"],
+}
+
+export const quotes = {
+  guts: { text: "The struggler is stronger than the dreamer.", by: "Guts", kanji: "生きろ" },
+  aizen: { text: "In this world, there is no such thing as a coincidence.", by: "Aizen", kanji: "藍染惣右介" },
+  light: { text: "The world is rotten. I alone am righteous.", by: "Light Yagami", kanji: "夜神月" },
+}
