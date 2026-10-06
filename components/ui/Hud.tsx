@@ -51,7 +51,7 @@ export function Hud() {
             <ScoreChip />
           </header>
 
-          <nav aria-label="Sections" className="pointer-events-auto absolute right-[16.5rem] top-6 hidden gap-6 lg:flex">
+          <nav aria-label="Sections" className="pointer-events-auto absolute right-[20rem] top-6 hidden gap-6 lg:flex">
             {sections.map((s) => (
               <button
                 key={s.id}
