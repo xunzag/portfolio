@@ -12,6 +12,7 @@ import { ArsenalAct } from "./acts/ArsenalAct"
 import { FinaleAct } from "./acts/FinaleAct"
 import { ArtLabels } from "./acts/ArtLabels"
 import { Flash } from "./acts/Flash"
+import { Slash } from "./acts/Slash"
 import { ScreenReader } from "./acts/ScreenReader"
 import { Loader } from "./ui/Loader"
 import { Hud } from "./ui/Hud"
@@ -61,6 +62,7 @@ export function Experience() {
       <ArsenalAct />
       <FinaleAct />
       <Flash />
+      <Slash />
       <ArtLabels />
       <Hud />
       {/* the page is only as tall as the film */}

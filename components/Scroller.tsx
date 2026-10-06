@@ -70,6 +70,9 @@ export function Scroller() {
       })
     }
 
+    // a slash cuts straight to a beat: no tween, the transition is the cut itself
+    scrollBus.jump = (vh) => lenis.scrollTo((vh / 100) * window.innerHeight, { immediate: true, force: true })
+
     return () => {
       unsub()
       gsap.ticker.remove(tick)

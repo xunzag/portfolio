@@ -1,11 +1,13 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useTexture } from "@react-three/drei"
 import * as THREE from "three"
+import { profile } from "@/lib/content"
 import { useRoom } from "@/lib/store"
 import { live } from "../live"
+import { ss } from "@/lib/acts"
 import { IMG_ASPECT, frame, view } from "./view"
 
 // A painting rendered as a 2.5D diorama: every pixel is pushed by its depth
@@ -24,6 +26,7 @@ const frag = /* glsl */ `
   uniform vec2 uFocus; uniform vec2 uView; uniform float uDolly; uniform vec2 uPar;
   uniform float uTime; uniform float uKind; uniform float uBright;
   uniform vec2 uMouse; uniform float uLights; uniform float uParty; uniform float uT;
+  uniform sampler2D uName; uniform float uNameOn; uniform float uReveal; uniform vec4 uNameRect;
   varying vec2 vUv;
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -114,6 +117,32 @@ const frag = /* glsl */ `
       c += c * purple * (noise(uv * 30.0 + t * 2.0) - 0.5) * 0.5;
     }
 
+    // ── the name, painted INTO the scene ──
+    // It lives on its own depth plane: in front of the sky, castle and city,
+    // behind Eren, the samurai, Johan, Hisoka and the man at the desk.
+    if (uKind < 0.5 && uNameOn > 0.001) {
+      const float dN = 0.175;
+      float sN = 1.0 / (1.0 - uDolly * dN * dN * 0.92);
+      vec2 nuv = uFocus + (base - uFocus - uPar * (dN - 0.4)) / sN;
+      vec2 q = (nuv - uNameRect.xy) / uNameRect.zw + 0.5;
+      if (q.x > 0.0 && q.x < 1.0 && q.y > 0.0 && q.y < 1.0) {
+        vec2 tq = vec2(q.x, 1.0 - q.y);
+        float ink = texture2D(uName, tq).a;
+        float halo = texture2D(uName, tq, 4.5).a;
+        // brush write-on from left to right, with a hot leading edge
+        float front = uReveal * 1.25 - 0.12;
+        float wrote = 1.0 - smoothstep(front - 0.1, front, q.x);
+        float edge = smoothstep(front - 0.14, front - 0.02, q.x) * wrote;
+        // anything nearer than the name's plane hides it (soft edge)
+        float occ = smoothstep(dN + 0.035, dN + 0.004, d);
+        float k = occ * wrote * uNameOn;
+        c *= 1.0 - halo * 0.6 * k;
+        vec3 col = mix(vec3(1.0, 0.95, 0.93), vec3(1.0, 0.62, 0.6), smoothstep(0.2, 1.0, q.x));
+        c = mix(c, col * 1.25, ink * k);
+        c += vec3(1.0, 0.25, 0.15) * (ink * edge * 2.5 + halo * 0.25 * (0.7 + 0.3 * sin(t * 1.5))) * k;
+      }
+    }
+
     if (uParty > 0.5) c = hue(c, t * 2.0 + uv.x * 6.0) * 1.15;
     // grade: deeper blacks, warm highlights
     c = pow(c, vec3(1.08));
@@ -139,6 +168,9 @@ export function Painting() {
     }
   }, [heroMap, heroDepth, arsMap, arsDepth])
 
+  const nameTex = useNameTexture()
+  const revealAt = useRef<number | null>(null)
+
   const uniforms = useMemo(
     () => ({
       uMap: { value: heroMap },
@@ -154,8 +186,13 @@ export function Painting() {
       uLights: { value: 1 },
       uParty: { value: 0 },
       uT: { value: 0 },
+      uName: { value: nameTex },
+      uNameOn: { value: 0 },
+      uReveal: { value: 0 },
+      // centre x, centre y, width, height — in image coords
+      uNameRect: { value: new THREE.Vector4(0.47, 0.33, 0.64, (0.64 * IMG_ASPECT) / 4) },
     }),
-    [heroMap, heroDepth],
+    [heroMap, heroDepth, nameTex],
   )
   const mesh = useRef<THREE.Mesh>(null)
   const mat = useRef<THREE.ShaderMaterial>(null)
@@ -188,6 +225,11 @@ export function Painting() {
     lights.current += ((st.lightsOn ? 1 : 0) - lights.current) * Math.min(1, dt * 4)
     u.uLights.value = lights.current
     u.uParty.value = st.party ? 1 : 0
+    // the name writes itself in once the loader lifts; portrait screens use the DOM signature instead
+    if (st.phase === "room" && revealAt.current === null) revealAt.current = clock.elapsedTime + 0.5
+    const r = revealAt.current === null ? 0 : Math.min(1, Math.max(0, (clock.elapsedTime - revealAt.current) / 2.6))
+    u.uReveal.value = 1 - Math.pow(1 - r, 3)
+    u.uNameOn.value = size.width > size.height ? 1 - ss(0.4, 0.6, v.heroT) : 0
     // the torch only follows a real pointer
     const fine = live.px.x > -1e3
     u.uMouse.value.set(fine ? f.fx + (live.px.x / size.width - 0.5) * f.vw : -9, fine ? f.fy + (live.px.y / size.height - 0.5) * f.vh : -9)
@@ -199,4 +241,47 @@ export function Painting() {
       <shaderMaterial ref={mat} vertexShader={vert} fragmentShader={frag} uniforms={uniforms} transparent depthWrite={false} depthTest={false} toneMapped={false} />
     </mesh>
   )
+}
+
+// "Farhan Ali" in the script face, drawn once into a texture for the shader.
+function useNameTexture() {
+  const tex = useMemo(() => {
+    const c = document.createElement("canvas")
+    c.width = 2048
+    c.height = 512
+    const t = new THREE.CanvasTexture(c)
+    t.generateMipmaps = true
+    t.minFilter = THREE.LinearMipmapLinearFilter
+    t.anisotropy = 8
+    return t
+  }, [])
+  useEffect(() => {
+    // next/font hashes the family name, so read it back from the CSS variable
+    const probe = document.createElement("span")
+    probe.style.fontFamily = "var(--font-script-face)"
+    document.body.appendChild(probe)
+    const family = getComputedStyle(probe).fontFamily
+    probe.remove()
+    let alive = true
+    document.fonts.load(`300px ${family}`).finally(() => {
+      if (!alive) return
+      const c = tex.image as HTMLCanvasElement
+      const g = c.getContext("2d")!
+      g.clearRect(0, 0, c.width, c.height)
+      g.fillStyle = "#fff"
+      g.textAlign = "center"
+      g.textBaseline = "middle"
+      let size = 330
+      g.font = `${size}px ${family}`
+      const w = g.measureText(profile.name).width
+      if (w > c.width * 0.94) size *= (c.width * 0.94) / w
+      g.font = `${size}px ${family}`
+      g.fillText(profile.name, c.width / 2, c.height * 0.52)
+      tex.needsUpdate = true
+    })
+    return () => {
+      alive = false
+    }
+  }, [tex])
+  return tex
 }

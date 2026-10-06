@@ -180,3 +180,21 @@ html.lenis body {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(200%); }
 }
+/* katana cut: DOM layers drop out while the frozen frame splits */
+.layer {
+  transition: opacity 0.5s ease;
+}
+html.cutting .layer {
+  opacity: 0;
+  transition: none;
+}
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+input,
+textarea,
+a {
+  -webkit-user-select: text;
+  user-select: text;
+}

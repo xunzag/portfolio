@@ -13,6 +13,7 @@ import { Painting } from "./Painting"
 import { Backdrop } from "./Backdrop"
 import { Particles } from "./Particles"
 import { Finale } from "./Finale"
+import { CutEffect } from "./CutEffect"
 
 // One canvas for the whole film. Paintings and the void are full-screen
 // shader quads; particles float in camera space; the finale is a real 3D set.
@@ -56,6 +57,7 @@ function Effects({ high }: { high: boolean }) {
   })
   return high ? (
     <EffectComposer multisampling={0}>
+      <CutEffect />
       <Bloom mipmapBlur luminanceThreshold={0.62} luminanceSmoothing={0.2} intensity={0.85} radius={0.7} />
       <ChromaticAberration offset={ca} radialModulation modulationOffset={0.3} />
       <Noise premultiply blendFunction={BlendFunction.SCREEN} opacity={0.12} />
@@ -63,6 +65,7 @@ function Effects({ high }: { high: boolean }) {
     </EffectComposer>
   ) : (
     <EffectComposer multisampling={0}>
+      <CutEffect />
       <Bloom mipmapBlur luminanceThreshold={0.65} intensity={0.7} />
       <Vignette offset={0.25} darkness={0.7} />
     </EffectComposer>

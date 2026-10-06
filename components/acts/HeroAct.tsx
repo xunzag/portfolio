@@ -40,9 +40,9 @@ export function HeroAct() {
 
   return (
     <div ref={root} className="layer z-10">
-      {/* signature */}
-      <div ref={title} className="absolute inset-x-0 top-[24%] flex flex-col items-center px-4 text-center sm:top-[25%]">
-        <svg className={`signature${go} h-[clamp(5rem,13vw,10rem)] w-[min(92vw,44rem)] overflow-visible`} viewBox="0 0 700 160" aria-label={profile.name} role="img">
+      {/* landscape: the name is painted into the scene by the stage shader; portrait gets this SVG signature */}
+      <div ref={title} className="absolute inset-x-0 top-[24%] flex flex-col items-center px-4 text-center landscape:top-[47%]">
+        <svg className={`signature${go} landscape:hidden h-[clamp(5rem,13vw,10rem)] w-[min(92vw,44rem)] overflow-visible`} viewBox="0 0 700 160" aria-label={profile.name} role="img">
           <defs>
             <linearGradient id="ink" x1="0" x2="1">
               <stop offset="0" stopColor="#fff" />
@@ -72,6 +72,7 @@ export function HeroAct() {
       <div ref={hint} className={`rise${go} absolute inset-x-0 bottom-[7vh] flex flex-col items-center`}>
         <div style={{ animationDelay: "3.2s" }} className="flex flex-col items-center gap-3">
           <span className="smallcaps text-white/60">scroll to enter</span>
+          <span className="smallcaps -mt-1 !text-[9px] text-blood/80">or drag across the screen to slash</span>
           <span className="relative block h-12 w-px overflow-hidden bg-white/15">
             <span className="absolute inset-x-0 top-0 h-1/2 animate-[drip_1.8s_ease-in-out_infinite] bg-gradient-to-b from-transparent to-blood" />
           </span>

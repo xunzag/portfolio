@@ -37,9 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${sans.variable} ${mono.variable} ${serif.variable} ${script.variable} ${jp.variable}`}>
       <head>
         {/* start the heaviest downloads before any JS runs */}
-        <link rel="preload" href="/art/hero.webp" as="image" media="(min-width: 768px)" />
-        <link rel="preload" href="/art/hero-2k.webp" as="image" media="(max-width: 767px)" />
-        <link rel="preload" href="/art/hero-depth.webp" as="image" />
+        <link rel="preload" href="/art/hero.webp" as="image" media="(min-width: 768px)" crossOrigin="anonymous" />
+        <link rel="preload" href="/art/hero-2k.webp" as="image" media="(max-width: 767px)" crossOrigin="anonymous" />
+        <link rel="preload" href="/art/hero-depth.webp" as="image" crossOrigin="anonymous" />
         <link rel="preload" href="/models/guts.glb" as="fetch" crossOrigin="anonymous" />
       </head>
       <body>{children}</body>

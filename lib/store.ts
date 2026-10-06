@@ -42,4 +42,4 @@ export const useRoom = create<State>((set) => ({
 
 // Smooth-scroll hook-up lives in components/Scroller.tsx; this is how anything
 // (HUD, terminal, keyboard) jumps to a section.
-export const scrollBus: { to: (section: Section | "top") => void } = { to: () => {} }
+export const scrollBus: { to: (section: Section | "top") => void; jump: (vh: number) => void } = { to: () => {}, jump: () => {} }

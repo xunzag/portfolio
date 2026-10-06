@@ -68,3 +68,14 @@ export const sections: { id: Section; label: string; act: ActId; t: number; key:
   { id: "life", label: "Off the clock", act: "finale", t: 0.2, key: "4" },
   { id: "contact", label: "Contact", act: "finale", t: 1, key: "5" },
 ]
+
+/** Where a katana slash cuts to: the next "beat" of the film (in vh). */
+export function beats(): number[] {
+  const [w0] = RANGES.work
+  const [a0, a1] = RANGES.arsenal
+  const [f0, f1] = RANGES.finale
+  const A = (t: number) => a0 + (a1 - a0) * t
+  const F = (t: number) => f0 + (f1 - f0) * t
+  const cases = Array.from({ length: Math.round((a0 - w0) / CASE_VH) }, (_, i) => w0 + i * CASE_VH + CASE_VH * 0.35)
+  return [0, RANGES.hero[1] * 0.4, ...cases, A(0.1), A(0.35), A(0.58), A(0.81), F(0.1), F(0.38), F(1)]
+}
