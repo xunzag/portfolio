@@ -72,7 +72,7 @@ export function Loader() {
           {/* footer: progress + enter */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-5 pb-6 sm:px-[6vw] sm:pb-10">
             <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted">
-              <p className="hidden sm:block">farhan babar · portfolio</p>
+              <p className="hidden sm:block">farhan ali · portfolio</p>
               <div className="mt-2 h-px w-40 overflow-hidden bg-white/10 sm:w-56">
                 <motion.div className="h-full bg-gradient-to-r from-[#ff4fd8] to-cyan" animate={{ width: `${pct}%` }} transition={{ ease: "easeOut" }} />
               </div>

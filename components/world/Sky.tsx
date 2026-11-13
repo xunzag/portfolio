@@ -39,10 +39,10 @@ const fragment = /* glsl */ `
     float toMoon = max(dot(d, uMoon), 0.0);
 
     // night gradient
-    vec3 col = mix(vec3(0.05, 0.02, 0.13), vec3(0.002, 0.003, 0.014), smoothstep(-0.05, 0.7, y));
+    vec3 col = mix(vec3(0.028, 0.01, 0.075), vec3(0.002, 0.003, 0.012), smoothstep(-0.05, 0.6, y));
     // the horizon burns violet, hotter towards the moon
     float hz = pow(1.0 - clamp(abs(y), 0.0, 1.0), 9.0);
-    col += mix(vec3(0.22, 0.05, 0.32), vec3(0.75, 0.2, 0.55), pow(toMoon, 3.0)) * hz * 0.75;
+    col += mix(vec3(0.22, 0.05, 0.32), vec3(0.75, 0.2, 0.55), pow(toMoon, 3.0)) * hz * 0.38;
 
     // stars + a milky band
     vec2 sg = sph * 110.0;
@@ -70,7 +70,7 @@ const fragment = /* glsl */ `
     vec3 moonCol = mix(vec3(0.75, 0.68, 0.95), vec3(1.0, 0.94, 1.0), crater) * (0.75 + 0.5 * sqrt(max(0.0, 1.0 - dot(mp, mp))));
     col = mix(col, moonCol * 1.9, disc);
     col += vec3(0.75, 0.5, 1.0) * exp(-max(ang - R, 0.0) * 9.0) * 0.4 * (1.0 - disc);
-    col += vec3(0.5, 0.25, 0.8) * exp(-ang * 2.2) * 0.22;
+    col += vec3(0.5, 0.25, 0.8) * exp(-ang * 2.6) * 0.14;
 
     // below the horizon it just falls to black (the cloud sea covers it)
     col *= smoothstep(-0.45, 0.0, y) * 0.8 + 0.2;

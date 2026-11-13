@@ -45,14 +45,14 @@ const frag = /* glsl */ `
     vec3 col = mix(deep, top, puff);
     // moonlight rakes across the tops, strongest looking towards the moon
     float toward = pow(max(dot(normalize(-V.xz), normalize(uMoon.xz)), 0.0), 6.0);
-    col += vec3(0.75, 0.45, 0.95) * pow(puff, 2.5) * (0.12 + toward * 0.9);
+    col += vec3(0.75, 0.45, 0.95) * pow(puff, 2.5) * (0.08 + toward * 0.55);
     // storms far inside
     vec2 cell = floor(p * 0.5);
     float flick = pow(max(0.0, sin(uTime * (0.6 + hash(cell) * 1.4) + hash(cell + 3.0) * 30.0)), 24.0);
     col += vec3(0.6, 0.4, 1.0) * flick * smoothstep(0.5, 0.8, c) * 0.8;
     // dissolve into the horizon glow
     float far = smoothstep(120.0, 620.0, dist);
-    col = mix(col, vec3(0.16, 0.05, 0.24) * (0.5 + toward), far);
+    col = mix(col, vec3(0.07, 0.02, 0.12) * (0.5 + toward), far);
     gl_FragColor = vec4(col, 1.0 - smoothstep(560.0, 760.0, dist));
     #include <colorspace_fragment>
   }

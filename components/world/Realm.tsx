@@ -8,6 +8,7 @@ import { animes, hobbies } from "@/lib/content"
 import { RANGES } from "@/lib/chapters"
 import { Type } from "./Type"
 import { Island as RockIsland } from "./Rock"
+import { Weeknd } from "./Weeknd"
 import { usePresence, useReveal } from "./presence"
 import { useRoom } from "@/lib/store"
 import { live } from "./live"
@@ -22,7 +23,6 @@ const ISLANDS: { pos: [number, number, number]; r: number; slot?: number }[] = [
   { pos: [11, 1.5, 4], r: 2.6, slot: 1 },
   { pos: [-8, 3, 9], r: 2.4, slot: 2 },
   { pos: [-3, -1, -12], r: 2.8, slot: 3 },
-  { pos: [14, 6, -9], r: 1.4 },
   { pos: [-15, 7, -3], r: 1.2 },
 ]
 
@@ -37,6 +37,7 @@ export function Realm() {
       <PosterRing />
       <HobbyRing />
       <RealmTitle />
+      <Weeknd position={[12.5, 2, -7.2]} />
     </group>
   )
 }

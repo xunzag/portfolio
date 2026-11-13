@@ -10,6 +10,7 @@ import { FxOverlay } from "./FxOverlay"
 import { Loader } from "./ui/Loader"
 import { Hud } from "./ui/Hud"
 import { Terminal } from "./ui/Terminal"
+import { Cursor } from "./ui/Cursor"
 
 const World = dynamic(() => import("./world/World"), { ssr: false })
 
@@ -59,6 +60,7 @@ export function Experience({ models }: { models: string[] }) {
       <Hud />
       <AnimatePresence>{terminalOpen && <Terminal key="terminal" />}</AnimatePresence>
       <Loader />
+      <Cursor />
     </>
   )
 }

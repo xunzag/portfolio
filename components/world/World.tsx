@@ -18,6 +18,8 @@ import { Hero } from "./Hero"
 import { AboutStation, FactsStation, ProjectStations } from "./Stations"
 import { StackShrine } from "./StackShrine"
 import { Portal } from "./Portal"
+import { Drive } from "./Drive"
+import { Eagle } from "./Eagle"
 import { Realm } from "./Realm"
 import { ContactStation } from "./ContactStation"
 
@@ -74,6 +76,7 @@ export default function World() {
         <Zone name="dream">
           <Dream />
           <Hero />
+          <Drive />
           <ProjectStations />
           <AboutStation />
           <FactsStation />
@@ -84,6 +87,7 @@ export default function World() {
           <Realm />
           <ContactStation />
         </Zone>
+        <Eagle />
         <Preload all />
       </Suspense>
       <ScrollRig />

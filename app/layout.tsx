@@ -6,15 +6,15 @@ const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" }
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
-  title: "Farhan Babar — Full Stack Developer",
+  title: "Farhan Ali — IT Engineer & Full-Stack Developer",
   description:
-    "Step into Farhan Babar's 3D developer room: projects on the monitor, the stack inside the PC, anime on the walls. Full stack developer from Pakistan.",
+    "A night drive through Farhan Ali's world: projects on drive-in screens above the clouds, a mechanical eagle for a guide. IT engineer and full-stack developer from Karachi.",
   icons: {
     icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/favicon-32x32.png", type: "image/png" }],
     apple: { url: "/apple-touch-icon.png" },
   },
   openGraph: {
-    title: "Farhan Babar — Full Stack Developer",
+    title: "Farhan Ali — IT Engineer & Full-Stack Developer",
     description: "An interactive 3D developer room. Click around.",
     type: "website",
   },

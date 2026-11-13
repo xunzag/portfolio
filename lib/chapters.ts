@@ -3,12 +3,12 @@
 
 export type ChapterId = "hero" | "work" | "about" | "facts" | "stack" | "portal" | "life" | "contact"
 
-export const PROJECT_VH = 150
+export const PROJECT_VH = 130
 
 export const CHAPTERS: { id: ChapterId; vh: number; label?: string }[] = [
   { id: "hero", vh: 150, label: "Intro" },
-  { id: "work", vh: PROJECT_VH * 7, label: "Work" },
-  { id: "about", vh: 300, label: "About" },
+  { id: "work", vh: PROJECT_VH * 9, label: "Work" },
+  { id: "about", vh: 340, label: "About" },
   { id: "facts", vh: 260, label: "Facts" },
   { id: "stack", vh: 300, label: "Stack" },
   { id: "portal", vh: 120 },

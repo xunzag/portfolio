@@ -1,17 +1,17 @@
 // Single source of truth for everything the room talks about.
 
 export const profile = {
-  name: "Farhan Babar",
+  name: "Farhan Ali",
   handle: "xunzag",
-  role: "Full Stack Developer",
-  roles: ["Full Stack Developer", "AI Enthusiast", "Open Source Contributor", "Problem Solver", "anime enjoyer 🍜"],
-  tagline: "I build fast, delightful products — from pixels to servers.",
+  role: "IT Engineer & Full-Stack Developer",
+  roles: ["IT Engineer", "Full-Stack Developer", "Microsoft 365 Admin", "Problem Solver", "anime enjoyer"],
+  tagline: "I build the product — and run the systems behind it.",
   bio: [
-    "I'm a full stack developer from Pakistan who likes shipping things people actually use — e-commerce engines, learning platforms, analytics dashboards and mobile apps.",
-    "My sweet spot is the space where clean architecture meets obsessive UI polish: typed end-to-end, fast by default, and fun to click around in.",
-    "When I'm not coding you'll find me re-watching Hunter x Hunter, shooting photos up north, or playing The Weeknd badly on guitar.",
+    "I'm an IT engineer and full-stack developer from Karachi. By day I lead IT for a US property-management client: Microsoft 365, Entra ID, Intune, SharePoint, and every ticket in between.",
+    "Before that I shipped client web products end to end with React, Next.js and Node, and deployed them on Azure and AWS. I'm comfortable on both sides of the screen: the code, and the systems that keep it running.",
+    "Off the clock it's Hunter x Hunter, photography up north, and The Weeknd on repeat.",
   ],
-  location: "Pakistan · Remote OK",
+  location: "Karachi, Pakistan · Remote OK",
   timezone: "UTC +5 (PKT)",
   email: "farhan.babar123@gmail.com",
   cv: "/cv.pdf",
@@ -24,10 +24,15 @@ export const profile = {
 }
 
 export const stats = [
-  { value: 2, suffix: "+", label: "Years experience" },
-  { value: 50, suffix: "+", label: "Projects shipped" },
-  { value: 30, suffix: "+", label: "Happy clients" },
-  { value: 15, suffix: "+", label: "Technologies" },
+  { value: 3, suffix: "+", label: "Years in tech" },
+  { value: 4, suffix: "", label: "Companies" },
+  { value: 9, suffix: "+", label: "Products shipped" },
+  { value: 1, suffix: "", label: "M365 tenant run" },
+]
+
+export const credentials = [
+  { title: "BS Software Engineering", where: "UIT University, Karachi", when: "2020 - 2024" },
+  { title: "Microsoft Student Ambassador", where: "Workshops on Git & Microsoft tools", when: "2023 - 2024" },
 ]
 
 export type Project = {
@@ -35,7 +40,8 @@ export type Project = {
   title: string
   tagline: string
   description: string
-  image: string
+  /** screenshot; projects without one get a generated title card */
+  image?: string
   tech: string[]
   metrics: [string, string][]
   category: "Full Stack" | "Frontend" | "Mobile"
@@ -45,6 +51,32 @@ export type Project = {
 }
 
 export const projects: Project[] = [
+  {
+    slug: "cdta-exam-portal",
+    title: "CDTA Exam Portal",
+    tagline: "Secure national exam platform",
+    description:
+      "Exam portal for the CDTA with secure authentication and role-based access control: account creation, permissions and access management built for a non-technical admin team.",
+    tech: ["Authentication", "Role-based access", "Account management", "Admin tooling"],
+    metrics: [["RBAC", "access control"], ["Live", "in production"], ["Canada", "national body"]],
+    category: "Full Stack",
+    year: "2025",
+    accent: "#5fd8ff",
+    links: { live: "https://portal.cdtanational.ca" },
+  },
+  {
+    slug: "shf-safe-home",
+    title: "SHF Safe Home",
+    tagline: "Field inspection app on the App Store",
+    description:
+      "Mobile-first, reliability-focused inspection app for field teams: data capture and reporting workflows that keep working across iOS devices on site.",
+    tech: ["iOS", "Mobile-first", "Data capture", "Reporting"],
+    metrics: [["iOS", "App Store"], ["Field", "data capture"], ["PDF", "reporting"]],
+    category: "Mobile",
+    year: "2025",
+    accent: "#6fffc0",
+    links: {},
+  },
   {
     slug: "elevate-carts",
     title: "Elevate Carts",
@@ -148,29 +180,38 @@ export const projects: Project[] = [
 export const experience = [
   {
     hash: "a3f9d12",
-    role: "Senior Full Stack Developer",
-    company: "Elevate Carts",
-    period: "2023 — Present",
+    role: "IT Lead",
+    company: "VirtueServe Solutions",
+    period: "Sep 2026 - Now",
     type: "Full-time",
-    desc: "Building enterprise e-commerce solutions handling 100k+ SKUs — payments, analytics and the infra underneath.",
+    desc: "Lead IT for a US property-management client. Global Admin on Microsoft 365: Exchange, SharePoint, Entra ID, Intune. Runbooks, onboarding and every escalation.",
     active: true,
   },
   {
     hash: "c7f2b91",
-    role: "Full Stack Developer",
-    company: "AmazonChapter",
-    period: "2022 — 2023",
-    type: "Contract",
-    desc: "Shipped an educational platform serving 10k+ active course learners.",
+    role: "Production Lead & Full Stack Dev",
+    company: "Babar Tech Solutions",
+    period: "Jan 2025 - Sep 2026",
+    type: "Full-time",
+    desc: "Led client web projects end to end: timelines, quality, releases. Azure and AWS deployments with Docker and Git.",
     active: false,
   },
   {
     hash: "8d1a5e3",
-    role: "Frontend Developer",
-    company: "LunchThymes",
-    period: "2022",
-    type: "Freelance",
-    desc: "Pixel-perfect responsive interfaces with micro-animations.",
+    role: "Full Stack Developer",
+    company: "Elevate Carts",
+    period: "Sep 2024 - Jan 2025",
+    type: "Full-time",
+    desc: "Scalable e-commerce apps with React, Next.js, Node and Express. SQL and NoSQL design, REST integrations.",
+    active: false,
+  },
+  {
+    hash: "41be7c0",
+    role: "Data Scientist (Intern)",
+    company: "Systems Limited",
+    period: "Jun - Dec 2023",
+    type: "Internship",
+    desc: "Analysed large datasets, tuned neural networks for prediction, automated data pipelines in Python.",
     active: false,
   },
 ]
@@ -183,40 +224,40 @@ export const values = [
 
 export const skillGroups = [
   {
-    name: "Frontend",
+    name: "Development",
     color: "#8b7bff",
     items: [
-      { name: "React & Next.js", level: 93 },
+      { name: "React & Next.js", level: 92 },
       { name: "TypeScript", level: 88 },
-      { name: "TailwindCSS", level: 92 },
-      { name: "Motion & Three.js", level: 82 },
-    ],
-  },
-  {
-    name: "Backend",
-    color: "#4cc9ff",
-    items: [
-      { name: "Node.js & Express", level: 87 },
-      { name: "MongoDB", level: 85 },
-      { name: "PostgreSQL", level: 83 },
+      { name: "Node & Express", level: 87 },
       { name: "Python", level: 80 },
     ],
   },
   {
-    name: "Cloud & DevOps",
+    name: "Microsoft 365 & Cloud",
+    color: "#4cc9ff",
+    items: [
+      { name: "M365 Admin", level: 93 },
+      { name: "Entra ID & Intune", level: 86 },
+      { name: "SharePoint", level: 88 },
+      { name: "Azure & AWS", level: 82 },
+    ],
+  },
+  {
+    name: "Data & DevOps",
     color: "#3ee39a",
     items: [
+      { name: "PostgreSQL & SQL", level: 85 },
+      { name: "MongoDB", level: 84 },
+      { name: "Docker & CI/CD", level: 85 },
       { name: "Git", level: 92 },
-      { name: "CI/CD", level: 86 },
-      { name: "Docker", level: 85 },
-      { name: "AWS", level: 80 },
     ],
   },
 ]
 
 export const toolbelt = [
-  "React", "Next.js", "TypeScript", "Node.js", "Python", "Docker", "MongoDB",
-  "PostgreSQL", "Git", "Redux", "Tailwind", "AWS", "Laravel", "Vue.js", "GraphQL", "Three.js",
+  "React", "Next.js", "TypeScript", "Node.js", "Python", "PowerShell", "Microsoft 365", "Entra ID",
+  "Intune", "SharePoint", "Azure", "AWS", "Docker", "PostgreSQL", "MongoDB", "Zendesk",
 ]
 
 export const animes = [
@@ -236,10 +277,10 @@ export const hobbies = [
 ]
 
 export const openTo = [
-  "Full-time senior developer roles",
+  "IT engineering & Microsoft 365 roles",
+  "Full-stack development",
   "Long-term contracts (6+ months)",
   "Consulting & freelance projects",
-  "Technical co-founder",
 ]
 
 export const duckQuotes = [
@@ -274,6 +315,7 @@ export const facts = [
 
 export const setup = [
   ["Machine", "MacBook Pro M3"],
+  ["Desk", "Zendesk, Splashtop, M365 admin"],
   ["Editor", "VS Code (neovim on weekends)"],
   ["Shell", "zsh + oh-my-zsh"],
   ["Debugger", "a rubber duck"],
@@ -282,7 +324,7 @@ export const setup = [
 ] as const
 
 export const principles = [
-  "Ship end-to-end — not just frontend or backend.",
+  "Own it end to end: the code and the systems under it.",
   "Obsessed with performance.",
   "Write code other devs actually want to maintain.",
   "It works on my machine → so I ship the machine.",

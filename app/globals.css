@@ -105,3 +105,17 @@ html.lenis body {
 .holo-form {
   filter: drop-shadow(0 0 18px rgb(111 255 192 / 0.15));
 }
+
+/* custom cursor (fine pointers only) */
+.cursor-layer {
+  display: none;
+}
+html.has-cursor .cursor-layer {
+  display: block;
+}
+@media (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+}
