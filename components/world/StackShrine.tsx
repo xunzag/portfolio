@@ -137,7 +137,6 @@ function Blade() {
   return (
     <group ref={ref}>
       <primitive object={scene} />
-      <pointLight position={[0, 0, 1.5]} color="#9fb4ff" intensity={8} distance={8} decay={1.6} />
       <mesh rotation-x={-Math.PI / 2} position={[0, -2.9, 0]}>
         <ringGeometry args={[0.9, 1.05, 64]} />
         <meshBasicMaterial color={[1.4, 1.2, 3.2]} toneMapped={false} />

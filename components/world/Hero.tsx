@@ -13,39 +13,13 @@ useGLTF.preload("/models/guts.glb")
 
 // Guts, crouched in the rain in the middle of the neon highway.
 export function Hero() {
-  const key = useRef<THREE.SpotLight>(null)
-  const target = useMemo(() => new THREE.Object3D(), [])
-  useFrame(({ clock }) => {
-    // lightning-ish flicker every few seconds
-    const t = clock.elapsedTime % 7
-    if (key.current) key.current.intensity = 70 + (t > 6.6 && Math.sin(t * 90) > 0 ? 160 : 0)
-  })
   return (
     <group>
-      <primitive object={target} position={[0, 0.8, 0]} />
       <Suspense fallback={null}>
         <Guts position={[0, 0, 0]} />
       </Suspense>
       <Brand />
       <Embers />
-      {/* key light from above + neon rims from behind */}
-      <spotLight
-        ref={key}
-        target={target}
-        position={[1.5, 9, 3]}
-        angle={0.42}
-        penumbra={0.8}
-        intensity={70}
-        distance={20}
-        decay={1.5}
-        color="#ffe2d0"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0005}
-      />
-      <pointLight position={[-2.6, 2.2, -2.2]} color="#ff2d6f" intensity={30} distance={8} decay={1.6} />
-      <pointLight position={[2.8, 2.6, -1.6]} color="#2dd8ff" intensity={30} distance={8} decay={1.6} />
-      <pointLight position={[0, 0.4, 0]} color="#ff3b1f" intensity={6} distance={3} decay={1.8} />
     </group>
   )
 }

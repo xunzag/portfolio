@@ -4,18 +4,18 @@ import { Suspense, useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { useGLTF } from "@react-three/drei"
 import * as THREE from "three"
+import { PROJECT_VH, RANGES } from "@/lib/chapters"
 import { live } from "./live"
 
 useGLTF.preload("/models/eagle.glb")
 
 /** +1 if the model's beak points down +Z in its file, -1 if down -Z */
 const NOSE = 1
-const SPAN = 3.4
+const SPAN = 2.9
 
 // The mechanical eagle is your guide: it circles over Guts at the start, then
-// on the first scroll it flies ahead of the camera for the whole
-// journey — surging forward when you scroll, banking as it drifts, gliding
-// when you stop to read.
+// flies with the camera for the whole journey — surging ahead when you scroll,
+// holding station in a corner of the frame when you stop to read.
 export function Eagle() {
   return (
     <Suspense fallback={null}>
@@ -24,6 +24,7 @@ export function Eagle() {
   )
 }
 
+const REST: Record<string, number> = { about: -0.62, facts: 0.75, stack: -0.1, portal: 0.6, life: 0.7, contact: 0.8 }
 const PERCH = new THREE.Vector3(5.2, 4.6, -0.5)
 const tmp = new THREE.Vector3()
 
@@ -54,7 +55,10 @@ function Bird() {
       g.computeBoundingBox()
       box.union(g.boundingBox!)
       const mat = (m.material as THREE.MeshStandardMaterial).clone()
-      mat.envMapIntensity = 1.6
+      mat.envMapIntensity = 2.2
+      // it has to read against a night sky: lift its own glow
+      mat.emissiveIntensity = 3
+      if (!mat.emissiveMap) mat.emissive = new THREE.Color("#2a1a4a")
       mat.onBeforeCompile = (sh) => {
         sh.uniforms.uFlap = flap
         sh.uniforms.uHalf = { value: 1 }
@@ -101,7 +105,7 @@ function Bird() {
   const g = useRef<THREE.Group>(null)
   const bank = useRef<THREE.Group>(null)
   const st = useMemo(
-    () => ({ pos: PERCH.clone(), vel: new THREE.Vector3(), target: new THREE.Vector3(), look: new THREE.Vector3(), fwd: new THREE.Vector3(), right: new THREE.Vector3(), up: new THREE.Vector3(), phase: 0, roll: 0, busy: 0, init: false }),
+    () => ({ pos: PERCH.clone(), vel: new THREE.Vector3(), target: new THREE.Vector3(), look: new THREE.Vector3(), fwd: new THREE.Vector3(), right: new THREE.Vector3(), up: new THREE.Vector3(), phase: 0, roll: 0, busy: 0, side: -1, init: false }),
     [],
   )
 
@@ -120,15 +124,27 @@ function Bird() {
       st.target.set(Math.cos(t * 0.45) * 5.2, 4.6 + Math.sin(t * 0.6) * 0.4, Math.sin(t * 0.45) * 5.2 - 0.5)
     } else {
       // a slow figure-of-eight across the top of the frame, a few metres ahead
-      // It only drops into view while you're travelling. Stop to read and it
-      // climbs back above the frame, so it never sits on top of the content.
-      st.busy += ((Math.abs(live.velocity) > 1.5 ? 1 : 0) - st.busy) * Math.min(1, d * (Math.abs(live.velocity) > 1.5 ? 3 : 0.9))
-      const lead = 10 + st.busy * 3
+      // Always in view, never on the content: it holds station in an upper
+      // corner of the frame (the side away from the text), and swoops to the
+      // middle to lead the way whenever you scroll.
+      const moving = Math.abs(live.velocity) > 0.25
+      st.busy += ((moving ? 1 : 0) - st.busy) * Math.min(1, d * (moving ? 3 : 1.1))
+      const cam = camera as THREE.PerspectiveCamera
+      const lead = 13 + st.busy * 3
+      const hh = lead * Math.tan((cam.fov * Math.PI) / 360)
+      const hw = hh * cam.aspect
+      const f = live.frame
+      // where along the top edge there's empty sky in each chapter (-1 left … 1 right)
+      let side = REST[f.chapter] ?? 0
+      if (f.chapter === "work") side = Math.floor((s - RANGES.work[0]) / PROJECT_VH) % 2 === 0 ? -0.8 : 0.8
+      st.side += (side - st.side) * Math.min(1, d * 1.2)
+      const restX = st.side * Math.max(0, hw - SPAN * 0.75)
+      const restY = hh - SPAN * 0.3
       st.target
         .copy(camera.position)
         .addScaledVector(st.fwd, lead)
-        .addScaledVector(st.right, Math.sin(t * 0.21) * 3.6)
-        .addScaledVector(st.up, 6.2 - st.busy * 4.6 + Math.sin(t * 0.34) * 0.3)
+        .addScaledVector(st.right, restX * (1 - st.busy * 0.75) + Math.sin(t * 0.5) * 0.35)
+        .addScaledVector(st.up, restY * (1 - st.busy * 0.35) + Math.sin(t * 0.8) * 0.2)
     }
     if (!st.init) {
       st.pos.copy(st.target)
@@ -145,7 +161,7 @@ function Bird() {
     st.pos.addScaledVector(st.vel, d)
     if (!perched) {
       // never let it fall far behind, and never let the camera fly through it
-      tmp.copy(st.pos).sub(st.target).clampLength(0, 4.5)
+      tmp.copy(st.pos).sub(st.target).clampLength(0, 3.5)
       st.pos.copy(st.target).add(tmp)
       const ahead = tmp.copy(st.pos).sub(camera.position).dot(st.fwd)
       if (ahead < 6) st.pos.addScaledVector(st.fwd, 6 - ahead)
@@ -175,7 +191,19 @@ function Bird() {
     <group ref={g}>
       <group ref={bank}>
         <primitive object={model} />
-        <pointLight color="#ffb080" intensity={2.5} distance={4} decay={1.8} />
+        {/* a soft halo so the silhouette never gets lost */}
+        <mesh position={[0, 0, -0.3]}>
+          <planeGeometry args={[SPAN * 1.5, SPAN * 1.5]} />
+          <shaderMaterial
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+            vertexShader={`varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`}
+            fragmentShader={`varying vec2 vUv; void main(){ float r = length(vUv - 0.5) * 2.0; float a = pow(max(0.0, 1.0 - r), 2.5) * 0.35; gl_FragColor = vec4(vec3(0.55, 0.75, 1.0) * a, a); }`}
+          />
+        </mesh>
       </group>
     </group>
   )

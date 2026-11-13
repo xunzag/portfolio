@@ -19,7 +19,6 @@ export function Weeknd(props: ThreeElements["group"]) {
   const turn = useRef<THREE.Group>(null)
   const bars = useRef<THREE.InstancedMesh>(null)
   const rings = useRef<THREE.Group>(null)
-  const key = useRef<THREE.PointLight>(null)
   const o = useMemo(() => new THREE.Object3D(), [])
   const world = useMemo(() => new THREE.Vector3(), [])
   const R = 4.3
@@ -62,7 +61,6 @@ export function Weeknd(props: ThreeElements["group"]) {
         r.scale.setScalar(1 + k * 2.2 + beat * 0.08)
         ;((r as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = (1 - k) * 0.7
       })
-    if (key.current) key.current.intensity = 90 + beat * 160
   })
 
   return (
@@ -85,9 +83,6 @@ export function Weeknd(props: ThreeElements["group"]) {
           </mesh>
         ))}
       </group>
-      {/* After Hours: hard red key from below, a cold rim from behind */}
-      <pointLight ref={key} position={[0, 2.2, 4.5]} color="#ff1f3d" intensity={90} distance={16} decay={1.5} />
-      <pointLight position={[-4, 9, -4]} color="#5f8cff" intensity={60} distance={16} decay={1.5} />
       <group position={[0, 10.9, 0]}>
         <Billboarded>
           <Type weight="semi" fontSize={0.26} letterSpacing={0.34} anchorX="center" color="#ff6f8a" glow={2.2}>

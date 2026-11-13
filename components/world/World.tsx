@@ -10,7 +10,7 @@ import { useRoom } from "@/lib/store"
 import { live } from "./live"
 import { zones } from "./track"
 import { ScrollRig } from "./ScrollRig"
-import { MOON_DIR, Sky } from "./Sky"
+import { Sky } from "./Sky"
 import { CloudSea } from "./CloudSea"
 import { Atmosphere } from "./Atmosphere"
 import { Dream, Dust } from "./Dream"
@@ -20,6 +20,7 @@ import { StackShrine } from "./StackShrine"
 import { Portal } from "./Portal"
 import { Drive } from "./Drive"
 import { Eagle } from "./Eagle"
+import { Lights } from "./Lights"
 import { Realm } from "./Realm"
 import { ContactStation } from "./ContactStation"
 
@@ -54,20 +55,12 @@ export default function World() {
           setQuality("low")
           setDpr(1)
         }}
-        onIncline={() => {
-          setQuality("high")
-          setDpr(Math.min(1.5, window.devicePixelRatio))
-        }}
       />
       <AdaptiveDpr pixelated={false} />
 
       <Sky />
       <CloudSea />
-      {/* moonlight from ahead, a violet bounce from the clouds below */}
-      <ambientLight intensity={0.22} color="#8f7fd6" />
-      <hemisphereLight args={["#6f7fe0", "#3a1054", 0.75]} />
-      <directionalLight position={MOON_DIR.clone().multiplyScalar(60)} intensity={2.4} color="#d6dcff" />
-      <directionalLight position={[-20, 12, 30]} intensity={0.55} color="#ff7fd0" />
+      <Lights />
       <Dust />
       <Atmosphere />
 
@@ -135,7 +128,7 @@ function Effects({ high }: { high: boolean }) {
     )
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
-      <Bloom mipmapBlur intensity={1.15} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.78} levels={7} />
+      <Bloom mipmapBlur intensity={1.15} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.78} levels={6} />
       <ChromaticAberration offset={offset} radialModulation modulationOffset={0.25} />
       <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
       <Vignette darkness={0.5} offset={0.3} />
