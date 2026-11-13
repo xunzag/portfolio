@@ -15,7 +15,8 @@ import { CloudSea } from "./CloudSea"
 import { Atmosphere } from "./Atmosphere"
 import { Dream, Dust } from "./Dream"
 import { Hero } from "./Hero"
-import { AboutStation, FactsStation, ProjectStations } from "./Stations"
+import { AboutStation, ProjectStations } from "./Stations"
+import { Desk } from "./Desk"
 import { StackShrine } from "./StackShrine"
 import { Portal } from "./Portal"
 import { Drive } from "./Drive"
@@ -72,7 +73,7 @@ export default function World() {
           <Drive />
           <ProjectStations />
           <AboutStation />
-          <FactsStation />
+          <Desk />
           <StackShrine />
           <Portal />
         </Zone>

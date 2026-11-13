@@ -23,7 +23,7 @@ export function Dream() {
         return <Island key={i} radius={2.7} seed={10 + i} position={[st.park.x, st.park.y - 0.62, st.park.z]} rim={projects[i].accent} />
       })}
       <Island radius={5.5} seed={31} position={[ABOUT.x, ABOUT.y - 4.9, ABOUT.z]} rim="#7fd8ff" />
-      <Island radius={3.2} seed={37} position={[FACTS.x, FACTS.y - 5.8, FACTS.z]} rim="#ffcf7f" />
+      <Island radius={5.4} seed={37} position={[FACTS.x, FACTS.y - 5.28, FACTS.z]} rim="#ffcf7f" />
       <Island radius={4.6} seed={41} position={[STACK.x, STACK.y - 4.2, STACK.z]} rim="#9d7bff" />
     </group>
   )

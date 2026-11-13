@@ -65,7 +65,7 @@ export function Lights() {
       <pointLight ref={car} color="#cdbfff" intensity={5} distance={7} decay={1.6} />
       <pointLight ref={screen} color="#ffffff" intensity={0} distance={9} decay={1.6} />
       {/* the desk lamp */}
-      <pointLight position={[FACTS.x - 1, FACTS.y + 1.6, FACTS.z + 2.5]} color="#ffd9a8" intensity={22} distance={9} decay={1.6} />
+      <pointLight position={[FACTS.x - 1, FACTS.y + 1.8, FACTS.z + 3.2]} color="#ffd9a8" intensity={26} distance={11} decay={1.6} />
       {/* the blade */}
       <pointLight position={[STACK.x, STACK.y + 0.8, STACK.z + 1.5]} color="#9fb4ff" intensity={8} distance={8} decay={1.6} />
       {/* After Hours: a hard red key and a cold rim on the Weeknd */}

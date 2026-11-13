@@ -28,6 +28,8 @@ type State = {
   models: string[]
   /** what the visitor scored on the loading screen */
   loaderScore: { kind: "wpm" | "petals"; value: number } | null
+  /** contact form: "sent" while the eagle is carrying the message away */
+  letter: "idle" | "sent"
   setPhase: (p: State["phase"]) => void
   setFocus: (s: Section | null) => void
   setHovered: (h: State["hovered"]) => void
@@ -52,6 +54,7 @@ export const useRoom = create<State>((set) => ({
   quality: "high",
   models: [],
   loaderScore: null,
+  letter: "idle",
   setPhase: (phase) => set({ phase }),
   setFocus: (focus) => set({ focus }),
   setHovered: (hovered) => set({ hovered }),
