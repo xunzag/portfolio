@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
-import { useFrame } from "@react-three/fiber"
+import { useFrame, useThree } from "@react-three/fiber"
 import { useTexture } from "@react-three/drei"
 import * as THREE from "three"
 import { PROJECT_VH, RANGES } from "@/lib/chapters"
@@ -82,7 +82,8 @@ function posterTexture(p: Project) {
 }
 
 function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Texture }) {
-  const st = projectStation(i)
+  const portrait = useThree((s) => s.size.width / s.size.height < 0.8)
+  const st = projectStation(i, portrait)
   const a = RANGES.work[0] + i * PROJECT_VH
   const on = usePresence(a + 20, a + PROJECT_VH + 6, 45, 34)
   const info = useRef<THREE.Group>(null)
@@ -105,7 +106,9 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
   const inner = -st.side
   const W = 6.6
   const H = W * 0.5625
-  const infoX = inner > 0 ? W / 2 + 0.6 : -W / 2 - 0.6 - 4.3
+  // portrait: the text floats in front of the island, under the car
+  const infoX = portrait ? -1.3 : inner > 0 ? W / 2 + 0.6 : -W / 2 - 0.6 - 4.3
+  const infoY = portrait ? -3.7 : 2.45
   const accent = useMemo(() => new THREE.Color(p.accent), [p.accent])
   const url = p.links.live ?? p.links.github
 
@@ -150,7 +153,7 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
           <HoloScreen map={map} accent={p.accent} width={W} height={H} on={on} />
         </group>
       </group>
-      <group ref={info} position={[infoX, 2.45, 0.3]}>
+      <group ref={info} position={[infoX, infoY, portrait ? 5.3 : 0.3]} scale={portrait ? 0.5 : 1}>
         <Type weight="semi" fontSize={0.17} letterSpacing={0.18} color={p.accent} glow={1.8}>
           {`${String(i + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}   ${p.category.toUpperCase()}   ${p.year}`}
         </Type>

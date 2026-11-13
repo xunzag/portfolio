@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber"
 import { easing } from "maath"
 import * as THREE from "three"
 import { live } from "./live"
+import { mode } from "./track"
 
 // The camera is a pure function of the (already smoothed) scroll position,
 // plus a small damped cursor parallax so it always feels alive.
@@ -21,6 +22,7 @@ export function ScrollRig() {
     if (DEBUG) (window as unknown as Record<string, unknown>).__info = { programs: gl.info.programs?.length }
     const f = live.frame
     const aspect = size.width / size.height
+    mode.portrait = aspect < 0.8
     const desktop = size.width >= 900
 
     easing.damp(para, "x", pointer.x, 0.6, dt)

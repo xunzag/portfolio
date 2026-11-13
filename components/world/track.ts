@@ -15,12 +15,16 @@ export const CONTACT = new THREE.Vector3(0, 416, -30)
 const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
 
 // Drive-in screens alternate either side of the road, rising gently.
-export function projectStation(i: number) {
+/** set by the camera rig: phones held upright get their own framing */
+export const mode = { portrait: false }
+
+export function projectStation(i: number, portrait = false) {
   const side = i % 2 === 0 ? -1 : 1
   const center = v3(side * 5.6, 3 + i * 0.5, -30 - i * 26)
-  const cam = center.clone().add(v3(-side * 2.4, 0.6, 12.6))
-  const target = center.clone().add(v3(-side * 1.9, -0.5, 0))
-  const yaw = Math.atan2(cam.x - center.x, cam.z - center.z)
+  // landscape: screen and text side by side. portrait: screen on top, the car, then the text.
+  const cam = center.clone().add(portrait ? v3(0, -3.3, 9.2) : v3(-side * 2.4, 0.6, 12.6))
+  const target = center.clone().add(portrait ? v3(0, -3.5, 0) : v3(-side * 1.9, -0.5, 0))
+  const yaw = portrait ? 0 : Math.atan2(cam.x - center.x, cam.z - center.z)
   // where the car pulls up: under the screen, a little in front
   const park = center.clone().add(v3(side * 0.3, -2.75, 2.6))
   return { side, center, cam, target, yaw, park }
@@ -93,14 +97,14 @@ const lerp = THREE.MathUtils.lerp
 
 type Key = { s: number; pos: THREE.Vector3; target: THREE.Vector3; fov?: number; flash?: number; roll?: number; chase?: boolean }
 
-function buildTrack(): Key[] {
+function buildTrack(portrait: boolean): Key[] {
   const K: Key[] = []
   const [w0] = RANGES.work
   K.push({ s: RANGES.hero[1], pos: v3(0, 2.1, 5.6), target: v3(0, 1.5, -4), fov: 40 })
   // chase cam: low behind the car as it pulls away from the start line
   K.push({ s: w0 + 22, pos: road.getPoint(carU(w0 + 22)).add(v3(1.2, 1.5, 7)), target: road.getPoint(carU(w0 + 22) + 0.01).add(v3(0, 0.9, -3)), fov: 48, roll: 0.03, chase: true })
   projects.forEach((_, i) => {
-    const st = projectStation(i)
+    const st = projectStation(i, portrait)
     const a = w0 + i * PROJECT_VH
     const drift = v3(st.side * 0.7, 0.1, -0.9)
     K.push({ s: a + 55, pos: st.cam, target: st.target, fov: 38, roll: -st.side * 0.02 })
@@ -130,11 +134,18 @@ function buildTrack(): Key[] {
   return K
 }
 
-const TRACK = buildTrack()
-const curvePos = new THREE.CatmullRomCurve3(TRACK.map((k) => k.pos), false, "centripetal")
-const curveTarget = new THREE.CatmullRomCurve3(TRACK.map((k) => k.target), false, "centripetal")
+const mk = (portrait: boolean) => {
+  const keys = buildTrack(portrait)
+  return {
+    keys,
+    pos: new THREE.CatmullRomCurve3(keys.map((k) => k.pos), false, "centripetal"),
+    target: new THREE.CatmullRomCurve3(keys.map((k) => k.target), false, "centripetal"),
+  }
+}
+const TRACKS = { landscape: mk(false), portrait: mk(true) }
 
 function sampleTrack(s: number, out: Frame) {
+  const { keys: TRACK, pos: curvePos, target: curveTarget } = mode.portrait ? TRACKS.portrait : TRACKS.landscape
   let j = 0
   while (j < TRACK.length - 2 && s >= TRACK[j + 1].s) j++
   const a = TRACK[j]
@@ -198,12 +209,16 @@ export function sample(s: number): Frame {
     out.t = t
   } else {
     const t = local(s, "contact")
-    const e = ease.inOut(clamp01(t / 0.7))
+    const e = ease.inOut(clamp01(t / 0.42))
     const lifeEnd = v3(REALM.x + Math.sin(0.2 + Math.PI * 1.6) * 17, REALM.y + 6, REALM.z + Math.cos(0.2 + Math.PI * 1.6) * 17)
     pos.lerpVectors(lifeEnd, CONTACT.clone().add(v3(0, 0.8, 12.5)), e)
     target.lerpVectors(v3(REALM.x, REALM.y + 4, REALM.z), CONTACT.clone().add(v3(0, 0.3, 0)), e)
     pos.y += Math.sin(e * Math.PI) * 5
-    out.fov = 40
+    // the last scroll: pull back and down to the final island (Guts, the Alfa, the moon)
+    const o = ease.inOutSine(clamp01((t - 0.72) / 0.28))
+    pos.lerp(CONTACT.clone().add(v3(0.6, -1.1, 22.5)), o)
+    target.lerp(CONTACT.clone().add(v3(0, -1.5, 0)), o)
+    out.fov = 40 + o * 4
     out.chapter = "contact"
     out.t = t
   }

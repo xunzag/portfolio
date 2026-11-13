@@ -5,7 +5,10 @@ import { useFrame } from "@react-three/fiber"
 import { useGLTF } from "@react-three/drei"
 import * as THREE from "three"
 import { PROJECT_VH, RANGES } from "@/lib/chapters"
+import { useRoom } from "@/lib/store"
 import { live } from "./live"
+import { MOON_DIR } from "./Sky"
+import { CONTACT } from "./track"
 
 useGLTF.preload("/models/eagle.glb")
 
@@ -27,6 +30,8 @@ export function Eagle() {
 const REST: Record<string, number> = { about: -0.62, facts: 0.75, stack: -0.1, portal: 0.6, life: 0.7, contact: 0.8 }
 const PERCH = new THREE.Vector3(5.2, 4.6, -0.5)
 const tmp = new THREE.Vector3()
+/** where the scroll hangs in the contact scene */
+const LETTER = CONTACT.clone().add(new THREE.Vector3(2.4, 0.9, 1.4))
 
 function Bird() {
   const gltf = useGLTF("/models/eagle.glb")
@@ -104,8 +109,9 @@ function Bird() {
 
   const g = useRef<THREE.Group>(null)
   const bank = useRef<THREE.Group>(null)
+  const letter = useRef<THREE.Mesh>(null)
   const st = useMemo(
-    () => ({ pos: PERCH.clone(), vel: new THREE.Vector3(), target: new THREE.Vector3(), look: new THREE.Vector3(), fwd: new THREE.Vector3(), right: new THREE.Vector3(), up: new THREE.Vector3(), phase: 0, roll: 0, busy: 0, side: -1, init: false }),
+    () => ({ pos: PERCH.clone(), vel: new THREE.Vector3(), target: new THREE.Vector3(), look: new THREE.Vector3(), fwd: new THREE.Vector3(), right: new THREE.Vector3(), up: new THREE.Vector3(), phase: 0, roll: 0, busy: 0, side: -1, lt: 0, init: false }),
     [],
   )
 
@@ -146,20 +152,28 @@ function Bird() {
         .addScaledVector(st.right, restX * (1 - st.busy * 0.75) + Math.sin(t * 0.5) * 0.35)
         .addScaledVector(st.up, restY * (1 - st.busy * 0.35) + Math.sin(t * 0.8) * 0.2)
     }
+    // a letter to deliver: swoop down to the scroll, take it, and make for the moon
+    const carrying = useRoom.getState().letter === "sent"
+    st.lt = carrying ? st.lt + d : 0
+    if (carrying) {
+      if (st.lt < 1.5) st.target.copy(LETTER)
+      else st.target.copy(LETTER).addScaledVector(MOON_DIR, (st.lt - 1.5) * 26).add(tmp.set(0, (st.lt - 1.5) * 1.5, 0))
+    }
+    if (letter.current) letter.current.visible = carrying && st.lt > 1.2
     if (!st.init) {
       st.pos.copy(st.target)
       st.init = true
     }
     // critically-damped chase, so it glides rather than snaps
-    const k = perched ? 3 : 2.2
+    const k = carrying ? 2.6 : perched ? 3 : 2.2
     st.vel.addScaledVector(st.target.clone().sub(st.pos), k * k * d).multiplyScalar(Math.exp(-2 * k * d))
     // jumping between worlds (the portal) would otherwise leave it far behind
-    if (st.pos.distanceTo(st.target) > 60) {
+    if (!carrying && st.pos.distanceTo(st.target) > 60) {
       st.pos.copy(st.target)
       st.vel.set(0, 0, 0)
     }
     st.pos.addScaledVector(st.vel, d)
-    if (!perched) {
+    if (!perched && !carrying) {
       // never let it fall far behind, and never let the camera fly through it
       tmp.copy(st.pos).sub(st.target).clampLength(0, 3.5)
       st.pos.copy(st.target).add(tmp)
@@ -172,7 +186,7 @@ function Bird() {
     // face where it's going; when hovering, face the way the camera travels
     const speed = st.vel.length()
     st.look.copy(st.pos)
-    if (perched) st.look.addScaledVector(st.vel, 1)
+    if (perched || carrying) st.look.addScaledVector(st.vel, 1)
     else st.look.addScaledVector(st.fwd, 1).addScaledVector(st.vel, 0.12)
     g.current.lookAt(st.look)
     if (bank.current) {
@@ -182,7 +196,7 @@ function Bird() {
       bank.current.rotation.x = perched ? 0 : THREE.MathUtils.clamp(-st.vel.dot(st.up) * 0.05, -0.4, 0.4)
     }
     // wingbeat: lazy when gliding, urgent when you scroll
-    const rate = perched ? 3.4 : 3.2 + Math.min(9, speed * 0.9 + Math.abs(live.velocity) * 0.12)
+    const rate = carrying ? 9 : perched ? 3.4 : 3.2 + Math.min(9, speed * 0.9 + Math.abs(live.velocity) * 0.12)
     st.phase += rate * d
     flap.value = Math.sin(st.phase) * 0.42 + 0.05
   })
@@ -191,6 +205,11 @@ function Bird() {
     <group ref={g}>
       <group ref={bank}>
         <primitive object={model} />
+        {/* the letter, glowing in its talons */}
+        <mesh ref={letter} position={[0, -0.45, 0.1]} rotation-x={-Math.PI / 2} visible={false}>
+          <planeGeometry args={[0.5, 0.34]} />
+          <meshBasicMaterial color={[1.2, 4, 2.6]} toneMapped={false} side={THREE.DoubleSide} />
+        </mesh>
         {/* a soft halo so the silhouette never gets lost */}
         <mesh position={[0, 0, -0.3]}>
           <planeGeometry args={[SPAN * 1.5, SPAN * 1.5]} />
