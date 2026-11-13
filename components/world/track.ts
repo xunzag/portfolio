@@ -117,8 +117,9 @@ function buildTrack(): Key[] {
   K.push({ s: ab0 + 100, pos: ABOUT.clone().add(v3(0, 0.6, 14.4)), target: ABOUT.clone().add(v3(0, -0.1, 0)), fov: 40 })
   K.push({ s: ab0 + 290, pos: ABOUT.clone().add(v3(0.7, 0.45, 13.9)), target: ABOUT.clone().add(v3(0.15, -0.1, 0)), fov: 40 })
   const [f0] = RANGES.facts
-  K.push({ s: f0 + 80, pos: FACTS.clone().add(v3(0, 0, 14)), target: FACTS, fov: 42, roll: 0.03 })
-  K.push({ s: f0 + 220, pos: FACTS.clone().add(v3(-1.6, 0.6, 9.5)), target: FACTS.clone().add(v3(0.4, 0, 0)), fov: 40, roll: -0.03 })
+  // the desk: arrive high on the left, drift round to the right as the facts light up
+  K.push({ s: f0 + 70, pos: FACTS.clone().add(v3(-3.6, 1.5, 12.4)), target: FACTS.clone().add(v3(0, 0.1, 0)), fov: 42, roll: 0.02 })
+  K.push({ s: f0 + 225, pos: FACTS.clone().add(v3(3.4, 1.1, 11.6)), target: FACTS.clone().add(v3(0, 0.0, 0)), fov: 41, roll: -0.02 })
   const [st0] = RANGES.stack
   K.push({ s: st0 + 80, pos: STACK.clone().add(v3(3, 1.8, 20.5)), target: STACK.clone().add(v3(0.4, 0.8, 0)), fov: 40, roll: -0.02 })
   K.push({ s: st0 + 240, pos: STACK.clone().add(v3(-1.5, 1.1, 18)), target: STACK.clone().add(v3(0.6, 0.6, 0)), fov: 40, roll: 0.02 })
