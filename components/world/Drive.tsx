@@ -205,7 +205,6 @@ function Car() {
           </mesh>
         ))}
       </group>
-      <pointLight position={[0, 2.2, 0.5]} color="#cdbfff" intensity={5} distance={7} decay={1.6} />
     </group>
   )
 }

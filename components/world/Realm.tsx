@@ -9,6 +9,7 @@ import { RANGES } from "@/lib/chapters"
 import { Type } from "./Type"
 import { Island as RockIsland } from "./Rock"
 import { Weeknd } from "./Weeknd"
+import { WEEKND_POS } from "./Lights"
 import { usePresence, useReveal } from "./presence"
 import { useRoom } from "@/lib/store"
 import { live } from "./live"
@@ -37,7 +38,7 @@ export function Realm() {
       <PosterRing />
       <HobbyRing />
       <RealmTitle />
-      <Weeknd position={[12.5, 2, -7.2]} />
+      <Weeknd position={WEEKND_POS} />
     </group>
   )
 }

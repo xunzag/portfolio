@@ -8,6 +8,8 @@ import { live } from "./live"
 
 // The camera is a pure function of the (already smoothed) scroll position,
 // plus a small damped cursor parallax so it always feels alive.
+const DEBUG = typeof window !== "undefined" && location.search.includes("debug")
+
 export function ScrollRig() {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const size = useThree((s) => s.size)
@@ -15,7 +17,8 @@ export function ScrollRig() {
   const right = useMemo(() => new THREE.Vector3(), [])
   const up = useMemo(() => new THREE.Vector3(), [])
 
-  useFrame(({ pointer }, dt) => {
+  useFrame(({ pointer, gl }, dt) => {
+    if (DEBUG) (window as unknown as Record<string, unknown>).__info = { programs: gl.info.programs?.length }
     const f = live.frame
     const aspect = size.width / size.height
     const desktop = size.width >= 900

@@ -29,7 +29,7 @@ const fragment = /* glsl */ `
     vec2 u = f * f * (3.0 - 2.0 * f);
     return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
   }
-  float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; } return v; }
+  float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; } return v; }
   vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0, 4, 2), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
 
   void main() {
@@ -54,8 +54,8 @@ const fragment = /* glsl */ `
     col += vec3(0.12, 0.07, 0.25) * pow(band, 3.0) * 0.5;
 
     // aurora ribbons
-    float rib = smoothstep(0.52, 0.95, fbm(vec2(sph.x * 2.5 + uTime * 0.02, y * 3.0 + fbm(sph * 2.0 + uTime * 0.01) * 2.0)));
-    vec3 aur = mix(vec3(0.5, 0.2, 1.0), vec3(0.1, 0.85, 0.8), fbm(sph * 1.5 + 3.0));
+    float rib = smoothstep(0.52, 0.95, fbm(vec2(sph.x * 2.5 + uTime * 0.02, y * 3.0 + noise(sph * 2.0 + uTime * 0.01) * 2.0)));
+    vec3 aur = mix(vec3(0.5, 0.2, 1.0), vec3(0.1, 0.85, 0.8), noise(sph * 1.5 + 3.0));
     aur = mix(aur, hue(fract(uTime * 0.1 + sph.x * 0.1)), uParty);
     col += aur * rib * smoothstep(0.04, 0.28, y) * (1.0 - smoothstep(0.5, 0.9, y)) * 0.55;
 
@@ -66,7 +66,7 @@ const fragment = /* glsl */ `
     vec3 mt = normalize(cross(uMoon, vec3(0.0, 1.0, 0.0)));
     vec3 mb = cross(mt, uMoon);
     vec2 mp = vec2(dot(d, mt), dot(d, mb)) / R;
-    float crater = fbm(mp * 3.0 + 7.0) * 0.6 + fbm(mp * 9.0) * 0.25;
+    float crater = disc > 0.0 ? fbm(mp * 3.0 + 7.0) * 0.6 + noise(mp * 9.0) * 0.25 : 0.0;
     vec3 moonCol = mix(vec3(0.75, 0.68, 0.95), vec3(1.0, 0.94, 1.0), crater) * (0.75 + 0.5 * sqrt(max(0.0, 1.0 - dot(mp, mp))));
     col = mix(col, moonCol * 1.9, disc);
     col += vec3(0.75, 0.5, 1.0) * exp(-max(ang - R, 0.0) * 9.0) * 0.4 * (1.0 - disc);

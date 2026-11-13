@@ -67,7 +67,7 @@ export function CloudSea() {
     const u = mat.current?.uniforms
     if (u) {
       u.uTime.value = clock.elapsedTime
-      u.uOct.value = high ? 5 : 3
+      u.uOct.value = high ? 4 : 3
     }
     // always a long way beneath whatever island we're at
     mesh.current?.position.set(camera.position.x, camera.position.y - 26, camera.position.z)

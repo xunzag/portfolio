@@ -149,8 +149,6 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
         >
           <HoloScreen map={map} accent={p.accent} width={W} height={H} on={on} />
         </group>
-        {/* the screen throws its colour onto the car parked below */}
-        <pointLight position={[0, -1.2, 2.2]} color={p.accent} intensity={14} distance={9} decay={1.6} />
       </group>
       <group ref={info} position={[infoX, 2.45, 0.3]}>
         <Type weight="semi" fontSize={0.17} letterSpacing={0.18} color={p.accent} glow={1.8}>
