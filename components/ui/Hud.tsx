@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { FileDown, TerminalSquare } from "lucide-react"
+import { FileDown, TerminalSquare, Volume2, VolumeX } from "lucide-react"
 import { CHAPTERS } from "@/lib/chapters"
 import { profile } from "@/lib/content"
 import { scrollBus, useRoom } from "@/lib/store"
 import { Github, Linkedin } from "./icons"
+import { sound } from "@/lib/sound"
 
 const NAV = CHAPTERS.filter((c) => c.label)
 
@@ -52,6 +53,7 @@ export function Hud() {
           </nav>
 
           <div className="pointer-events-auto absolute right-4 top-4 flex gap-2 sm:right-6 sm:top-5">
+            <SoundBtn />
             <IconBtn label="Open terminal (ctrl + `)" onClick={() => useRoom.getState().setTerminal(true)}>
               <TerminalSquare size={15} />
             </IconBtn>
@@ -111,5 +113,16 @@ function ScoreChip() {
         </motion.p>
       )}
     </AnimatePresence>
+  )
+}
+
+function SoundBtn() {
+  const [on, setOn] = useState(sound.on)
+  useEffect(() => sound.subscribe(setOn), [])
+  return (
+    <button aria-label={on ? "Mute sound" : "Turn sound on"} title={on ? "Mute" : "Sound on"} onClick={() => sound.toggle()} className={`${iconCls} relative ${on ? "!text-ink" : ""}`}>
+      {on ? <Volume2 size={15} /> : <VolumeX size={15} />}
+      {!on && <span className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px] uppercase tracking-widest text-muted">sound</span>}
+    </button>
   )
 }

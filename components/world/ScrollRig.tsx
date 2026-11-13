@@ -33,7 +33,7 @@ export function ScrollRig() {
     camera.lookAt(f.target)
     camera.rotateZ(f.roll)
 
-    const fov = aspect < 1 ? Math.min(100, f.fov * (1.1 + (1 - aspect) * 0.9)) : f.fov
+    const fov = aspect < 1 ? Math.min(88, f.fov * (1.1 + (1 - aspect) * 2)) : f.fov
     if (Math.abs(camera.fov - fov) > 0.01) {
       camera.fov = fov
       camera.updateProjectionMatrix()

@@ -3,7 +3,7 @@
 import { useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
-import { local } from "@/lib/chapters"
+import { RANGES, local } from "@/lib/chapters"
 import { live } from "./live"
 import { PORTAL } from "./track"
 import { Type } from "./Type"
@@ -40,7 +40,10 @@ export function Portal() {
   const uniforms = useMemo(() => ({ uTime: { value: 0 }, uPull: { value: 0 } }), [])
   const runes = useMemo(() => Array.from({ length: 24 }, (_, i) => (i / 24) * Math.PI * 2), [])
 
+  const root = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
+    // the gate only lights once you've left the shrine, so it never glares through earlier stops
+    if (root.current) root.current.visible = live.scroll > RANGES.stack[1] - 70
     const u = disk.current?.uniforms
     const pull = local(live.scroll, "portal")
     if (u) {
@@ -51,7 +54,7 @@ export function Portal() {
   })
 
   return (
-    <group position={PORTAL}>
+    <group ref={root} position={PORTAL}>
       <mesh>
         <circleGeometry args={[6, 96]} />
         <shaderMaterial ref={disk} vertexShader={vortexV} fragmentShader={vortexF} uniforms={uniforms} transparent depthWrite={false} toneMapped={false} side={THREE.DoubleSide} />

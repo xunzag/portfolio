@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from "react"
 import { TOTAL_VH } from "@/lib/chapters"
+import { sound } from "@/lib/sound"
 import { live } from "./world/live"
+import { carAt } from "./world/track"
 
 // Screen-space effects that ride on scroll: warp flash between worlds,
 // speed lines when you scroll fast, and a thin progress bar.
@@ -20,6 +22,9 @@ export function FxOverlay() {
       const target = moving ? Math.min(1, Math.abs(live.velocity) * 0.09) : 0
       speed += (target - speed) * 0.12
       if (lines.current) lines.current.style.opacity = String(speed * 0.55 + (f.chapter === "portal" ? f.t * f.t * 0.6 : 0))
+      // sound follows the film: engine with the car, the full band in the off-the-clock world
+      const driving = f.chapter === "work" || (f.chapter === "about" && f.t < 0.25)
+      sound.mix(driving ? Math.min(1, Math.abs(carAt(live.scroll).speed) * 0.35) : 0, f.chapter === "life" ? 1 : f.chapter === "contact" ? 0.4 : 0)
       if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, live.scroll / (TOTAL_VH - 100))})`
       raf = requestAnimationFrame(loop)
     }

@@ -31,3 +31,13 @@ All copy lives in `lib/content.ts`. Realm characters are `public/models/char-1.g
 ```bash
 npm install && npm run dev
 ```
+
+## v3: the night drive
+
+- **Atmosphere:** midnight sky with a moon, auroras and a moonlit cloud sea (`Sky.tsx`, `CloudSea.tsx`); islands are faceted rock with glowing veins and rune platforms (`Rock.tsx`).
+- **Work:** the Alfa Romeo drives a road of light past one drive-in screen per project (`Drive.tsx`, road and car path in `track.ts`). Projects without a screenshot get a generated title card.
+- **Guide:** a mechanical eagle flies ahead while you scroll and leaves the frame when you stop (`Eagle.tsx`; wings bend in the vertex shader).
+- **Off the clock:** The Weeknd bust with a beat-synced equaliser (`Weeknd.tsx`).
+- **Sound:** fully procedural WebAudio (`lib/sound.ts`): wind, engine, an original synth loop. Off until the visitor turns it on.
+
+Models are optimised with `npx @gltf-transform/cli optimize in.glb out.glb --texture-compress webp --texture-size 1024 --compress meshopt` (add `--simplify-ratio` for heavy meshes; run `metalrough` first for spec-gloss files).

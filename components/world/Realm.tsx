@@ -7,6 +7,8 @@ import * as THREE from "three"
 import { animes, hobbies } from "@/lib/content"
 import { RANGES } from "@/lib/chapters"
 import { Type } from "./Type"
+import { Island as RockIsland } from "./Rock"
+import { Weeknd } from "./Weeknd"
 import { usePresence, useReveal } from "./presence"
 import { useRoom } from "@/lib/store"
 import { live } from "./live"
@@ -21,7 +23,6 @@ const ISLANDS: { pos: [number, number, number]; r: number; slot?: number }[] = [
   { pos: [11, 1.5, 4], r: 2.6, slot: 1 },
   { pos: [-8, 3, 9], r: 2.4, slot: 2 },
   { pos: [-3, -1, -12], r: 2.8, slot: 3 },
-  { pos: [14, 6, -9], r: 1.4 },
   { pos: [-15, 7, -3], r: 1.2 },
 ]
 
@@ -36,45 +37,19 @@ export function Realm() {
       <PosterRing />
       <HobbyRing />
       <RealmTitle />
+      <Weeknd position={[12.5, 2, -7.2]} />
     </group>
   )
 }
 
-function rockGeometry(radius: number, seed: number) {
-  const g = new THREE.IcosahedronGeometry(1, 3)
-  const r = rng(seed * 97)
-  const p = g.attributes.position as THREE.BufferAttribute
-  const v = new THREE.Vector3()
-  const jitter = new Map<string, number>()
-  for (let i = 0; i < p.count; i++) {
-    v.fromBufferAttribute(p, i)
-    const key = `${v.x.toFixed(3)},${v.y.toFixed(3)},${v.z.toFixed(3)}`
-    if (!jitter.has(key)) jitter.set(key, 0.85 + r() * 0.3)
-    const j = jitter.get(key)!
-    if (v.y > 0) v.y *= 0.25
-    else v.y *= 2.2 + (1 - Math.abs(v.x)) * 0.6
-    v.multiplyScalar(j)
-    p.setXYZ(i, v.x * radius, v.y * radius, v.z * radius)
-  }
-  g.computeVertexNormals()
-  return g
-}
-
 function Island({ pos, r, slot, seed }: { pos: [number, number, number]; r: number; slot?: number; seed: number }) {
   const ref = useRef<THREE.Group>(null)
-  const geo = useMemo(() => rockGeometry(r, seed), [r, seed])
   useFrame(({ clock }) => {
     if (ref.current) ref.current.position.y = pos[1] + Math.sin(clock.elapsedTime * 0.5 + seed) * 0.35
   })
   return (
     <group ref={ref} position={pos}>
-      <mesh geometry={geo} castShadow receiveShadow>
-        <meshStandardMaterial color="#4a3a6a" roughness={0.9} flatShading />
-      </mesh>
-      <mesh position={[0, r * 0.2, 0]} receiveShadow>
-        <cylinderGeometry args={[r * 0.96, r * 0.9, 0.2, 40]} />
-        <meshStandardMaterial color="#e889c8" roughness={0.8} />
-      </mesh>
+      <RockIsland radius={r} seed={seed + 50} rim={seed % 2 ? "#ff7fd0" : "#9d8bff"} />
       {slot && <CharacterSlot index={slot} y={r * 0.2 + 0.1} />}
     </group>
   )

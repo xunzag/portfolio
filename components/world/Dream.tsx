@@ -7,48 +7,8 @@ import { projects } from "@/lib/content"
 import { useRoom } from "@/lib/store"
 import { rng } from "@/lib/rng"
 import { live } from "./live"
-import { ABOUT, FACTS, STACK, projectStation } from "./track"
-
-// ── Shared: a floating rock island ─────────────────────────────────────
-export function rockGeometry(radius: number, seed: number) {
-  const g = new THREE.IcosahedronGeometry(1, 3)
-  const r = rng(seed * 97)
-  const p = g.attributes.position as THREE.BufferAttribute
-  const v = new THREE.Vector3()
-  const jitter = new Map<string, number>()
-  for (let i = 0; i < p.count; i++) {
-    v.fromBufferAttribute(p, i)
-    const key = `${v.x.toFixed(3)},${v.y.toFixed(3)},${v.z.toFixed(3)}`
-    if (!jitter.has(key)) jitter.set(key, 0.85 + r() * 0.3)
-    const j = jitter.get(key)!
-    if (v.y > 0) v.y *= 0.18
-    else v.y *= 2.3 + (1 - Math.abs(v.x)) * 0.6
-    v.multiplyScalar(j)
-    p.setXYZ(i, v.x * radius, v.y * radius, v.z * radius)
-  }
-  g.computeVertexNormals()
-  return g
-}
-
-/** Pastel floating island in the realm's style, with a glowing rim in the station colour. */
-export function Island({ radius = 3, seed = 1, rim = "#b18cff", top = "#d77ab8", ...props }: { radius?: number; seed?: number; rim?: string; top?: string } & import("@react-three/fiber").ThreeElements["group"]) {
-  const geo = useMemo(() => rockGeometry(radius, seed), [radius, seed])
-  return (
-    <group {...props}>
-      <mesh geometry={geo}>
-        <meshStandardMaterial color="#4a3a6a" roughness={0.9} flatShading />
-      </mesh>
-      <mesh position={[0, radius * 0.18 + 0.01, 0]} receiveShadow>
-        <cylinderGeometry args={[radius * 0.97, radius * 0.93, 0.2, 48]} />
-        <meshStandardMaterial color={top} roughness={0.8} />
-      </mesh>
-      <mesh position={[0, radius * 0.18 + 0.115, 0]} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[radius * 0.9, radius * 0.95, 64]} />
-        <meshBasicMaterial color={new THREE.Color(rim).multiplyScalar(2.2)} toneMapped={false} />
-      </mesh>
-    </group>
-  )
-}
+import { ABOUT, FACTS, PORTAL, ROAD_END, STACK, projectStation } from "./track"
+import { Island } from "./Rock"
 
 // ── The dream world ───────────────────────────────────────────────────
 
@@ -57,10 +17,10 @@ export function Dream() {
     <group>
       <LightPath />
       <Crystals />
-      <Island radius={4.2} seed={3} position={[0, -0.78, 0.3]} rim="#ff3fa0" top="#5a3470" />
+      <Island radius={4.2} seed={3} position={[0, -0.87, 0.3]} rim="#ff3fa0" shadow />
       {projects.map((_, i) => {
         const st = projectStation(i)
-        return <Island key={i} radius={2.4} seed={10 + i} position={[st.center.x, st.center.y - 3.4, st.center.z]} rim={projects[i].accent} />
+        return <Island key={i} radius={2.7} seed={10 + i} position={[st.park.x, st.park.y - 0.62, st.park.z]} rim={projects[i].accent} />
       })}
       <Island radius={5.5} seed={31} position={[ABOUT.x, ABOUT.y - 4.9, ABOUT.z]} rim="#7fd8ff" />
       <Island radius={3.2} seed={37} position={[FACTS.x, FACTS.y - 5.8, FACTS.z]} rim="#ffcf7f" />
@@ -89,17 +49,16 @@ const pathF = /* glsl */ `
 
 function LightPath() {
   const geo = useMemo(() => {
-    const pts = [new THREE.Vector3(0, -0.2, 4), new THREE.Vector3(0, -0.2, -8)]
-    projects.forEach((_, i) => {
-      const st = projectStation(i)
-      pts.push(new THREE.Vector3(st.center.x * 0.15, st.center.y - 1.6, st.center.z + 6))
-    })
-    pts.push(new THREE.Vector3(ABOUT.x * 0.5, ABOUT.y - 2.4, ABOUT.z + 12))
-    pts.push(new THREE.Vector3(FACTS.x * 0.5, FACTS.y - 3, FACTS.z + 12))
-    pts.push(new THREE.Vector3(STACK.x + 2, STACK.y - 3, STACK.z + 12))
-    pts.push(new THREE.Vector3(0, 17.5, -330))
+    // picks up where the road ends and carries on to the gate
+    const pts = [
+      new THREE.Vector3(ROAD_END.x, ROAD_END.y, ROAD_END.z - 2),
+      new THREE.Vector3(ABOUT.x * 0.5, ABOUT.y - 2.4, ABOUT.z - 14),
+      new THREE.Vector3(FACTS.x * 0.5, FACTS.y - 3, FACTS.z + 12),
+      new THREE.Vector3(STACK.x + 2, STACK.y - 3, STACK.z + 12),
+      new THREE.Vector3(PORTAL.x, PORTAL.y - 2.5, PORTAL.z + 22),
+    ]
     const curve = new THREE.CatmullRomCurve3(pts, false, "centripetal")
-    return new THREE.TubeGeometry(curve, 600, 0.06, 6, false)
+    return new THREE.TubeGeometry(curve, 300, 0.06, 6, false)
   }, [])
   const uniforms = useMemo(() => ({ uTime: { value: 0 } }), [])
   useFrame(({ clock }) => (uniforms.uTime.value = clock.elapsedTime))
@@ -117,7 +76,7 @@ function Crystals() {
   const data = useMemo(() => {
     const r = rng(12)
     return Array.from({ length: count }, () => ({
-      p: new THREE.Vector3((r() - 0.5) * 70, -6 + r() * 30, 20 - r() * 330),
+      p: new THREE.Vector3((r() - 0.5) * 80, -6 + r() * 34, 20 - r() * (30 - PORTAL.z)),
       s: 0.15 + r() * r() * 0.9,
       spin: (r() - 0.5) * 0.8,
       ph: r() * 6,
