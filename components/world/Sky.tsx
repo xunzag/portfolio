@@ -4,10 +4,12 @@ import { useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 import { useRoom } from "@/lib/store"
-import { live } from "./live"
 
-// One sky dome that follows the camera and blends between the three moods:
-// neon night (city + room), pink dusk over a sea of clouds (realm), sunrise (contact).
+/** Where the moon hangs: dead ahead of the journey, low over the horizon. */
+export const MOON_DIR = new THREE.Vector3(0.34, 0.3, -1).normalize()
+
+// Midnight over a sea of clouds: indigo zenith, a violet-magenta horizon,
+// a huge moon with a halo, aurora ribbons, a band of stars.
 const vertex = /* glsl */ `
   varying vec3 vDir;
   void main() {
@@ -18,9 +20,8 @@ const vertex = /* glsl */ `
 `
 const fragment = /* glsl */ `
   uniform float uTime;
-  uniform float uRealm;
-  uniform float uSun;
   uniform float uParty;
+  uniform vec3 uMoon;
   varying vec3 vDir;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 45758.5453); }
   float noise(vec2 p) {
@@ -35,39 +36,44 @@ const fragment = /* glsl */ `
     vec3 d = normalize(vDir);
     float y = d.y;
     vec2 sph = vec2(atan(d.z, d.x), asin(clamp(y, -1.0, 1.0)));
+    float toMoon = max(dot(d, uMoon), 0.0);
 
-    // stars (fade near horizon)
-    vec2 sg = sph * vec2(90.0, 90.0);
-    float st = step(0.992, hash(floor(sg))) * smoothstep(0.35, 0.0, length(fract(sg) - 0.5)) * smoothstep(0.02, 0.3, y);
-    st *= 0.6 + 0.4 * sin(uTime * 2.0 + hash(floor(sg)) * 40.0);
+    // night gradient
+    vec3 col = mix(vec3(0.05, 0.02, 0.13), vec3(0.002, 0.003, 0.014), smoothstep(-0.05, 0.7, y));
+    // the horizon burns violet, hotter towards the moon
+    float hz = pow(1.0 - clamp(abs(y), 0.0, 1.0), 9.0);
+    col += mix(vec3(0.22, 0.05, 0.32), vec3(0.75, 0.2, 0.55), pow(toMoon, 3.0)) * hz * 0.75;
 
-    // ── neon night
-    vec3 night = mix(vec3(0.11, 0.035, 0.16), vec3(0.008, 0.006, 0.02), smoothstep(-0.05, 0.55, y));
-    night += vec3(0.75, 0.2, 0.7) * pow(1.0 - clamp(abs(y), 0.0, 1.0), 10.0) * 0.6;
-    float rib = smoothstep(0.5, 0.95, fbm(vec2(sph.x * 2.5 + uTime * 0.02, y * 3.0 + fbm(sph * 2.0) * 2.0)));
-    vec3 aur = mix(vec3(0.35, 0.25, 0.95), vec3(0.15, 0.6, 0.95), fbm(sph * 1.5));
+    // stars + a milky band
+    vec2 sg = sph * 110.0;
+    float h = hash(floor(sg));
+    float st = step(0.985, h) * smoothstep(0.4, 0.0, length(fract(sg) - 0.5)) * smoothstep(0.0, 0.25, y);
+    st *= 0.55 + 0.45 * sin(uTime * (1.0 + h * 3.0) + h * 40.0);
+    float band = fbm(vec2(sph.x * 1.3 + sph.y * 2.2, sph.y * 3.0 - sph.x)) * smoothstep(0.1, 0.5, y);
+    col += vec3(0.8, 0.85, 1.0) * st * (0.7 + band * 1.6);
+    col += vec3(0.12, 0.07, 0.25) * pow(band, 3.0) * 0.5;
+
+    // aurora ribbons
+    float rib = smoothstep(0.52, 0.95, fbm(vec2(sph.x * 2.5 + uTime * 0.02, y * 3.0 + fbm(sph * 2.0 + uTime * 0.01) * 2.0)));
+    vec3 aur = mix(vec3(0.5, 0.2, 1.0), vec3(0.1, 0.85, 0.8), fbm(sph * 1.5 + 3.0));
     aur = mix(aur, hue(fract(uTime * 0.1 + sph.x * 0.1)), uParty);
-    night += aur * rib * smoothstep(0.05, 0.3, y) * (1.0 - smoothstep(0.6, 0.95, y)) * 0.5;
-    night += st;
+    col += aur * rib * smoothstep(0.04, 0.28, y) * (1.0 - smoothstep(0.5, 0.9, y)) * 0.55;
 
-    // ── realm dusk over a sea of clouds
-    vec3 dusk = mix(vec3(0.3, 0.15, 0.45), vec3(0.045, 0.02, 0.11), smoothstep(-0.05, 0.75, y));
-    float m = length(vec2(sph.x - 1.1, sph.y - 0.32) * vec2(1.0, 1.0));
-    dusk += vec3(1.0, 0.95, 0.9) * smoothstep(0.075, 0.07, m) + vec3(1.0, 0.6, 0.85) * smoothstep(0.5, 0.0, m) * 0.18;
-    float cl = fbm(vec2(sph.x * 3.0 + uTime * 0.01, y * 10.0));
-    vec3 clouds = mix(vec3(0.16, 0.08, 0.28), vec3(0.34, 0.19, 0.46), cl);
-    dusk = mix(dusk, clouds, smoothstep(0.02, -0.18, y) * 0.9);
-    dusk += st * smoothstep(0.35, 0.6, y);
+    // the moon: cratered disc, hard limb, wide halo
+    float ang = acos(clamp(dot(d, uMoon), -1.0, 1.0));
+    float R = 0.085;
+    float disc = smoothstep(R, R - 0.004, ang);
+    vec3 mt = normalize(cross(uMoon, vec3(0.0, 1.0, 0.0)));
+    vec3 mb = cross(mt, uMoon);
+    vec2 mp = vec2(dot(d, mt), dot(d, mb)) / R;
+    float crater = fbm(mp * 3.0 + 7.0) * 0.6 + fbm(mp * 9.0) * 0.25;
+    vec3 moonCol = mix(vec3(0.75, 0.68, 0.95), vec3(1.0, 0.94, 1.0), crater) * (0.75 + 0.5 * sqrt(max(0.0, 1.0 - dot(mp, mp))));
+    col = mix(col, moonCol * 1.9, disc);
+    col += vec3(0.75, 0.5, 1.0) * exp(-max(ang - R, 0.0) * 9.0) * 0.4 * (1.0 - disc);
+    col += vec3(0.5, 0.25, 0.8) * exp(-ang * 2.2) * 0.22;
 
-    // ── sunrise
-    vec3 sunrise = mix(vec3(1.0, 0.52, 0.3), vec3(0.14, 0.18, 0.42), smoothstep(-0.05, 0.5, y));
-    sunrise = mix(sunrise, vec3(0.05, 0.04, 0.09), smoothstep(0.0, -0.2, y));
-    vec3 sd = normalize(vec3(0.15, 0.07, -1.0));
-    float sa = max(dot(d, sd), 0.0);
-    sunrise += vec3(1.0, 0.75, 0.45) * pow(sa, 900.0) * 3.0 + vec3(1.0, 0.45, 0.3) * pow(sa, 12.0) * 0.6;
-
-    vec3 col = mix(night, dusk, uRealm);
-    col = mix(col, sunrise, uSun);
+    // below the horizon it just falls to black (the cloud sea covers it)
+    col *= smoothstep(-0.45, 0.0, y) * 0.8 + 0.2;
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
   }
@@ -75,24 +81,20 @@ const fragment = /* glsl */ `
 
 export function Sky() {
   const mesh = useRef<THREE.Mesh>(null)
-  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uRealm: { value: 1 }, uSun: { value: 0 }, uParty: { value: 0 } }), [])
+  const mat = useRef<THREE.ShaderMaterial>(null)
+  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uParty: { value: 0 }, uMoon: { value: MOON_DIR.clone() } }), [])
   useFrame(({ clock, camera }, dt) => {
-    const f = live.frame
-    uniforms.uTime.value = clock.elapsedTime
-    // the whole journey now lives in the realm's dusk
-    const realm = 1
-    const sun = 0
-    // cuts are hidden by the flash, so these can snap quickly
-    uniforms.uRealm.value += (realm - uniforms.uRealm.value) * Math.min(1, dt * 8)
-    uniforms.uSun.value += (sun - uniforms.uSun.value) * Math.min(1, dt * 8)
+    const u = mat.current?.uniforms
+    if (!u) return
+    u.uTime.value = clock.elapsedTime
     const party = useRoom.getState().party ? 1 : 0
-    uniforms.uParty.value += (party - uniforms.uParty.value) * Math.min(1, dt * 2)
+    u.uParty.value += (party - u.uParty.value) * Math.min(1, dt * 2)
     mesh.current?.position.copy(camera.position)
   })
   return (
     <mesh ref={mesh} renderOrder={-10} frustumCulled={false}>
       <sphereGeometry args={[500, 48, 32]} />
-      <shaderMaterial uniforms={uniforms} vertexShader={vertex} fragmentShader={fragment} side={THREE.BackSide} depthWrite={false} depthTest={false} toneMapped={false} />
+      <shaderMaterial ref={mat} uniforms={uniforms} vertexShader={vertex} fragmentShader={fragment} side={THREE.BackSide} depthWrite={false} depthTest={false} toneMapped={false} />
     </mesh>
   )
 }

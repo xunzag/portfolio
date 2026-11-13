@@ -8,47 +8,7 @@ import { useRoom } from "@/lib/store"
 import { rng } from "@/lib/rng"
 import { live } from "./live"
 import { ABOUT, FACTS, STACK, projectStation } from "./track"
-
-// ── Shared: a floating rock island ─────────────────────────────────────
-export function rockGeometry(radius: number, seed: number) {
-  const g = new THREE.IcosahedronGeometry(1, 3)
-  const r = rng(seed * 97)
-  const p = g.attributes.position as THREE.BufferAttribute
-  const v = new THREE.Vector3()
-  const jitter = new Map<string, number>()
-  for (let i = 0; i < p.count; i++) {
-    v.fromBufferAttribute(p, i)
-    const key = `${v.x.toFixed(3)},${v.y.toFixed(3)},${v.z.toFixed(3)}`
-    if (!jitter.has(key)) jitter.set(key, 0.85 + r() * 0.3)
-    const j = jitter.get(key)!
-    if (v.y > 0) v.y *= 0.18
-    else v.y *= 2.3 + (1 - Math.abs(v.x)) * 0.6
-    v.multiplyScalar(j)
-    p.setXYZ(i, v.x * radius, v.y * radius, v.z * radius)
-  }
-  g.computeVertexNormals()
-  return g
-}
-
-/** Pastel floating island in the realm's style, with a glowing rim in the station colour. */
-export function Island({ radius = 3, seed = 1, rim = "#b18cff", top = "#d77ab8", ...props }: { radius?: number; seed?: number; rim?: string; top?: string } & import("@react-three/fiber").ThreeElements["group"]) {
-  const geo = useMemo(() => rockGeometry(radius, seed), [radius, seed])
-  return (
-    <group {...props}>
-      <mesh geometry={geo}>
-        <meshStandardMaterial color="#4a3a6a" roughness={0.9} flatShading />
-      </mesh>
-      <mesh position={[0, radius * 0.18 + 0.01, 0]} receiveShadow>
-        <cylinderGeometry args={[radius * 0.97, radius * 0.93, 0.2, 48]} />
-        <meshStandardMaterial color={top} roughness={0.8} />
-      </mesh>
-      <mesh position={[0, radius * 0.18 + 0.115, 0]} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[radius * 0.9, radius * 0.95, 64]} />
-        <meshBasicMaterial color={new THREE.Color(rim).multiplyScalar(2.2)} toneMapped={false} />
-      </mesh>
-    </group>
-  )
-}
+import { Island } from "./Rock"
 
 // ── The dream world ───────────────────────────────────────────────────
 
@@ -57,7 +17,7 @@ export function Dream() {
     <group>
       <LightPath />
       <Crystals />
-      <Island radius={4.2} seed={3} position={[0, -0.78, 0.3]} rim="#ff3fa0" top="#5a3470" />
+      <Island radius={4.2} seed={3} position={[0, -0.87, 0.3]} rim="#ff3fa0" shadow />
       {projects.map((_, i) => {
         const st = projectStation(i)
         return <Island key={i} radius={2.4} seed={10 + i} position={[st.center.x, st.center.y - 3.4, st.center.z]} rim={projects[i].accent} />

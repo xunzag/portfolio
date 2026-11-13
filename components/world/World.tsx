@@ -10,7 +10,8 @@ import { useRoom } from "@/lib/store"
 import { live } from "./live"
 import { zones } from "./track"
 import { ScrollRig } from "./ScrollRig"
-import { Sky } from "./Sky"
+import { MOON_DIR, Sky } from "./Sky"
+import { CloudSea } from "./CloudSea"
 import { Atmosphere } from "./Atmosphere"
 import { Dream, Dust } from "./Dream"
 import { Hero } from "./Hero"
@@ -44,8 +45,8 @@ export default function World() {
       camera={{ fov: 36, near: 0.1, far: 900, position: [6, 2.4, 6] }}
       aria-hidden
     >
-      <color attach="background" args={["#5a3d82"]} />
-      <fogExp2 attach="fog" args={["#6a4a94", 0.006]} />
+      <color attach="background" args={["#05030d"]} />
+      <fogExp2 attach="fog" args={["#0d0620", 0.0085]} />
       <PerformanceMonitor
         onDecline={() => {
           setQuality("low")
@@ -59,10 +60,12 @@ export default function World() {
       <AdaptiveDpr pixelated={false} />
 
       <Sky />
-      {/* the realm's soft pastel lighting, everywhere */}
-      <ambientLight intensity={0.3} color="#c9a8ff" />
-      <hemisphereLight args={["#ffc2ec", "#2a1250", 1.1]} />
-      <directionalLight position={[20, 40, 25]} intensity={1.6} color="#ffd6f0" />
+      <CloudSea />
+      {/* moonlight from ahead, a violet bounce from the clouds below */}
+      <ambientLight intensity={0.22} color="#8f7fd6" />
+      <hemisphereLight args={["#6f7fe0", "#3a1054", 0.75]} />
+      <directionalLight position={MOON_DIR.clone().multiplyScalar(60)} intensity={2.4} color="#d6dcff" />
+      <directionalLight position={[-20, 12, 30]} intensity={0.55} color="#ff7fd0" />
       <Dust />
       <Atmosphere />
 
