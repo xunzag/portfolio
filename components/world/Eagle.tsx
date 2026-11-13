@@ -24,7 +24,7 @@ export function Eagle() {
   )
 }
 
-const REST: Record<string, number> = { about: -0.08, facts: 0.75, stack: -0.1, portal: 0.6, life: 0.7, contact: 0.8 }
+const REST: Record<string, number> = { about: -0.62, facts: 0.75, stack: -0.1, portal: 0.6, life: 0.7, contact: 0.8 }
 const PERCH = new THREE.Vector3(5.2, 4.6, -0.5)
 const tmp = new THREE.Vector3()
 
@@ -139,7 +139,7 @@ function Bird() {
       if (f.chapter === "work") side = Math.floor((s - RANGES.work[0]) / PROJECT_VH) % 2 === 0 ? -0.8 : 0.8
       st.side += (side - st.side) * Math.min(1, d * 1.2)
       const restX = st.side * Math.max(0, hw - SPAN * 0.75)
-      const restY = hh - SPAN * 0.42
+      const restY = hh - SPAN * 0.3
       st.target
         .copy(camera.position)
         .addScaledVector(st.fwd, lead)
