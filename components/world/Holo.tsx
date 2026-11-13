@@ -23,7 +23,7 @@ const holoF = /* glsl */ `
     float glitch = step(0.985, fract(sin(floor(uTime * 10.0)) * 43758.5)) * 0.015;
     uv.x += glitch * sin(uv.y * 90.0);
     // cover-fit the image
-    vec2 c = uv - 0.5; c.y *= uAspect; c += 0.5;
+    vec2 c = uv - 0.5; if (uAspect > 1.0) c.x /= uAspect; else c.y *= uAspect; c += 0.5;
     vec3 img = vec3(texture2D(uMap, c + vec2(0.0015, 0.0)).r, texture2D(uMap, c).g, texture2D(uMap, c - vec2(0.0015, 0.0)).b);
     float scan = 0.9 + 0.1 * sin(uv.y * 600.0 + uTime * 5.0);
     vec2 e = min(vUv, 1.0 - vUv);
