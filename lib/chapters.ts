@@ -13,7 +13,7 @@ export const CHAPTERS: { id: ChapterId; vh: number; label?: string }[] = [
   { id: "stack", vh: 300, label: "Stack" },
   { id: "portal", vh: 120 },
   { id: "life", vh: 360, label: "Life" },
-  { id: "contact", vh: 220, label: "Contact" },
+  { id: "contact", vh: 300, label: "Contact" },
 ]
 
 export const TOTAL_VH = CHAPTERS.reduce((n, c) => n + c.vh, 0)

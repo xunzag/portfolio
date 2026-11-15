@@ -41,3 +41,11 @@ npm install && npm run dev
 - **Sound:** fully procedural WebAudio (`lib/sound.ts`): wind, engine, an original synth loop. Off until the visitor turns it on.
 
 Models are optimised with `npx @gltf-transform/cli optimize in.glb out.glb --texture-compress webp --texture-size 1024 --compress meshopt` (add `--simplify-ratio` for heavy meshes; run `metalrough` first for spec-gloss files).
+
+### After v3
+
+- **Lights** all live in `Lights.tsx`, always mounted. Do not put a light inside a group that gets hidden: three.js bakes the light count into every shader, so a light appearing mid-scroll forces a recompile (a visible hitch). Add `?debug` to the URL and read `window.__info.programs` to check the shader count stays flat while scrolling.
+- **Facts** are a desk diorama (`Desk.tsx`): each prop is one entry of `facts` in `lib/content.ts`.
+- **Contact:** on a successful send the store's `letter` flips to `"sent"`; the scroll rolls shut (`ContactStation.tsx`) and the eagle carries it towards the moon (`Eagle.tsx`).
+- **Steering:** arrow keys / A-D, or phone tilt, slide the car across its lane (`Drive.tsx`).
+- **Portrait phones** get their own framing for the project stops (`mode.portrait` in `track.ts`).

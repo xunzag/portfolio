@@ -1,15 +1,15 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
-import { useFrame } from "@react-three/fiber"
+import { useFrame, useThree } from "@react-three/fiber"
 import { useTexture } from "@react-three/drei"
 import * as THREE from "three"
 import { PROJECT_VH, RANGES } from "@/lib/chapters"
-import { credentials, experience, facts, principles, profile, projects, setup, stats, type Project } from "@/lib/content"
+import { credentials, experience, profile, projects, stats, type Project } from "@/lib/content"
 import { Button3D, HoloScreen } from "./Holo"
 import { Type } from "./Type"
 import { usePresence, useReveal } from "./presence"
-import { ABOUT, FACTS, projectStation } from "./track"
+import { ABOUT, projectStation } from "./track"
 
 // ── Work: one floating hologram per project ───────────────────────────
 
@@ -82,7 +82,8 @@ function posterTexture(p: Project) {
 }
 
 function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Texture }) {
-  const st = projectStation(i)
+  const portrait = useThree((s) => s.size.width / s.size.height < 0.8)
+  const st = projectStation(i, portrait)
   const a = RANGES.work[0] + i * PROJECT_VH
   const on = usePresence(a + 20, a + PROJECT_VH + 6, 45, 34)
   const info = useRef<THREE.Group>(null)
@@ -105,7 +106,9 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
   const inner = -st.side
   const W = 6.6
   const H = W * 0.5625
-  const infoX = inner > 0 ? W / 2 + 0.6 : -W / 2 - 0.6 - 4.3
+  // portrait: the text floats in front of the island, under the car
+  const infoX = portrait ? -1.3 : inner > 0 ? W / 2 + 0.6 : -W / 2 - 0.6 - 4.3
+  const infoY = portrait ? -3.7 : 2.45
   const accent = useMemo(() => new THREE.Color(p.accent), [p.accent])
   const url = p.links.live ?? p.links.github
 
@@ -150,7 +153,7 @@ function ProjectStation({ p, i, map }: { p: Project; i: number; map: THREE.Textu
           <HoloScreen map={map} accent={p.accent} width={W} height={H} on={on} />
         </group>
       </group>
-      <group ref={info} position={[infoX, 2.45, 0.3]}>
+      <group ref={info} position={[infoX, infoY, portrait ? 5.3 : 0.3]} scale={portrait ? 0.5 : 1}>
         <Type weight="semi" fontSize={0.17} letterSpacing={0.18} color={p.accent} glow={1.8}>
           {`${String(i + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}   ${p.category.toUpperCase()}   ${p.year}`}
         </Type>
@@ -337,104 +340,6 @@ export function AboutStation() {
           <Button3D label="DOWNLOAD CV" href={profile.cv} accent={cyan} primary />
           <Button3D label="GITHUB" href={profile.socials.github} accent={cyan} position={[2.1, 0, 0]} />
           <Button3D label="LINKEDIN" href={profile.socials.linkedin} accent={cyan} position={[3.45, 0, 0]} />
-        </group>
-      </group>
-    </group>
-  )
-}
-
-// ── Facts: an orbit of glowing numbers ────────────────────────────────
-
-const orbF = /* glsl */ `
-  uniform vec3 uColor; varying vec3 vN; varying vec3 vV;
-  void main() {
-    float f = pow(1.0 - max(dot(normalize(vN), normalize(vV)), 0.0), 2.0);
-    gl_FragColor = vec4(uColor * (0.25 + f * 2.8), 1.0);
-  }
-`
-const orbV = /* glsl */ `
-  varying vec3 vN; varying vec3 vV;
-  void main() {
-    vec4 wp = modelMatrix * vec4(position, 1.0);
-    vN = normalize(mat3(modelMatrix) * normal);
-    vV = normalize(cameraPosition - wp.xyz);
-    gl_Position = projectionMatrix * viewMatrix * wp;
-  }
-`
-const ORB_COLORS = ["#ff5fc8", "#5fd8ff", "#b18cff", "#ffcf7f", "#6fffc0", "#ff8f6f", "#9fb4ff", "#ff9fe0"]
-
-export function FactsStation() {
-  const [a, b] = RANGES.facts
-  const on = usePresence(a + 40, b, 50, 40)
-  const g = useRef<THREE.Group>(null)
-  const ring = useRef<THREE.Group>(null)
-  useReveal(g, on, 0.8)
-  useFrame(({ clock }) => {
-    if (!ring.current) return
-    const t = clock.elapsedTime
-    ring.current.children.forEach((c, i) => {
-      const ang = (i / facts.length) * Math.PI * 2 + t * 0.06
-      c.position.set(Math.cos(ang) * 4.9, Math.sin(ang) * 3.1, Math.sin(ang * 2 + t * 0.3) * 0.4)
-    })
-  })
-
-  return (
-    <group position={FACTS}>
-      <Type weight="bold" fontSize={9} anchorX="center" anchorY="middle" position={[0, 0.5, -4]} color="#ffcf7f" opacity={0.07}>
-        {"04"}
-      </Type>
-      <group ref={g}>
-        <group position={[0, 1.05, 0]}>
-          <Type weight="semi" fontSize={0.16} letterSpacing={0.24} anchorX="center" color="#ffcf7f" glow={1.8}>
-            {"04   /ETC/FARHAN.CONF"}
-          </Type>
-          <Type weight="bold" fontSize={0.62} letterSpacing={-0.03} anchorX="center" position={[0, -0.32, 0]} glow={1.3}>
-            {"Cool things\nabout me"}
-          </Type>
-        </group>
-        <group ref={ring}>
-          {facts.map((f, i) => (
-            <group key={f.label}>
-              <mesh position={[0, 0.02, -0.75]}>
-                <sphereGeometry args={[0.55, 32, 24]} />
-                <shaderMaterial vertexShader={orbV} fragmentShader={orbF} uniforms={{ uColor: { value: new THREE.Color(ORB_COLORS[i]) } }} transparent />
-              </mesh>
-              <Type weight="bold" fontSize={0.42} anchorX="center" anchorY="middle" glow={2.2}>
-                {f.value}
-              </Type>
-              <Type weight="semi" fontSize={0.12} letterSpacing={0.14} anchorX="center" position={[0, -0.72, 0]} color={ORB_COLORS[i]} glow={1.6}>
-                {f.label.toUpperCase()}
-              </Type>
-              <Type weight="light" fontSize={0.11} anchorX="center" position={[0, -0.92, 0]} color="#a39dc4">
-                {`# ${f.note}`}
-              </Type>
-            </group>
-          ))}
-        </group>
-        <group position={[-8.6, 3.4, -1]} rotation-y={0.3}>
-          <Type weight="semi" fontSize={0.14} letterSpacing={0.2} color="#b18cff" glow={1.8}>
-            {"[SETUP]"}
-          </Type>
-          {setup.map(([k, v], i) => (
-            <group key={k} position={[0, -0.42 - i * 0.44, 0]}>
-              <Type fontSize={0.13} letterSpacing={0.12} color="#8e87b3">
-                {k.toUpperCase()}
-              </Type>
-              <Type weight="semi" fontSize={0.18} position={[1.35, 0.02, 0]}>
-                {v}
-              </Type>
-            </group>
-          ))}
-        </group>
-        <group position={[5.6, 3.4, -1]} rotation-y={-0.3}>
-          <Type weight="semi" fontSize={0.14} letterSpacing={0.2} color="#ff5fc8" glow={1.8}>
-            {"[PRINCIPLES]"}
-          </Type>
-          {principles.map((p, i) => (
-            <Type key={p} weight="light" fontSize={0.2} lineHeight={1.35} position={[0, -0.42 - i * 0.78, 0]} maxWidth={3.6}>
-              {`${String(i + 1).padStart(2, "0")}  ${p}`}
-            </Type>
-          ))}
         </group>
       </group>
     </group>

@@ -6,6 +6,7 @@ const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" }
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://xunzag.vercel.app"),
   title: "Farhan Ali — IT Engineer & Full-Stack Developer",
   description:
     "A night drive through Farhan Ali's world: projects on drive-in screens above the clouds, a mechanical eagle for a guide. IT engineer and full-stack developer from Karachi.",
@@ -15,9 +16,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Farhan Ali — IT Engineer & Full-Stack Developer",
-    description: "An interactive 3D developer room. Click around.",
+    description: "A night drive through my work: 3D, scroll-driven, built with three.js.",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Farhan Ali - a 3D portfolio" }],
     type: "website",
   },
+  // large preview card on X; LinkedIn and WhatsApp read the Open Graph image above
+  twitter: { card: "summary_large_image", images: ["/og.jpg"] },
 }
 
 export const viewport: Viewport = {

@@ -137,6 +137,25 @@ const beamV = /* glsl */ `
   void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
 `
 
+// ← → or A / D (or tilting a phone) nudges the car across its lane.
+const steer = { want: 0, x: 0 }
+if (typeof window !== "undefined") {
+  const keys = new Set<string>()
+  const upd = () => (steer.want = (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) - (keys.has("ArrowLeft") || keys.has("a") ? 1 : 0))
+  window.addEventListener("keydown", (e) => {
+    if ((e.target as HTMLElement | null)?.closest?.("input, textarea")) return
+    keys.add(e.key.length === 1 ? e.key.toLowerCase() : e.key)
+    upd()
+  })
+  window.addEventListener("keyup", (e) => {
+    keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key)
+    upd()
+  })
+  window.addEventListener("deviceorientation", (e) => {
+    if (e.gamma != null && keys.size === 0) steer.want = Math.max(-1, Math.min(1, e.gamma / 25))
+  })
+}
+
 function Car() {
   const g = useRef<THREE.Group>(null)
   const body = useRef<THREE.Group>(null)
@@ -149,12 +168,17 @@ function Car() {
     g.current.position.copy(c.pos)
     look.copy(c.pos).add(c.dir)
     g.current.lookAt(look)
+    // steering: slide across the lane and lean into it
+    steer.x += (steer.want * 1.15 - steer.x) * Math.min(1, dt * 3.5)
+    g.current.translateX(-steer.x)
+    g.current.rotateY(-(steer.want * 1.15 - steer.x) * 0.22)
     sm.speed += (Math.min(1, Math.abs(c.speed) * 0.5) - sm.speed) * Math.min(1, dt * 6)
     const t = clock.elapsedTime
     if (body.current) {
       // idle shiver, squat under acceleration
       body.current.position.y = Math.sin(t * 38) * 0.004 + Math.sin(t * 2.1) * 0.006
       body.current.rotation.x = -sm.speed * 0.025
+      body.current.rotation.z = (steer.want * 1.15 - steer.x) * 0.06
     }
     if (trails.current) {
       trails.current.scale.z = 0.05 + sm.speed * 1

@@ -24,7 +24,7 @@ export function Hero() {
   )
 }
 
-function Guts(props: import("@react-three/fiber").ThreeElements["group"]) {
+export function Guts(props: import("@react-three/fiber").ThreeElements["group"]) {
   const gltf = useGLTF("/models/guts.glb")
   const root = useRef<THREE.Group>(null)
   const eyes = useRef<THREE.Material[]>([])
